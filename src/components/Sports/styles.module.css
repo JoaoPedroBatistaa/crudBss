@@ -44,6 +44,7 @@
   font-weight: 700;
   margin-bottom: 20px;
   font-family: 'Montserrat', sans-serif;
+  color: black;
 }
 
 .sportName {
@@ -51,6 +52,7 @@
   font-weight: 700;
   font-family: 'Montserrat', sans-serif;
   text-align: left;
+  color: black;
 }
 
 .sportIcon {

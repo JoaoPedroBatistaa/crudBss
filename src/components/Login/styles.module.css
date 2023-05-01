@@ -26,6 +26,7 @@
   font-weight: 700;
   margin-bottom: 60px;
   font-family: 'Montserrat', sans-serif;
+  color: black;
 }
 
 .label {
@@ -33,6 +34,7 @@
   font-weight: 500;
   text-align: left;
   font-family: 'Montserrat', sans-serif;
+  color: black;
 }
 
 .field {

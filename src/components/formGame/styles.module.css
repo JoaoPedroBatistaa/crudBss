@@ -64,7 +64,7 @@
   font-family: 'Montserrat', sans-serif;
   font-size: 20px;
   font-weight: 600;
-
+  color: black;
 }
 
 .newTeam {
@@ -91,12 +91,14 @@
   font-size: 40px;
   font-weight: 700;
   font-family: 'Montserrat', sans-serif;
+  color: black;
 }
 
 .newTeamName {
   font-size: 24px;
   font-weight: 700;
   font-family: 'Montserrat', sans-serif;
+  color: black;
   text-align: left;
 }
 
@@ -158,6 +160,7 @@
   font-weight: 500;
   text-align: left;
   font-family: 'Montserrat', sans-serif;
+  color: black;
 }
 
 .field::placeholder {

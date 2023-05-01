@@ -64,7 +64,7 @@
   font-family: 'Montserrat', sans-serif;
   font-size: 16px;
   font-weight: 600;
-
+  color: black;
 }
 
 .newTeam {
@@ -91,6 +91,7 @@
   font-size: 32px;
   font-weight: 700;
   font-family: 'Montserrat', sans-serif;
+  color: black;
 }
 
 .newTeamName {
@@ -98,6 +99,7 @@
   font-weight: 700;
   font-family: 'Montserrat', sans-serif;
   text-align: left;
+  color: black;
 }
 
 .crudIcon:hover {
@@ -158,6 +160,7 @@
   font-weight: 500;
   text-align: left;
   font-family: 'Montserrat', sans-serif;
+  color: black;
 }
 
 .field::placeholder {
