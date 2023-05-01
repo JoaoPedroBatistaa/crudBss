@@ -1,0 +1,16 @@
+
+
+.Logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.3);
+  height: 75px;
+  background-color: #ffffff;
+}
+
+.logoIcon {
+  width: 105px;
+  height: 70px;
+  object-fit: cover;
+}

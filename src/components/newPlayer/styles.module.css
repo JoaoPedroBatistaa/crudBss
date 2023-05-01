@@ -1,0 +1,124 @@
+.Container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: #fff;
+  height: 100%;
+  width: 100%;
+}
+
+.Card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  padding: 90px;
+  border-radius: 25px;
+  margin-top: 90px;
+
+}
+
+.titleGroup {
+  display: flex;
+  justify-content: space-between;
+  align-items: space-between;
+  flex-direction: row;
+  gap: 60px;
+}
+
+.NameGroup {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.crudGroup {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.new {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.newTitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+
+}
+
+.newTeam {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  padding-left: 20px;
+  padding-right: 20px;
+  height: 5rem;
+  width: 35.3rem;
+  background-color: #fff;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  margin-top: 25px;
+}
+
+.newTeam:hover {
+  background-color: rgb(240, 240, 240);
+  cursor: pointer;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.newTeamName {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  text-align: left;
+}
+
+.crudIcon:hover {
+  scale: 1.2;
+  cursor: pointer;
+}
+
+.categorieIcon {
+  width: 42px;
+  height: 42px;
+
+}
+
+.back {
+  width: 9.5rem;
+  height: 2.5rem;
+  border: none;
+  background-color: #FF9F00;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
+  margin-bottom: 30px;
+  margin-top: 30px;
+
+}
+
+.back:hover {
+  background-color: #ca7d00;
+  cursor: pointer;
+}
