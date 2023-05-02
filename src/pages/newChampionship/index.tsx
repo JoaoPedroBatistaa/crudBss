@@ -20,7 +20,11 @@ export default function NewPlayer() {
   }
 
   function popup() {
-    alert('Deseja mesmo excluir?')
+    if (confirm('Deseja mesmo excluir?')) {
+      // Ação a ser executada se o usuário clicar em "Sim"
+    } else {
+      // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
+    }
   }
 
   return (
