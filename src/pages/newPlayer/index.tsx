@@ -1,13 +1,24 @@
 import styles from './styles.module.css';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useState } from 'react';
 
 
 
-export default function newPlayer() {
+export default function NewPlayer() {
 
+  const [moreInfoVisible, setMoreInfoVisible] = useState(false);
+  const router = useRouter();
+
+  function toggleMoreInfo() {
+    setMoreInfoVisible(!moreInfoVisible);
+  }
   function HandleBackButtonClick() {
     window.history.back();
+  }
+
+  function popup() {
+    alert('Deseja mesmo excluir?')
   }
 
   return (
@@ -34,70 +45,31 @@ export default function newPlayer() {
             </div>
 
             <div className={styles.crudGroup}>
-              <img className={styles.crudIcon} src="./assets/detalhes.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
+              <img id='moreInfoButton' className={styles.crudIcon} src="./assets/detalhes.png" alt="" onClick={toggleMoreInfo} />
+              <Link href='/editPlayer'>
+                <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
+              </Link>
+              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={popup} />
             </div>
           </div>
 
 
-          <div className={styles.newTeam}>
-            <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/player.png" alt="" />
-              <h1 className={styles.newTeamName}>Herbert Carnauba</h1>
+          <div id='moreInfo' className={`${styles.moreInfo} ${moreInfoVisible ? '' : styles.hidden}`}>
+
+            <div className={styles.line}>
+              <p className={styles.dataInfo}>Info</p>
+              <p className={styles.dataInfo}>dados</p>
+            </div>
+            <div className={styles.line}>
+              <p className={styles.dataInfo}>info</p>
+              <p className={styles.dataInfo}>dados</p>
+            </div>
+            <div className={styles.line}>
+              <p className={styles.dataInfo}>info </p>
+              <p className={styles.dataInfo}>dados</p>
             </div>
 
-            <div className={styles.crudGroup}>
-              <img className={styles.crudIcon} src="./assets/detalhes.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
-            </div>
           </div>
-
-
-          <div className={styles.newTeam}>
-            <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/player.png" alt="" />
-              <h1 className={styles.newTeamName}>Herbert Carnauba</h1>
-            </div>
-
-            <div className={styles.crudGroup}>
-              <img className={styles.crudIcon} src="./assets/detalhes.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
-            </div>
-          </div>
-
-
-          <div className={styles.newTeam}>
-            <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/player.png" alt="" />
-              <h1 className={styles.newTeamName}>Herbert Carnauba</h1>
-            </div>
-
-            <div className={styles.crudGroup}>
-              <img className={styles.crudIcon} src="./assets/detalhes.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
-            </div>
-          </div>
-
-
-          <div className={styles.newTeam}>
-            <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/player.png" alt="" />
-              <h1 className={styles.newTeamName}>Herbert Carnauba</h1>
-            </div>
-
-            <div className={styles.crudGroup}>
-              <img className={styles.crudIcon} src="./assets/detalhes.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
-            </div>
-          </div>
-
-
-
 
 
         </div>

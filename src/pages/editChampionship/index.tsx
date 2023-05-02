@@ -2,7 +2,6 @@ import styles from './styles.module.css';
 import { useRouter } from 'next/router';
 
 
-
 export default function newPlayer() {
 
   function HandleBackButtonClick() {
@@ -16,28 +15,24 @@ export default function newPlayer() {
         <div className={styles.Card}>
 
           <div className={styles.titleGroup}>
-            <h1 className={styles.title}>Times</h1>
+            <h1 className={styles.title}>Campeonatos</h1>
 
             <div className={styles.new}>
-              <p className={styles.newTitle}>NOVO TIME</p>
+              <p className={styles.newTitle}>NOVO CAMPEONTATO</p>
               <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
             </div>
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>Nome do Time</p>
+            <p className={styles.label}>Nome do Campeonato</p>
             <input className={styles.field} type="text" />
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>Logo</p>
-            <input className={styles.fieldFile} type="file" accept="image/*" />
+            <p className={styles.label}>Logo do campeonato</p>
+            <input className={styles.field} type="file" accept="image/*" />
           </div>
 
-          <div className={styles.form}>
-            <p className={styles.label}>Elenco</p>
-            <select className={styles.select} name="Adicionar jogador" id=""></select>
-          </div>
 
 
         </div>

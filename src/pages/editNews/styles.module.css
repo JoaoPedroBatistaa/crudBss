@@ -26,7 +26,8 @@
   justify-content: space-between;
   align-items: space-between;
   flex-direction: row;
-  gap: 60px;
+  gap: 120px;
+  margin-bottom: 30px;
 }
 
 .NameGroup {
@@ -35,6 +36,14 @@
   justify-content: space-between;
   align-items: center;
   gap: 10px;
+}
+
+.Game {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
 }
 
 .crudGroup {
@@ -53,7 +62,7 @@
 
 .newTitle {
   font-family: 'Montserrat', sans-serif;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   color: black;
 }
@@ -125,36 +134,69 @@
   cursor: pointer;
 }
 
-.moreInfo {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding-left: 20px;
-  padding-right: 20px;
-  width: 35.3rem;
-}
-
-.line {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding-left: 25px;
-  padding-right: 25px;
-  border-bottom: solid 2px rgb(206, 206, 206);
-  padding-top: 20px;
-  padding-bottom: 20px;
-  width: 33.3rem;
-}
-
-.dataInfo {
-  color: #000000;
-  font-size: 20px;
+.save {
+  width: 17rem;
+  height: 3.5rem;
+  border: none;
+  background-color: #FF9F00;
+  color: #fff;
+  font-size: 24px;
   font-weight: 600;
   font-family: 'Montserrat', sans-serif;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
+  margin-bottom: 10px;
+  margin-top: 30px;
+
 }
 
-.hidden {
-  display: none;
+.save:hover {
+  background-color: #ca7d00;
+  cursor: pointer;
+}
+
+.label {
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  font-family: 'Montserrat', sans-serif;
+  color: black;
+}
+
+.field::placeholder {
+  color: rgb(197, 197, 197);
+}
+
+.field {
+  width: 32rem;
+  height: 3.75rem;
+  border-radius: 20px;
+  background-color: #F1F1F1;
+  border: none;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  margin-top: 8px;
+  margin-bottom: 25px;
+  font-size: 16px;
+  color: #6b6b6b;
+  padding-left: 25px;
+  padding-right: 25px;
+  font-family: 'Montserrat', sans-serif;
+
+}
+
+.fieldFile {
+  width: 32rem;
+  height: 3.75rem;
+  border-radius: 20px;
+  background-color: #F1F1F1;
+  border: none;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  margin-top: 8px;
+  margin-bottom: 25px;
+  font-size: 16px;
+  color: #6b6b6b;
+  padding-left: 25px;
+  padding-right: 25px;
+  font-family: 'Montserrat', sans-serif;
+  padding-top: 17px;
 }

@@ -1,17 +1,32 @@
 import styles from './styles.module.css';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useState } from 'react';
+import Header from '../../components/Header';
+import Head from 'next/head';
 
 
 
-export default function newPlayer() {
+export default function NewPlayer() {
 
+  const [moreInfoVisible, setMoreInfoVisible] = useState(false);
+  const router = useRouter();
+
+  function toggleMoreInfo() {
+    setMoreInfoVisible(!moreInfoVisible);
+  }
   function HandleBackButtonClick() {
     window.history.back();
   }
 
+  function popup() {
+    alert('Deseja mesmo excluir?')
+  }
+
   return (
     <>
+      <Header></Header>
+
       <div className={styles.Container}>
 
         <div className={styles.Card}>
@@ -27,18 +42,6 @@ export default function newPlayer() {
             </div>
           </div>
 
-          <div className={styles.newTeam}>
-            <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/random.png" alt="" />
-              <h1 className={styles.newTeamName}>Nome Campeonato</h1>
-            </div>
-
-            <div className={styles.crudGroup}>
-              <img className={styles.crudIcon} src="./assets/detalhes.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
-            </div>
-          </div>
 
           <div className={styles.newTeam}>
             <div className={styles.NameGroup}>
@@ -47,66 +50,31 @@ export default function newPlayer() {
             </div>
 
             <div className={styles.crudGroup}>
-              <img className={styles.crudIcon} src="./assets/detalhes.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
+              <img id='moreInfoButton' className={styles.crudIcon} src="./assets/detalhes.png" alt="" onClick={toggleMoreInfo} />
+              <Link href='/editChampionship'>
+                <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
+              </Link>
+              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={popup
+              } />
             </div>
           </div>
 
-          <div className={styles.newTeam}>
-            <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/random.png" alt="" />
-              <h1 className={styles.newTeamName}>Nome Campeonato</h1>
+          <div id='moreInfo' className={`${styles.moreInfo} ${moreInfoVisible ? '' : styles.hidden}`}>
+
+            <div className={styles.line}>
+              <p className={styles.dataInfo}>Info</p>
+              <p className={styles.dataInfo}>dados</p>
+            </div>
+            <div className={styles.line}>
+              <p className={styles.dataInfo}>info</p>
+              <p className={styles.dataInfo}>dados</p>
+            </div>
+            <div className={styles.line}>
+              <p className={styles.dataInfo}>info </p>
+              <p className={styles.dataInfo}>dados</p>
             </div>
 
-            <div className={styles.crudGroup}>
-              <img className={styles.crudIcon} src="./assets/detalhes.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
-            </div>
           </div>
-
-          <div className={styles.newTeam}>
-            <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/random.png" alt="" />
-              <h1 className={styles.newTeamName}>Nome Campeonato</h1>
-            </div>
-
-            <div className={styles.crudGroup}>
-              <img className={styles.crudIcon} src="./assets/detalhes.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
-            </div>
-          </div>
-
-          <div className={styles.newTeam}>
-            <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/random.png" alt="" />
-              <h1 className={styles.newTeamName}>Nome Campeonato</h1>
-            </div>
-
-            <div className={styles.crudGroup}>
-              <img className={styles.crudIcon} src="./assets/detalhes.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
-            </div>
-          </div>
-
-          <div className={styles.newTeam}>
-            <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/random.png" alt="" />
-              <h1 className={styles.newTeamName}>Nome Campeonato</h1>
-            </div>
-
-            <div className={styles.crudGroup}>
-              <img className={styles.crudIcon} src="./assets/detalhes.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
-            </div>
-          </div>
-
-
-
 
 
         </div>

@@ -16,29 +16,44 @@ export default function newPlayer() {
         <div className={styles.Card}>
 
           <div className={styles.titleGroup}>
-            <h1 className={styles.title}>Times</h1>
+            <h1 className={styles.title}>Jogos</h1>
 
             <div className={styles.new}>
-              <p className={styles.newTitle}>NOVO TIME</p>
+              <p className={styles.newTitle}>NOVO JOGO</p>
               <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
             </div>
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>Nome do Time</p>
+            <p className={styles.label}>Nome do Time 1</p>
             <input className={styles.field} type="text" />
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>Logo</p>
+            <p className={styles.label}>Logo time 1</p>
             <input className={styles.fieldFile} type="file" accept="image/*" />
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>Elenco</p>
-            <select className={styles.select} name="Adicionar jogador" id=""></select>
+            <p className={styles.label}>Nome do Time 2</p>
+            <input className={styles.field} type="text" />
           </div>
 
+          <div className={styles.form}>
+            <p className={styles.label}>Logo time 2</p>
+            <input className={styles.fieldFile} type="file" accept="image/*" />
+          </div>
+
+
+          <div className={styles.form}>
+            <p className={styles.label}>Data do Jogo</p>
+            <input className={styles.field} type="date" />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Local do Jogo</p>
+            <input className={styles.field} type="text" />
+          </div>
 
         </div>
 
