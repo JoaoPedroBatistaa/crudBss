@@ -1,34 +1,37 @@
 import styles from './styles.module.css';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 function HandleBackButtonClick() {
   const router = useRouter();
   router.back();
 }
 
-export default function newTeam() {
+export default function newPlayer() {
 
-  
 
-  return(
+
+  return (
     <>
       <div className={styles.Container}>
 
         <div className={styles.Card}>
-          
+
           <div className={styles.titleGroup}>
-            <h1 className={styles.title}>Times</h1>
+            <h1 className={styles.title}>Jogadores</h1>
 
             <div className={styles.new}>
-              <p className={styles.newTitle}>NOVO TIME</p>
-              <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
+              <p className={styles.newTitle}>NOVO JOGADOR</p>
+              <Link href='/formPlayer'>
+                <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
+              </Link>
             </div>
           </div>
 
           <div className={styles.newTeam}>
             <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/team1.png" alt="" />
-              <h1 className={styles.newTeamName}>JAVA Basquetebol</h1>
+              <img className={styles.modalityIcon} src="./assets/player.png" alt="" />
+              <h1 className={styles.newTeamName}>Herbert Carnauba</h1>
             </div>
 
             <div className={styles.crudGroup}>
@@ -37,11 +40,12 @@ export default function newTeam() {
               <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
             </div>
           </div>
-          
+
+
           <div className={styles.newTeam}>
             <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/team1.png" alt="" />
-              <h1 className={styles.newTeamName}>JAVA Basquetebol</h1>
+              <img className={styles.modalityIcon} src="./assets/player.png" alt="" />
+              <h1 className={styles.newTeamName}>Herbert Carnauba</h1>
             </div>
 
             <div className={styles.crudGroup}>
@@ -50,11 +54,12 @@ export default function newTeam() {
               <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
             </div>
           </div>
-          
+
+
           <div className={styles.newTeam}>
             <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/team1.png" alt="" />
-              <h1 className={styles.newTeamName}>JAVA Basquetebol</h1>
+              <img className={styles.modalityIcon} src="./assets/player.png" alt="" />
+              <h1 className={styles.newTeamName}>Herbert Carnauba</h1>
             </div>
 
             <div className={styles.crudGroup}>
@@ -63,11 +68,12 @@ export default function newTeam() {
               <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
             </div>
           </div>
-          
+
+
           <div className={styles.newTeam}>
             <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/team1.png" alt="" />
-              <h1 className={styles.newTeamName}>JAVA Basquetebol</h1>
+              <img className={styles.modalityIcon} src="./assets/player.png" alt="" />
+              <h1 className={styles.newTeamName}>Herbert Carnauba</h1>
             </div>
 
             <div className={styles.crudGroup}>
@@ -76,11 +82,12 @@ export default function newTeam() {
               <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
             </div>
           </div>
-          
+
+
           <div className={styles.newTeam}>
             <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/team1.png" alt="" />
-              <h1 className={styles.newTeamName}>JAVA Basquetebol</h1>
+              <img className={styles.modalityIcon} src="./assets/player.png" alt="" />
+              <h1 className={styles.newTeamName}>Herbert Carnauba</h1>
             </div>
 
             <div className={styles.crudGroup}>
@@ -89,12 +96,14 @@ export default function newTeam() {
               <img className={styles.crudIcon} src="./assets/excluir.png" alt="" />
             </div>
           </div>
-          
-          
+
+
+
+
 
         </div>
 
-        <button className={styles.back}  onClick={HandleBackButtonClick}>Voltar</button>
+        <button className={styles.back} onClick={HandleBackButtonClick}>Voltar</button>
 
       </div>
     </>

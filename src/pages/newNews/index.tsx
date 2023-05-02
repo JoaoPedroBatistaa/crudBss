@@ -1,6 +1,8 @@
 import styles from './styles.module.css';
 import { useRouter } from 'next/router';
 
+import Link from 'next/link';
+
 function HandleBackButtonClick() {
   const router = useRouter();
   router.back();
@@ -21,7 +23,9 @@ export default function newPlayer() {
 
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVA NOTÍCIA</p>
-              <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
+              <Link href='/formNews'>
+                <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
+              </Link>
             </div>
           </div>
 

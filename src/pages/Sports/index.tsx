@@ -1,20 +1,27 @@
 import styles from './styles.module.css';
+import Header from '../../components/Header';
 
-export default function Sports() {
-  return(
+import Link from 'next/link';
+
+function Sports() {
+  return (
     <>
+      <Header></Header>
+
       <div className={styles.Container}>
 
         <div className={styles.Card}>
-          
+
           <h1 className={styles.title}>Esportes</h1>
 
-          <div className={styles.sport}>
-            <img className={styles.sportIcon} src="./assets/basquete.png" alt="" />
+          <Link href='/Categories'>
+            <div className={styles.sport}>
+              <img className={styles.sportIcon} src="./assets/basquete.png" alt="" />
 
-            <h1 className={styles.sportName}>Basquete</h1>
-          </div>
-          
+              <h1 className={styles.sportName}>Basquete</h1>
+            </div>
+          </Link>
+
           <div className={styles.sport}>
             <img className={styles.sportIcon} src="./assets/handebol.png" alt="" />
 
@@ -32,3 +39,5 @@ export default function Sports() {
     </>
   )
 }
+
+export default Sports;
