@@ -1,21 +1,10 @@
-import React, { useState } from 'react';
 import styles from './styles.module.css';
 import Header from '../Header';
 import Head from 'next/head';
 import Link from 'next/link';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    if (email === 'teste@gmail.com' && password === '123') {
-      // Executa a navegação para a página "/Sports"
-      window.location.href = '/Sports';
-    } else {
-      alert('Email ou senha incorretos!');
-    }
-  }
 
   return (
     <>
@@ -28,15 +17,17 @@ export default function Login() {
 
           <div className={styles.form}>
             <p className={styles.label}>Email</p>
-            <input className={styles.field} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input className={styles.field} type="email" />
           </div>
 
           <div className={styles.form}>
             <p className={styles.label}>Senha</p>
-            <input className={styles.field} type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <input className={styles.field} type="password" />
           </div>
 
-          <button className={styles.login} onClick={handleLogin}>Login</button>
+          <Link href='/Sports'>
+            <button className={styles.login}>Login</button>
+          </Link>
 
         </div>
       </div>

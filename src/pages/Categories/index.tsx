@@ -10,8 +10,7 @@ import Link from 'next/link';
 export default function Categories() {
 
   function HandleBackButtonClick() {
-    const router = useRouter();
-    router.back();
+    window.history.back();
   }
 
   return (

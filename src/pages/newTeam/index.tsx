@@ -2,14 +2,13 @@ import styles from './styles.module.css';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 
-function HandleBackButtonClick() {
-  const router = useRouter();
-  router.back();
-}
+
 
 export default function newTeam() {
 
-
+  function HandleBackButtonClick() {
+    window.history.back();
+  }
 
   return (
     <>

@@ -3,14 +3,12 @@ import { useRouter } from 'next/router';
 
 import Link from 'next/link';
 
-function HandleBackButtonClick() {
-  const router = useRouter();
-  router.back();
-}
 
 export default function newPlayer() {
 
-
+  function HandleBackButtonClick() {
+    window.history.back();
+  }
 
   return (
     <>
