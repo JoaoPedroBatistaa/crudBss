@@ -32,7 +32,7 @@ export default function newPlayer() {
 
           <div className={styles.form}>
             <p className={styles.label}>Logo do campeonato</p>
-            <input className={styles.field} type="text" placeholder='Fazer upload' />
+            <input className={styles.field} type="file" accept="image/*" />
           </div>
 
 

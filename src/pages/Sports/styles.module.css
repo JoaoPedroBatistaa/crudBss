@@ -22,7 +22,7 @@
 
 .sport {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   flex-direction: row;
   gap: 100px;
@@ -32,6 +32,8 @@
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
   border-radius: 20px;
   margin-top: 25px;
+  padding-left: 80px;
+  padding-right: 80px;
 }
 
 .sport:hover {

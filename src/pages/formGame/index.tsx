@@ -32,7 +32,7 @@ export default function newPlayer() {
 
           <div className={styles.form}>
             <p className={styles.label}>Logo time 1</p>
-            <input className={styles.field} type="text" placeholder='Fazer upload' />
+            <input className={styles.fieldFile} type="file" accept="image/*" />
           </div>
 
           <div className={styles.form}>
@@ -42,7 +42,7 @@ export default function newPlayer() {
 
           <div className={styles.form}>
             <p className={styles.label}>Logo time 2</p>
-            <input className={styles.field} type="text" placeholder='Fazer upload' />
+            <input className={styles.fieldFile} type="file" accept="image/*" />
           </div>
 
 

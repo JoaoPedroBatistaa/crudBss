@@ -183,3 +183,20 @@
   font-family: 'Montserrat', sans-serif;
 
 }
+
+.fieldFile {
+  width: 32rem;
+  height: 3.75rem;
+  border-radius: 20px;
+  background-color: #F1F1F1;
+  border: none;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  margin-top: 8px;
+  margin-bottom: 25px;
+  font-size: 16px;
+  color: #6b6b6b;
+  padding-left: 25px;
+  padding-right: 25px;
+  font-family: 'Montserrat', sans-serif;
+  padding-top: 17px;
+}

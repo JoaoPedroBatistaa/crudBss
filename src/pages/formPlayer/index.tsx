@@ -32,7 +32,7 @@ export default function newPlayer() {
 
           <div className={styles.form}>
             <p className={styles.label}>Foto do Jogador</p>
-            <input className={styles.field} type="text" placeholder='Fazer upload' />
+            <input className={styles.fieldFile} type="file" accept="image/*" />
           </div>
 
           <div className={styles.form}>

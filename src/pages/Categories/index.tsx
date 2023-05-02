@@ -5,14 +5,14 @@ import Header from '../../components/Header';
 import Link from 'next/link';
 
 
-function HandleBackButtonClick() {
-  const router = useRouter();
-  router.back();
-}
+
 
 export default function Categories() {
 
-
+  function HandleBackButtonClick() {
+    const router = useRouter();
+    router.back();
+  }
 
   return (
     <>
