@@ -1,3 +1,7 @@
+body {
+  background-color: #fff;
+}
+
 .Container {
   display: flex;
   justify-content: center;
@@ -61,7 +65,6 @@
 .categorieIcon {
   width: 42px;
   height: 42px;
-
 }
 
 .back {

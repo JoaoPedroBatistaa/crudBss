@@ -1,3 +1,7 @@
+body {
+  background-color: #fff;
+}
+
 .Container {
   display: flex;
   justify-content: center;
