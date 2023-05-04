@@ -1,0 +1,106 @@
+
+
+time {
+  lista_jogador
+    foto_jogador:"syui883uiuwiwi"
+    genero:true
+    nome_jogador:"mateus"
+    pontos:100
+logo:"bsssports"
+nome_time:"java"
+}
+
+Noticias {
+  data: '15 de março de 2023 às 18:13:02 UTC-3'
+descricao:"bla bla bla bla bla"
+foto:"uyiuo9283883484"
+titulo:"Mateus marcou 100 pontos"
+}
+
+Modalidade: {
+  genero:true
+nome_modalidade:"basquet"
+}
+
+Jogo {
+  data:6 de março de 2023 às 16:20:27 UTC-3
+  fase:1
+  mvp:"Mateus"
+placar
+  mandante:331
+  visitante:330
+times
+  time_1:"real"
+  time_2:"barca"
+
+}
+
+Jogador {
+  Foto:""
+  Genero:""
+  Nome:""
+  id:""
+}
+
+Campeonato{
+  name_campeonato:"taca_coritiba"
+}
+
+-----------------
+
+
+
+teams {
+  players: {
+    player_photo: "syui883uiuwiwi",
+    gender: true,
+    player_name: "mateus",
+    points: 100
+  },
+  logo: "bsssports",
+  name: "java"
+}
+
+news {
+  date: 'March 15th, 2023 at 6:13:02 PM UTC-3',
+  description: "bla bla bla bla bla",
+  photo: "uyiuo9283883484",
+  title: "Mateus scored 100 points"
+}
+
+modalities {
+  gender: true,
+  name: "basketball"
+}
+
+games {
+  date: March 6th, 2023 at 4:20:27 PM UTC-3,
+  phase: 1,
+  mvp: {
+    name:"Mateus",
+    team:"barca",
+    number:40
+  },
+  score: {
+    home_team: 331,
+    away_team: 330
+  },
+  teams: {
+    home_team: "real",
+    away_team: "barca"
+  }
+}
+
+player {
+  photo: "",
+  gender: "",
+  name: "",
+  number:"",
+  team:{
+    name:""
+  }
+}
+
+championship {
+  name: "taca_coritiba"
+}
