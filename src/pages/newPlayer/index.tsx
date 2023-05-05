@@ -2,10 +2,16 @@ import styles from './styles.module.css';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useState } from 'react';
+import { GetServerSidePropsContext } from 'next';
 
 
 
-export default function NewPlayer() {
+
+interface Modality{
+  id:string
+}
+
+export default function NewPlayer({ data }: { data: Modality }) {
 
   const [moreInfoVisible, setMoreInfoVisible] = useState(false);
   const router = useRouter();
@@ -36,7 +42,7 @@ export default function NewPlayer() {
 
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVO JOGADOR</p>
-              <Link href='/formPlayer'>
+              <Link href={{ pathname: '/FormPlayer', query: { mdl: data.id} }}>
                 <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
               </Link>
             </div>
@@ -83,4 +89,16 @@ export default function NewPlayer() {
       </div>
     </>
   )
+}
+
+export async function getServerSideProps(context:GetServerSidePropsContext) {
+  const { query } = context;
+  const {mdl} = query;
+  console.log(mdl)
+
+  return {
+    props: {
+      data:{id:mdl}
+    },
+  };
 }

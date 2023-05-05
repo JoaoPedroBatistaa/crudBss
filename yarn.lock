@@ -577,6 +577,11 @@
   dependencies:
     tslib "^2.4.0"
 
+"@types/dom-to-image@^2.6.4":
+  version "2.6.4"
+  resolved "https://registry.npmjs.org/@types/dom-to-image/-/dom-to-image-2.6.4.tgz"
+  integrity sha512-UddUdGF1qulrSDulkz3K2Ypq527MR6ixlgAzqLbxSiQ0icx0XDlIV+h4+edmjq/1dqn0KgN0xGSe1kI9t+vGuw==
+
 "@types/json5@^0.0.29":
   version "0.0.29"
   resolved "https://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz"
@@ -859,7 +864,7 @@ cliui@^8.0.1:
     strip-ansi "^6.0.1"
     wrap-ansi "^7.0.0"
 
-clsx@^1.1.1:
+clsx@^1.1.1, clsx@^1.2.1:
   version "1.2.1"
   resolved "https://registry.npmjs.org/clsx/-/clsx-1.2.1.tgz"
   integrity sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==
@@ -975,6 +980,11 @@ doctrine@^3.0.0:
   integrity sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==
   dependencies:
     esutils "^2.0.2"
+
+dom-to-image@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.npmjs.org/dom-to-image/-/dom-to-image-2.6.0.tgz"
+  integrity sha512-Dt0QdaHmLpjURjU7Tnu3AgYSF2LuOmksSGsUcE6ItvJoCWTBEmiMXcqBdNSAm9+QbbwD7JMoVsuuKX6ZVQv1qA==
 
 emoji-regex@^8.0.0:
   version "8.0.0"
@@ -1996,6 +2006,11 @@ node-fetch@2.6.7:
   dependencies:
     whatwg-url "^5.0.0"
 
+normalize-wheel@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/normalize-wheel/-/normalize-wheel-1.0.1.tgz"
+  integrity sha512-1OnlAPZ3zgrk8B91HyRj+eVv+kS5u+Z0SCsak6Xil/kmgEia50ga7zfkumayonZrImffAxPU/5WcyGhzetHNPA==
+
 object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz"
@@ -2218,13 +2233,28 @@ queue-microtask@^1.2.2:
   resolved "https://registry.npmjs.org/queue-microtask/-/queue-microtask-1.2.3.tgz"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
-react-dom@^18.2.0, react-dom@>=16, react-dom@18.2.0:
+react-dom@^18.2.0, react-dom@>=16, react-dom@>=16.4.0, react-dom@18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-18.2.0.tgz"
   integrity sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==
   dependencies:
     loose-envify "^1.1.0"
     scheduler "^0.23.0"
+
+react-easy-crop@^4.7.4:
+  version "4.7.4"
+  resolved "https://registry.npmjs.org/react-easy-crop/-/react-easy-crop-4.7.4.tgz"
+  integrity sha512-oDi1375Jo/zuPUvo3oauxnNbfy8L4wsbmHD1KB2vT55fdgu+q8/K0w/rDWzy9jz4jfQ94Q9+3Yu366sDDFVmiA==
+  dependencies:
+    normalize-wheel "^1.0.1"
+    tslib "2.0.1"
+
+react-image-crop@^10.0.9:
+  version "10.0.9"
+  resolved "https://registry.npmjs.org/react-image-crop/-/react-image-crop-10.0.9.tgz"
+  integrity sha512-fqn6a811cx/sE7jtu8txL4lBTwgZYuEVNvy7UPKMNMWeRcZa6v0ja11+Gd9nZQiBfaxDal3PBcKhGBLQ956UNg==
+  dependencies:
+    clsx "^1.2.1"
 
 react-is@^16.13.1:
   version "16.13.1"
@@ -2238,7 +2268,7 @@ react-toastify@^9.1.2:
   dependencies:
     clsx "^1.1.1"
 
-react@^18.2.0, "react@>= 16.8.0 || 17.x.x || ^18.0.0-0", react@>=16, react@18.2.0:
+react@^18.2.0, "react@>= 16.8.0 || 17.x.x || ^18.0.0-0", react@>=16, react@>=16.13.1, react@>=16.4.0, react@18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
@@ -2530,6 +2560,11 @@ tslib@^2.1.0, tslib@^2.4.0, tslib@^2.5.0:
   version "2.5.0"
   resolved "https://registry.npmjs.org/tslib/-/tslib-2.5.0.tgz"
   integrity sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==
+
+tslib@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npmjs.org/tslib/-/tslib-2.0.1.tgz"
+  integrity sha512-SgIkNheinmEBgx1IUNirK0TUD4X9yjjBRTqqjggWCU3pUEqIk3/Uwl3yRixYKT6WjQuGiwDv4NomL3wqRCj+CQ==
 
 tsutils@^3.21.0:
   version "3.21.0"
