@@ -1,19 +1,24 @@
 
 import { useRef, useState } from 'react';
 import styles from './styles.module.css';
-import { useRouter } from 'next/router';
 import { GetServerSidePropsContext } from 'next';
-import { collection, addDoc, doc, getDoc,db,storage} from '../../firebase'
-import { DocumentData, Firestore, } from '@firebase/firestore';
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { collection, addDoc, doc, getDoc,db,storage,getDownloadURL, ref, uploadBytesResumable } from '../../firebase'
+import { DocumentData, Firestore } from '@firebase/firestore';
+
 import { toast } from 'react-toastify';
 import Spinner from '@/components/Spinner';
-import Cropper from 'react-easy-crop';
-import getCroppedImg from '../../cropImage'; 
-import ReactCrop, { Crop } from 'react-image-crop';
+import AvatarEditor from 'react-avatar-editor';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import CustomModal from '@/components/CustomModal';
 
 
 
+interface AvatarEditorComponentProps {
+  appRootElement: React.RefObject<HTMLElement>;
+}
 
 interface Modality{
   id:string
@@ -32,11 +37,15 @@ interface Player {
   position:string
 }
 
+// Modal.setAppElement('#root');
 export default function FormPlayer({ data }: { data: Modality }) {
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
+const [modalOpen, setModalOpen] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isFileInputOpen, setIsFileInputOpen] = useState(false);
 
    const [playerData, setPlayerData] = useState<Player>({
     totalScore: 0,
@@ -46,108 +55,74 @@ export default function FormPlayer({ data }: { data: Modality }) {
     threePointers: 0,
     topScorersOfTheChampionship: 0,
     topScorersOfTheGame: 0,
-    position:'' 
+    position:'' ,
+    instagram:''
   });
 
+const handleImageClick = () => {
+  if (!isFileInputOpen) {
+    setIsFileInputOpen(true);
+    fileInputRef.current?.click();
+  }
+};
+  const [image, setImage] = useState(null);
+  const [croppedImage, setCroppedImage] = useState(null);
+  const editorRef = useRef(null);
+
+  const handleImageUpload = (e) => {
+     setIsFileInputOpen(false);
+    // setCroppedImage(null)
+    // setImage(null)
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImage(reader.result);
+         setModalOpen(true);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+    const handleSave = () => {
+    if (editorRef.current) {
+      const canvas = editorRef.current.getImageScaledToCanvas();
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = 90;
+      finalCanvas.height = 90;
+      const ctx = finalCanvas.getContext('2d');
+      
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(45, 45, 45, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.clip();
+
+      ctx.drawImage(canvas, 0, 0, 90, 90);
+
+      ctx.restore();
+
+      const croppedImageDataURL = finalCanvas.toDataURL();
+      setCroppedImage(croppedImageDataURL);
+       setModalOpen(false);
+    }
+  };
+
+    const handleOpen = () => {
+    setModalOpen(true);
+  };
+
+  const handleClose = () => {
+    setModalOpen(false);
+  };
+
+  // const handleSave = () => {
+  //   console.log('Salvar');
+  //   setModalOpen(false);
+  // };
 
   
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [croppedImage, setCroppedImage] = useState<string | null>(null);
-
-  const [zoom, setZoom] = useState(1);
-  const [showCropper, setShowCropper] = useState(false);
-
-    const [crop, setCrop] = useState<Crop>({
-    unit: '%',
-    width: 50,
-    aspect: 1,
-  });
-
-  const [src, setSrc] = useState<string | null>(null);
-  const [imageRef, setImageRef] = useState<HTMLImageElement | null>(null);
-  const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
-
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const reader = new FileReader();
-      reader.addEventListener('load', () => setSrc(reader.result as string));
-      reader.readAsDataURL(e.target.files[0]);
-    }
-  };
-
-
-    const onImageLoaded = (image: HTMLImageElement) => {
-    setImageRef(image);
-  };
-
-  const onCropComplete = (crop: Crop) => {
-    if (imageRef && crop.width && crop.height) {
-      const croppedImageUrl = getCroppedImage(
-        imageRef,
-        crop,
-        'newFile.jpeg'
-      );
-      setCroppedImageUrl(croppedImageUrl);
-    }
-  };
-
-  const getCroppedImage = (
-    image: HTMLImageElement,
-    crop: Crop,
-    fileName: string
-  ) => {
-    const canvas = document.createElement('canvas');
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
-    canvas.width = crop.width!;
-    canvas.height = crop.height!;
-    const ctx = canvas.getContext('2d')!;
-
-    ctx.drawImage(
-      image,
-      crop.x! * scaleX,
-      crop.y! * scaleY,
-      crop.width! * scaleX,
-      crop.height! * scaleY,
-      0,
-      0,
-      crop.width!,
-      crop.height!
-    );
-
-    return canvas.toDataURL('image/jpeg');
-  };
-
-  // const onCropChange = (newCrop) => {
-  //   setCrop(newCrop);
-  // };
-
-  // const onZoomChange = (newZoom) => {
-  //   setZoom(newZoom);
-  // };
-
-  // const onCropComplete = async (croppedAreaPixels) => {
-  //   if (!file) return;
-
-  //   const croppedImageUrl = await getCroppedImg(URL.createObjectURL(file), croppedAreaPixels);
-  //   setCroppedImage(croppedImageUrl);
-  //   setShowCropper(false);
-  // };
-
-  // function handleFileInputChange(event: React.ChangeEvent<HTMLInputElement>) {
-  //   const files = event.target.files;
-  //   if (files && files.length > 0) {
-  //     setFile(files[0]);
-  //     setShowCropper(true);
-  //   }
-  // }
-
-  const closeModal = () => {
-    setShowCropper(false);
-  };
 
   function resetForm() {
     setPlayerData({
@@ -158,9 +133,12 @@ export default function FormPlayer({ data }: { data: Modality }) {
       threePointers: 0,
       topScorersOfTheChampionship: 0,
       topScorersOfTheGame: 0,
-      position:'' 
+      position:'' ,
+      instagram:''
     });
-    setFile(null);
+        setCroppedImage(null)
+    setImage(null)
+
   }
 
 
@@ -171,19 +149,54 @@ export default function FormPlayer({ data }: { data: Modality }) {
     });
   }
 
-  async function uploadImageAndGetDownloadURL(imageFile: File): Promise<string | null> {
-    try {
+    async function uploadImage(): Promise<string | null> {
+    if (croppedImage) {
+      try {
+        const fileExtension = croppedImage.split(';')[0].split('/')[1];
+        const fileName = `avatar_${new Date().getTime()}.${fileExtension}`;
+        const storageRef = ref(storage, `avatars/${fileName}`);
+        const response = await fetch(croppedImage);
+        const blob = await response.blob();
 
-      const storageRef = ref(storage, `players-photos/${imageFile.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, imageFile);
 
-      await uploadTask;
+        await uploadBytesResumable(storageRef, blob);
 
-      const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL;
-    } catch (error) {
-      console.error('Erro ao enviar a imagem:', error);
-      return null;
+       
+        const downloadURL = await getDownloadURL(storageRef);
+        console.log("URL da imagem:", downloadURL);
+        return downloadURL;
+          
+
+      } catch (error) {
+        console.error("Erro ao enviar a imagem:", error);
+            return null;
+      }
+    }
+        return null;
+  };
+
+
+  async function uploadImageAndGetDownloadURL(): Promise<string | null> {
+
+    if(croppedImage){
+      try {
+
+        console.log("Iniciando uploado de imagem")
+        const fileExtension = croppedImage.split(';')[0].split('/')[1];
+        const fileName = `avatar${new Date().getTime()}.${fileExtension}`;
+        const storageRef = ref(storage, `players-photos/${fileName}`);
+        const uploadTask = await uploadBytesResumable(storageRef, croppedImage);
+
+        await uploadTask;
+
+        const downloadURL = await getDownloadURL(storageRef);
+        return downloadURL;
+      } catch (error) {
+        console.error('Erro ao enviar a imagem:', error);
+        return null;
+      }
+    }else{
+    return null;
     }
   }
 
@@ -217,7 +230,7 @@ export default function FormPlayer({ data }: { data: Modality }) {
        toast.success("Jogador cadastrado com sucesso!");
     } catch (e) {
       console.error('Erro ao criar o documento:', e);
-       toast.success("Erro ao cadastrar o Jogador!");
+       toast.error("Erro ao cadastrar o Jogador!");
     }
   }
 
@@ -226,9 +239,13 @@ export default function FormPlayer({ data }: { data: Modality }) {
 
      console.log(isLoading)
     let photoURL = null;
-    if (file) {
-      photoURL = await uploadImageAndGetDownloadURL(file);
+    if (croppedImage) {
+      photoURL = await uploadImage();
     }
+
+    console.log("photoURL")
+    console.log(photoURL)
+
     const referenceCollectionName = 'modalities';
     const referenceId = data.id;
 
@@ -261,6 +278,18 @@ export default function FormPlayer({ data }: { data: Modality }) {
               <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
             </div>
           </div>
+                 <div className={styles.form}>     
+          
+     
+             
+              <label onClick={handleImageClick} className={styles.playerAvatar} >
+                <img className={styles.playerAvatar} src={croppedImage ? croppedImage: "./assets/avatar.jpg"} alt="Avatar"  />
+                
+              </label>
+              
+            
+             <input type="file" value="" ref={fileInputRef} onChange={handleImageUpload} style={{display:"none"}} />
+          </div>  
 
           <div className={styles.form}>
             <p className={styles.label}>Nome do Jogador</p>
@@ -272,37 +301,17 @@ export default function FormPlayer({ data }: { data: Modality }) {
             />
           </div>
 
-          <div className={styles.form}>
+          {/* <div className={styles.form}>
             <p className={styles.label}>Foto do Jogador</p>
             <input 
                 className={styles.fieldFile} 
                 type="file" 
                 accept="image/*" 
-                onChange={handleFileChange}
+                
             />
-             {
-              src && (
-              <div>
-                <ReactCrop
-                  src={src}
-                  crop={crop}
-                  ruleOfThirds
-                  onImageLoaded={onImageLoaded}
-                  onComplete={onCropComplete}
-                  onChange={(newCrop) => setCrop(newCrop)}
-                />
-                <button onClick={() => setSrc(null)}>Fechar crop</button>
-              </div>
-              )}
-              {croppedImageUrl && (
-                <img
-                  className={styles.croppedImage}
-                  src={croppedImageUrl}
-                  alt="Cropped Image"
-                />
-              )}
            
-          </div>
+          </div> */}
+     
 
           <div className={styles.form}>
             <p className={styles.label}>Posição</p>
@@ -397,23 +406,6 @@ export default function FormPlayer({ data }: { data: Modality }) {
         >
           Voltar
           </button>
-
-          {showCropper && (
-  <div >
-    <div >
-      <Cropper
-        image={URL.createObjectURL(file)}
-        crop={crop}
-        zoom={zoom}
-        aspect={1}
-        onCropChange={onCropChange}
-        onZoomChange={onZoomChange}
-        onCropComplete={onCropComplete}
-      />
-      <button className={styles.closeButton} onClick={closeModal}>×</button>
-    </div>
-  </div>
-)}
         
       </div>
            {
@@ -421,7 +413,29 @@ export default function FormPlayer({ data }: { data: Modality }) {
             <Spinner></Spinner>
           )}
           
-          
+          <CustomModal 
+              open={modalOpen} 
+              handleClose={handleClose} 
+              handleSave={handleSave} 
+              content={
+              <div>
+                {image && (
+                  <div>
+                    <AvatarEditor
+                      ref={editorRef}
+                      image={image}
+                      width={90}
+                      height={90}
+                      border={50}
+                      borderRadius={50} // Adicione esta linha para tornar o recorte redondo
+                      color={[255, 255, 255, 0.6]} // RGBA
+                      scale={1.2}
+                    />
+                    <button onClick={handleSave}>Cortar Imagem</button>
+                  </div>
+                )}</div>
+              } 
+          />
      
     </>
    
@@ -436,7 +450,7 @@ export async function getServerSideProps(context:GetServerSidePropsContext) {
 
   return {
     props: {
-      data:{id:mdl}
+      data:{id:mdl},
     },
   };
 }
