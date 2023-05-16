@@ -13,6 +13,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import CustomModal from '@/components/CustomModal';
+import { useRouter } from 'next/router';
 
 
 
@@ -40,12 +41,15 @@ interface Player {
 // Modal.setAppElement('#root');
 export default function FormPlayer({ data }: { data: Modality }) {
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
+   const [modality, setModality] = useState(data); 
 
-const [modalOpen, setModalOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFileInputOpen, setIsFileInputOpen] = useState(false);
+    const router = useRouter();
 
    const [playerData, setPlayerData] = useState<Player>({
     totalScore: 0,
@@ -176,30 +180,6 @@ const handleImageClick = () => {
   };
 
 
-  async function uploadImageAndGetDownloadURL(): Promise<string | null> {
-
-    if(croppedImage){
-      try {
-
-        console.log("Iniciando uploado de imagem")
-        const fileExtension = croppedImage.split(';')[0].split('/')[1];
-        const fileName = `avatar${new Date().getTime()}.${fileExtension}`;
-        const storageRef = ref(storage, `players-photos/${fileName}`);
-        const uploadTask = await uploadBytesResumable(storageRef, croppedImage);
-
-        await uploadTask;
-
-        const downloadURL = await getDownloadURL(storageRef);
-        return downloadURL;
-      } catch (error) {
-        console.error('Erro ao enviar a imagem:', error);
-        return null;
-      }
-    }else{
-    return null;
-    }
-  }
-
   function HandleBackButtonClick() {
     window.history.back();
   }
@@ -224,10 +204,11 @@ const handleImageClick = () => {
     }
 
     try {
-      const newData = { ...data, reference };
+      const newData = { ...data, modality:reference };
       const docRef = await addDoc(collection(db, collectionName), newData);
       console.log('Documento criado com sucesso. ID:', docRef.id);
        toast.success("Jogador cadastrado com sucesso!");
+       router.push("newPlayer?mdl="+modality.id)
     } catch (e) {
       console.error('Erro ao criar o documento:', e);
        toast.error("Erro ao cadastrar o Jogador!");
