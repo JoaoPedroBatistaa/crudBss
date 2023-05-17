@@ -25,17 +25,27 @@ interface Team {
   modality: string;
   name: string;
   squad: Item[];
+  cnpj: string;
+  responsibleCpf: string;
+  responsibleName: string;
+  instagram: string;
+  whatsapp: string;
 }
 
 export default function FormNewTime({ data }: { data: Modality }) {
   const [teamName, setTeamName] = useState('');
+  const [teamCnpj, setTeamCnpj] = useState('');
+  const [teamCpfResponsible, setTeamCpfResponsible] = useState('');
+  const [teamNameResponsible, setTeamNameResponsible] = useState('');
+  const [teamWhatsAppResponsible, setTeamWhatsAppResponsible] = useState('');
+  const [teamInstagram, setTeamInstagram] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [limparSelected, setLimparSelected] = useState(false);
-   const [searchText, setSearchText] = useState('');
-    const [placeholder, setPlaceholder] = useState('Pesquisar');
+  const [searchText, setSearchText] = useState('');
+  const [placeholder, setPlaceholder] = useState('Pesquisar');
 
 
   const router = useRouter();
@@ -91,6 +101,11 @@ export default function FormNewTime({ data }: { data: Modality }) {
         modality: modalityRef.path, // <- Adapte de acordo com a estrutura da sua coleção 'modalities'
         name: teamName,
         squad: squadRefs.map((ref) => ref.path), // <- Adapte de acordo com a estrutura da sua coleção 'players'
+        whatsapp:teamWhatsAppResponsible,
+        cnpj:teamCnpj,
+        instagram:teamCpfResponsible,
+        responsibleCpf:teamCpfResponsible,
+        responsibleName:teamNameResponsible
       };
 
       // Adicionando o novo time à coleção 'teams'
@@ -120,6 +135,11 @@ export default function FormNewTime({ data }: { data: Modality }) {
 
 const resetForm = () => {
 setTeamName('');
+setTeamCnpj('');
+setTeamCpfResponsible('');
+setTeamNameResponsible('');
+setTeamWhatsAppResponsible('');
+setTeamInstagram('');
 setSelectedFile(null);
 setPreviewImage(null);
 setSelectedItems([]);
@@ -150,7 +170,53 @@ return (
             onChange={(event) => setTeamName(event.target.value)}
           />
         </div>
+        <div className={styles.form}>
+          <p className={styles.label}>CNPJ do time:</p>
+          <input
+            className={styles.field}
+            type="text"
+            value={teamCnpj}
+            onChange={(event) => setTeamCnpj(event.target.value)}
+          />
+        </div>
+        <div className={styles.form}>
+          <p className={styles.label}>Instagram do Time:</p>
+          <input
+            className={styles.field}
+            type="text"
+            value={teamInstagram}
+            onChange={(event) => setTeamInstagram(event.target.value)}
+          />
+        </div>
 
+        <div className={styles.form}>
+          <p className={styles.label}>Nome Responsável:</p>
+          <input
+            className={styles.field}
+            type="text"
+            value={teamNameResponsible}
+            onChange={(event) => setTeamNameResponsible(event.target.value)}
+          />
+        </div>
+        <div className={styles.form}>
+          <p className={styles.label}>CPF Responsável:</p>
+          <input
+            className={styles.field}
+            type="text"
+            value={teamCpfResponsible}
+            onChange={(event) => setTeamCpfResponsible(event.target.value)}
+          />
+        </div>
+        <div className={styles.form}>
+          <p className={styles.label}>WhatsApp Responsável:</p>
+          <input
+            className={styles.field}
+            type="text"
+            value={teamWhatsAppResponsible}
+            onChange={(event) => setTeamWhatsAppResponsible(event.target.value)}
+          />
+        </div>
+       
         <div className={styles.form}>
           {previewImage && (
             <div className={styles.previewContainer}>
@@ -165,7 +231,7 @@ return (
 
         <div className={styles.form}>
           <p className={styles.label}>Elenco</p>
-          <SearchSelect onSelectItems={handleSelectItems} onResetSearch={handleResetSearch} />
+          <SearchSelect onSelectItems={handleSelectItems} />
         </div>
 
         <button className={styles.save} type="submit" disabled={isLoading}>

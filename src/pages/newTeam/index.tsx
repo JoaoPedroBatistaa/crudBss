@@ -122,7 +122,7 @@ export default function NewTeam({data, teams }: { data:Modality,teams: [Team] })
           <>  
           <div className={styles.newTeam}>
             <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon,styles.newLogoAvatarListItem} src="./assets/team1.png" alt="" />
+              <img className={styles.modalityIcon,styles.newLogoAvatarListItem} src={team.logo} alt="" />
               <h1 className={styles.newTeamName}>{team.name}</h1>
             </div>
 

@@ -8,18 +8,12 @@ import { DocumentData, Firestore } from '@firebase/firestore';
 import { toast } from 'react-toastify';
 import Spinner from '@/components/Spinner';
 import AvatarEditor from 'react-avatar-editor';
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
+
 import CustomModal from '@/components/CustomModal';
 import { useRouter } from 'next/router';
 
 
 
-interface AvatarEditorComponentProps {
-  appRootElement: React.RefObject<HTMLElement>;
-}
 
 interface Modality{
   id:string
