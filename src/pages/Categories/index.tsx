@@ -68,7 +68,7 @@ export default function Categories({ data }: { data: Modality }) {
               <h1 className={styles.categorieName}>Notícias</h1>
             </div>
           </Link>
-           <Link href={{ pathname: '/newGame', query: { mdl: data.id} }}>
+           <Link href={{ pathname: '/NewGame', query: { mdl: data.id} }}>
             <div className={styles.categorie}>
               <img className={styles.categorieIcon} src="./assets/jogos.png" alt="" />
 

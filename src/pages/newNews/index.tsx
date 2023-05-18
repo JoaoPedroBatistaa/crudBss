@@ -3,10 +3,15 @@ import { useRouter } from 'next/router';
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { GetServerSidePropsContext } from 'next';
+
+interface Modality{
+  id:string,
+  name:string,
+}
 
 
-
-export default function NewPlayer() {
+export default function NewPlayer({data }: { data:Modality }) {
 
   const [moreInfoVisible, setMoreInfoVisible] = useState(false);
   const router = useRouter();
@@ -37,7 +42,7 @@ export default function NewPlayer() {
 
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVA NOTÍCIA</p>
-              <Link href='/formNews'>
+              <Link href={{ pathname: '/formNews', query: { mdl: data.id} }}>
                 <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
               </Link>
             </div>
@@ -86,4 +91,28 @@ export default function NewPlayer() {
       </div>
     </>
   )
+}
+export async function getServerSideProps(context:GetServerSidePropsContext) {
+  const { query } = context;
+  const {mdl} = query;
+  console.log("mdl")
+  console.log(mdl)
+
+  //  let modalityId: string = '';
+  // if (typeof mdl === 'string') {
+  //   modalityId = mdl;
+  // } else if (Array.isArray(modalityId)) {
+  //   modalityId = modalityId.join(',');
+  // }
+  // console.log("modalityId")
+  // console.log(modalityId)
+
+  //  const players = await getCollectionData(modalityId);
+
+  return {
+    props: {
+      data:{id:mdl},
+     //players: players
+    },
+  };
 }

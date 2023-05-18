@@ -1,9 +1,13 @@
+import { GetServerSidePropsContext } from 'next';
 import styles from './styles.module.css';
 import { useRouter } from 'next/router';
 
+interface Modality {
+  id: string;
+}
 
 
-export default function newPlayer() {
+export default function newPlayer({ data }: { data: Modality })  {
 
   function HandleBackButtonClick() {
     window.history.back();
@@ -54,4 +58,15 @@ export default function newPlayer() {
       </div>
     </>
   )
+}
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+const { query } = context;
+const { mdl } = query;
+console.log(mdl);
+
+return {
+props: {
+data: { id: mdl },
+},
+};
 }
