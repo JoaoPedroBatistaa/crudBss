@@ -3,15 +3,30 @@ import { useRouter } from 'next/router';
 import Header from '../../components/Header';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { GetServerSidePropsContext } from 'next';
 
 
 
+interface Modality{
+  id:string
+}
 
-export default function Categories() {
+export default function Categories({ data }: { data: Modality }) {
+
+  
+  console.log(data);
+
 
   function HandleBackButtonClick() {
     window.history.back();
   }
+  console.log(data.id)
+
+  useEffect(()=>{
+    
+  },[])
+  
 
   return (
     <>
@@ -23,7 +38,7 @@ export default function Categories() {
 
           <h1 className={styles.title}>Categorias</h1>
 
-          <Link href='/newTeam'>
+          <Link href={{ pathname: '/newTeam', query: { mdl: data.id} }}>
             <div className={styles.categorie}>
               <img className={styles.categorieIcon} src="./assets/times.png" alt="" />
 
@@ -31,15 +46,14 @@ export default function Categories() {
             </div>
           </Link>
 
-          <Link href='/newPlayer'>
+         <Link href={{ pathname: '/newPlayer', query: { mdl: data.id} }}>
             <div className={styles.categorie}>
               <img className={styles.categorieIcon} src="./assets/masc.png" alt="" />
 
               <h1 className={styles.categorieName}>Jogadores</h1>
             </div>
           </Link>
-
-          <Link href='/newChampionship'>
+          <Link href={{ pathname: '/newChampionship', query: { mdl: data.id} }}>
             <div className={styles.categorie}>
               <img className={styles.categorieIcon} src="./assets/campeonatos.png" alt="" />
 
@@ -47,15 +61,14 @@ export default function Categories() {
             </div>
           </Link>
 
-          <Link href='newNews'>
+          <Link href={{ pathname: '/newNews', query: { mdl: data.id} }}>
             <div className={styles.categorie}>
               <img className={styles.categorieIcon} src="./assets/noticias.png" alt="" />
 
               <h1 className={styles.categorieName}>Notícias</h1>
             </div>
           </Link>
-
-          <Link href='newGame'>
+           <Link href={{ pathname: '/NewGame', query: { mdl: data.id} }}>
             <div className={styles.categorie}>
               <img className={styles.categorieIcon} src="./assets/jogos.png" alt="" />
 
@@ -70,4 +83,16 @@ export default function Categories() {
       </div>
     </>
   )
+}
+
+export async function getServerSideProps(context:GetServerSidePropsContext) {
+  const { query } = context;
+  const {mdl} = query;
+  console.log(mdl)
+
+  return {
+    props: {
+      data:{id:mdl}
+    },
+  };
 }

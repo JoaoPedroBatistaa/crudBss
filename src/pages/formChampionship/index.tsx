@@ -1,14 +1,144 @@
+import { useState } from 'react';
 import styles from './styles.module.css';
-import { useRouter } from 'next/router';
+import router, { useRouter } from 'next/router';
+import PhotoUpload from '@/components/PhotoUpload';
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
+import { addDoc, collection, db, doc, storage } from '@/firebase';
+import { DocumentData, Firestore, getDoc } from '@firebase/firestore';
+import { toast } from 'react-toastify';
+import Spinner from '@/components/Spinner';
+import { GetServerSidePropsContext } from 'next';
 
 
-export default function newPlayer() {
+
+interface Modality{
+  id:string
+}
+interface ChampionShip {
+
+  logo:string;
+  name:string;
+}
+
+export default function NewFormChampionship({ modalityForm }: { modalityForm: Modality }) {
 
   function HandleBackButtonClick() {
     window.history.back();
   }
 
+  
+  const [championShipData, setChampionShipData] = useState<ChampionShip>({
+    logo:"",
+    name:""
+  });
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+
+
+    const handleFileChange = (file: File | null) => {
+    setSelectedFile(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewImage(null);
+    }
+  };
+
+
+   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>, field: keyof ChampionShip) {
+    setChampionShipData({
+      ...championShipData,
+      [field]: event.target.value,
+    });
+  }
+
+
+
+  const handleSubmit = async () => {
+     setIsLoading(true);
+
+     console.log(isLoading)
+
+   let imageUrl = '';
+      if (selectedFile) {
+        //const storage = getStorage();
+        const storageRef = ref(storage, `championships/${selectedFile.name}`);
+        const fileSnapshot = await uploadBytes(storageRef, selectedFile);
+        imageUrl = await getDownloadURL(fileSnapshot.ref);
+      }
+
+
+
+    console.log("imageUrl")
+    console.log(imageUrl)
+
+    const referenceCollectionName = 'modalities';
+    const referenceId = modalityForm.id;
+
+    const championShipDataWithPhoto = { ...championShipData, logo: imageUrl };
+
+
+    await addNewDocumentWithReference(
+      db,
+      'championships', 
+      championShipDataWithPhoto, 
+      referenceCollectionName, 
+      referenceId
+    );
+
+    resetForm();
+    setIsLoading(false);
+  }
+    function resetForm() {
+    setChampionShipData({
+      logo:"",
+     name:""
+    });
+
+    setPreviewImage(null)
+    setSelectedFile(null)
+  }
+
+
+  async function addNewDocumentWithReference(
+    db: Firestore,
+    collectionName: string,
+    data: DocumentData,
+    referenceCollectionName: string,
+    referenceId: string
+  ) {
+    const reference = doc(db, referenceCollectionName, referenceId);
+    const referenceDoc = await getDoc(reference);
+
+    if (!referenceDoc.exists()) {
+      toast.error("Modalidade nãoe encontrada!");
+      console.error('Objeto de referência não encontrado');
+      return;
+    }
+
+    try {
+      const newData = { ...data, modality:reference };
+      const docRef = await addDoc(collection(db, collectionName), newData);
+      console.log('Documento criado com sucesso. ID:', docRef.id);
+       toast.success("Campeonato criado com sucesso!");
+       router.push("newChampionship?mdl="+modalityForm.id)
+    } catch (e) {
+      console.error('Erro ao criar o documento:', e);
+       toast.error("Erro ao cadastrar o campeonato!");
+    }
+  }
+
+
+
   return (
+      isLoading ? <Spinner />:
     <>
       <div className={styles.Container}>
 
@@ -23,25 +153,51 @@ export default function newPlayer() {
             </div>
           </div>
 
+           <div className={styles.form}>
+            {previewImage && (
+              <div className={styles.previewContainer}>
+                <img className={styles.previewImage} src={previewImage} alt="Preview" />
+              </div>
+            )}
+            <p className={styles.label}>Logo do campeonato</p>
+            <div className={styles.uploadContainer}>
+              <PhotoUpload onChange={handleFileChange} />
+            </div>
+          </div>
+
+
           <div className={styles.form}>
             <p className={styles.label}>Nome do Campeonato</p>
-            <input className={styles.field} type="text" />
+            <input 
+              className={styles.field} 
+              type="text" 
+              onChange={(e) => handleInputChange(e, 'name')}
+            />
           </div>
-
-          <div className={styles.form}>
-            <p className={styles.label}>Logo do campeonato</p>
-            <input className={styles.field} type="file" accept="image/*" />
-          </div>
-
-
 
         </div>
 
-        <button className={styles.save}>SALVAR</button>
+        <button 
+          className={styles.save} 
+          onClick={handleSubmit}
+          disabled={isLoading}
+          >SALVAR
+          </button>
 
         <button className={styles.back} onClick={HandleBackButtonClick}>Voltar</button>
 
       </div>
     </>
   )
+}
+export async function getServerSideProps(context:GetServerSidePropsContext) {
+  const { query } = context;
+  const {mdl} = query;
+  console.log(mdl)
+
+  return {
+    props: {
+      modalityForm:{id:mdl},
+    },
+  };
 }
