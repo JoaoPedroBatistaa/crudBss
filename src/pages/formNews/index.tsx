@@ -1,13 +1,18 @@
 import { GetServerSidePropsContext } from 'next';
 import styles from './styles.module.css';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 interface Modality {
   id: string;
 }
 
 
-export default function newPlayer({ data }: { data: Modality })  {
+export default function FormNewPlayer({ data }: { data: Modality })  {
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   function HandleBackButtonClick() {
     window.history.back();
@@ -30,7 +35,10 @@ export default function newPlayer({ data }: { data: Modality })  {
 
           <div className={styles.form}>
             <p className={styles.label}>Manchete</p>
-            <input className={styles.field} type="text" />
+            <input 
+              className={styles.field} 
+              type="text" 
+            />
           </div>
 
           <div className={styles.form}>
