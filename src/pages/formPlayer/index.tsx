@@ -299,6 +299,23 @@ const handleImageClick = () => {
           </div>
 
           <div className={styles.form}>
+            <p className={styles.label}>Data de Nascimento</p>
+            <input 
+              className={styles.field} 
+              type="date"
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>CPF</p>
+            <input 
+              className={styles.field} 
+              type="text"
+              pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
+            />
+          </div>
+
+          <div className={styles.form}>
             <p className={styles.label}>Pontuação total</p>
             <input className={styles.field} 
               type="number"  

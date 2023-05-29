@@ -109,7 +109,7 @@ export default function NewPlayer({data, players }: { data:Modality,players: [Pl
 
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVO JOGADOR</p>
-              <Link href={{ pathname: '/FormPlayer', query: { mdl: data.id} }}>
+              <Link href={{ pathname: '/formPlayer', query: { mdl: data.id} }}>
                 <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
               </Link>
             </div>

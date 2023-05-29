@@ -35,6 +35,16 @@ export default function newPlayer() {
           </div>
 
           <div className={styles.form}>
+          <p className={styles.label}>Instagram do Time:</p>
+          <input className={styles.field} type="text"/>
+        </div>
+
+        <div className={styles.form}>
+          <p className={styles.label}>WhatsApp Responsável:</p>
+          <input className={styles.field} type="text"/>
+        </div>
+
+          <div className={styles.form}>
             <p className={styles.label}>Elenco</p>
             <select className={styles.select} name="Adicionar jogador" id=""></select>
           </div>
