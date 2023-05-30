@@ -215,3 +215,8 @@
   font-family: 'Montserrat', sans-serif;
   padding-top: 17px;
 }
+
+.previewImage {
+  width: 300px;
+  height: auto;
+}

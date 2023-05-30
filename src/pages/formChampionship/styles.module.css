@@ -183,3 +183,8 @@
   padding-top: 15px;
 
 }
+
+.previewImage {
+  width: 300px;
+  height: auto;
+}

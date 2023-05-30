@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 import Link from 'next/link';
 import { useState } from 'react';
-import {  getDocs, query, where } from 'firebase/firestore';
+import {  getDocs, query, where, deleteDoc } from 'firebase/firestore';
 import { collection, db, doc, getDoc } from '@/firebase';
 
 import { toast } from 'react-toastify';
@@ -170,11 +170,34 @@ export default function NewGame({data, matches }: { data:Modality,matches: [Matc
     window.history.back();
   }
 
-  function popup() {
-    if (confirm('Deseja mesmo excluir?')) {
-      // Ação a ser executada se o usuário clicar em "Sim"
+  // function popup() {
+  //   if (confirm('Deseja mesmo excluir?')) {
+  //     // Ação a ser executada se o usuário clicar em "Sim"
+  //   } else {
+  //     // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
+  //   }
+  // }
+
+  const [matchet, setMatches] = useState<Matche[]>([]); 
+
+  async function popup(MatcheId: string) {
+    if (window.confirm('Deseja mesmo excluir?')) {
+      try {
+
+        await deleteDoc(doc(db, 'matches', MatcheId));
+        toast.success('Jogo excluído com sucesso!');
+
+        const equipesAtualizadas = matchet.filter(matchet => matchet.id !== MatcheId);
+        setMatches(equipesAtualizadas);
+        window.location.reload();
+        
+        
+      } catch (erro) {
+        toast.error('Erro ao excluir jogo.');
+        console.error(erro);
+      }
     } else {
-      // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
+
     }
   }
 
@@ -224,7 +247,7 @@ export default function NewGame({data, matches }: { data:Modality,matches: [Matc
               <Link href='/editGame'>
                 <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
               </Link>
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={popup} />
+              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={() => popup(matche.id)} />
             </div>
           </div>
 

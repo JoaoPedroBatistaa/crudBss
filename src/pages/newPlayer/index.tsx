@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { GetServerSidePropsContext } from 'next';
 import { collection, db, doc, getDoc } from '@/firebase';
 import { toast } from 'react-toastify';
-import { getDocs, query, where } from '@firebase/firestore';
+import { getDocs, query, where, deleteDoc } from '@firebase/firestore';
 
 
 interface Modality{
@@ -90,11 +90,34 @@ export default function NewPlayer({data, players }: { data:Modality,players: [Pl
     window.history.back();
   }
 
-  function popup() {
-    if (confirm('Deseja mesmo excluir?')) {
-      // Ação a ser executada se o usuário clicar em "Sim"
+  // function popup() {
+  //   if (confirm('Deseja mesmo excluir?')) {
+  //     // Ação a ser executada se o usuário clicar em "Sim"
+  //   } else {
+  //     // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
+  //   }
+  // }
+
+  const [playert, setPlayers] = useState<Player[]>([]); 
+
+  async function popup(PlayerId: string) {
+    if (window.confirm('Deseja mesmo excluir?')) {
+      try {
+
+        await deleteDoc(doc(db, 'players', PlayerId));
+        toast.success('Jogador excluído com sucesso!');
+
+        const equipesAtualizadas = playert.filter(playert => playert.id !== PlayerId);
+        setPlayers(equipesAtualizadas);
+        window.location.reload();
+        
+        
+      } catch (erro) {
+        toast.error('Erro ao excluir jogador.');
+        console.error(erro);
+      }
     } else {
-      // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
+
     }
   }
 
@@ -132,7 +155,7 @@ export default function NewPlayer({data, players }: { data:Modality,players: [Pl
                 <Link href='/editPlayer'>
                   <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
                 </Link>
-                <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={popup} />
+                <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={() => popup(player.id)} />
               </div>
             </div>
        

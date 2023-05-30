@@ -5,13 +5,83 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { GetServerSidePropsContext } from 'next';
 
+import { collection, db, doc, getDoc } from '@/firebase';
+
+import { toast } from 'react-toastify';
+import { getDocs, query, where, deleteDoc } from '@firebase/firestore';
+
+
+
+
+async function getCollectionData(modalityId:string) {
+
+  console.log("getCollectionData")
+
+  const collectionRef = collection(db, 'modalities');
+  const modalityRef = await getModalityReference(modalityId)
+
+  if (!modalityRef) {
+    toast.success('Modalidade não encontrado!');
+    return;
+  }
+
+  console.log("players -- buscar jogadores")
+  //console.log(modalityRef)
+
+  const q = query(collection(db, "news"), where('modality', '==', modalityRef));
+  //const q = query(collection(db, "modalities"))
+  const querySnapshot = await getDocs(q);
+  const documents = querySnapshot.docs.map(doc => {
+    const data = doc.data();
+    const jsonSerializableData = JSON.parse(JSON.stringify(data));
+    return {
+      id: doc.id,
+      ...jsonSerializableData,
+    };
+  });
+
+  if (documents.length > 0) {
+    console.log("documentos encontrados")
+  }
+  return documents;
+}
+
+
+async function getModalityReference(modalityId:string) {
+
+  // buscar esportes
+  console.log("buscar esportes -"+modalityId)
+  const sportsCollection = 'modalities';
+  const sportRef = doc(db, sportsCollection,modalityId);
+  const sportDoc = await getDoc(sportRef);
+
+  // console.log("sportDoc")
+  // console.log(sportDoc)
+
+  if (sportDoc.exists()) {
+      console.log("Sucesso ao buscar a modalidade -"+modalityId)
+
+    return sportRef;
+  } else {
+    toast.error('Esporte não encontrado!');
+    return null;
+  }
+}
+
 interface Modality{
   id:string,
   name:string,
 }
 
+interface New {
+  id:string,
+  image:string,
+  title: string
+}
 
-export default function NewPlayer({data }: { data:Modality }) {
+
+export default function NewNew({data, news }: {
+  data:Modality, news: [New] }) {
 
   const [moreInfoVisible, setMoreInfoVisible] = useState(false);
   const router = useRouter();
@@ -30,6 +100,28 @@ export default function NewPlayer({data }: { data:Modality }) {
       // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
     }
   }
+
+  const [newst, setnews] = useState<New[]>([]);
+
+  // async function popup(NewsId: string) {
+  //   if (window.confirm('Deseja mesmo excluir?')) {
+  //     try {
+  //       await deleteDoc(doc(db, 'news', NewsId));
+  //       toast.success('Campeonato excluído com sucesso!');
+
+  //       const noticiasAtualizados = news.filter(
+  //         (new) => new.id !== NewsId
+  //       );
+  //       setnews(noticiasAtualizados);
+  //       window.location.reload();
+  //     } catch (erro) {
+  //       toast.error('Erro ao excluir campeonato.');
+  //       console.error(erro);
+  //     }
+  //   } else {
+  //     // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
+  //   }
+  // }
 
   return (
     <>
@@ -98,21 +190,20 @@ export async function getServerSideProps(context:GetServerSidePropsContext) {
   console.log("mdl")
   console.log(mdl)
 
-  //  let modalityId: string = '';
-  // if (typeof mdl === 'string') {
-  //   modalityId = mdl;
-  // } else if (Array.isArray(modalityId)) {
-  //   modalityId = modalityId.join(',');
-  // }
-  // console.log("modalityId")
-  // console.log(modalityId)
+   let modalityId: string = '';
+  if (typeof mdl === 'string') {
+    modalityId = mdl;
+  } else if (Array.isArray(modalityId)) {
+    modalityId = modalityId.join(',');
+  }
+  console.log("modalityId")
+  console.log(modalityId)
 
-  //  const players = await getCollectionData(modalityId);
+   const players = await getCollectionData(modalityId);
 
   return {
     props: {
       data:{id:mdl},
-     //players: players
     },
   };
 }

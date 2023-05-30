@@ -6,7 +6,7 @@ import Header from '../../components/Header';
 import Head from 'next/head';
 import { GetServerSidePropsContext } from 'next';
 import { toast } from 'react-toastify';
-import { collection, doc, getDoc, getDocs, query, where } from '@firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where, deleteDoc } from '@firebase/firestore';
 import { db } from '@/firebase';
 
 
@@ -66,15 +66,16 @@ async function getModalityReference(modalityId:string) {
     return null;
   }
 }
+
 interface Modality{
   id:string,
   name:string,
 }
 
 interface ChampionShip {
-
-  logo:string;
-  name:string;
+  id: string;
+  logo: string;
+  name: string;
 }
 
 
@@ -92,9 +93,31 @@ export default function NewChampionship({data, championships }: { data:Modality,
     window.history.back();
   }
 
-  function popup() {
-    if (confirm('Deseja mesmo excluir?')) {
-      // Ação a ser executada se o usuário clicar em "Sim"
+  // function popup() {
+  //   if (confirm('Deseja mesmo excluir?')) {
+  //     // Ação a ser executada se o usuário clicar em "Sim"
+  //   } else {
+  //     // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
+  //   }
+  // }
+
+  const [championshipst, setchampionships] = useState<ChampionShip[]>([]);
+
+  async function popup(ChampionshipsId: string) {
+    if (window.confirm('Deseja mesmo excluir?')) {
+      try {
+        await deleteDoc(doc(db, 'championships', ChampionshipsId));
+        toast.success('Campeonato excluído com sucesso!');
+
+        const campeonatosAtualizados = championships.filter(
+          (championship) => championship.id !== ChampionshipsId
+        );
+        setchampionships(campeonatosAtualizados);
+        window.location.reload();
+      } catch (erro) {
+        toast.error('Erro ao excluir campeonato.');
+        console.error(erro);
+      }
     } else {
       // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
     }
@@ -131,7 +154,7 @@ export default function NewChampionship({data, championships }: { data:Modality,
                 <Link href='/editChampionship'>
                   <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
                 </Link>
-                <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={popup
+                <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={() => popup(championship.id)
                 } />
               </div>
             </div>
