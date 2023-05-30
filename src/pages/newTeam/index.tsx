@@ -6,7 +6,7 @@ import { GetServerSidePropsContext } from 'next';
 import { collection, db, doc, getDoc } from '@/firebase';
 
 import { toast } from 'react-toastify';
-import { getDocs, query, where } from '@firebase/firestore';
+import { getDocs, query, where, deleteDoc } from '@firebase/firestore';
 
 
 interface Modality{
@@ -29,7 +29,7 @@ async function getCollectionData(modalityId:string) {
   const modalityRef = await getModalityReference(modalityId)
 
   if (!modalityRef) {
-     toast.error('Modalidade não encontrado!');
+    toast.error('Modalidade não encontrado!');
     return;
   }
 
@@ -93,9 +93,27 @@ export default function NewTeam({data, teams }: { data:Modality,teams: [Team] })
     window.history.back();
   }
 
-  function popup() {
+  // function popup() {
+  //   if (confirm('Deseja mesmo excluir?')) {
+  //     // Ação a ser executada se o usuário clicar em "Sim"
+  //   } else {
+  //     // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
+  //   }
+  // }
+
+  async function popup(TeamId) {
     if (confirm('Deseja mesmo excluir?')) {
-      // Ação a ser executada se o usuário clicar em "Sim"
+      try {
+        // Executar a exclusão do time usando o ID fornecido
+        await deleteDoc(doc(db, 'teams', TeamId));
+        toast.success('Time excluído com sucesso!');
+        // Atualizar a lista de times após a exclusão
+        const updatedTeams = teams.filter(team => team.id !== TeamId);
+        setTeams(updatedTeams);
+      } catch (error) {
+        toast.error('Erro ao excluir o time.');
+        console.error(error);
+      }
     } else {
       // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
     }
@@ -131,7 +149,7 @@ export default function NewTeam({data, teams }: { data:Modality,teams: [Team] })
               <Link href='/editTeam'>
                 <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
               </Link>
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={popup} />
+              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={() => popup(team.id)} />
             </div>
           </div>
 
