@@ -101,21 +101,26 @@ export default function NewTeam({data, teams }: { data:Modality,teams: [Team] })
   //   }
   // }
 
-  async function popup(TeamId) {
-    if (confirm('Deseja mesmo excluir?')) {
+  const [teamst, setTeams] = useState<Team[]>([]); 
+
+  async function popup(TeamId: string) {
+    if (window.confirm('Deseja mesmo excluir?')) {
       try {
-        // Executar a exclusão do time usando o ID fornecido
+
         await deleteDoc(doc(db, 'teams', TeamId));
-        toast.success('Time excluído com sucesso!');
-        // Atualizar a lista de times após a exclusão
-        const updatedTeams = teams.filter(team => team.id !== TeamId);
-        setTeams(updatedTeams);
-      } catch (error) {
-        toast.error('Erro ao excluir o time.');
-        console.error(error);
+        toast.success('Equipe excluída com sucesso!');
+
+        const equipesAtualizadas = teamst.filter(teamst => teamst.id !== TeamId);
+        setTeams(equipesAtualizadas);
+        window.location.reload();
+        
+        
+      } catch (erro) {
+        toast.error('Erro ao excluir a equipe.');
+        console.error(erro);
       }
     } else {
-      // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
+
     }
   }
 
@@ -210,5 +215,4 @@ export async function getServerSideProps(context:GetServerSidePropsContext) {
     },
   };
 }
-
 
