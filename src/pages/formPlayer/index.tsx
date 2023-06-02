@@ -201,7 +201,7 @@ const handleImageClick = () => {
       const newData = { ...data, modality:reference };
       const docRef = await addDoc(collection(db, collectionName), newData);
       console.log('Documento criado com sucesso. ID:', docRef.id);
-       toast.success("Jogador cadastrado com sucesso!");
+      toast.success("Jogador cadastrado com sucesso!");
        router.push("newPlayer?mdl="+modality.id)
     } catch (e) {
       console.error('Erro ao criar o documento:', e);
@@ -394,8 +394,7 @@ const handleImageClick = () => {
 
         <button 
           className={styles.back} 
-          onClick={HandleBackButtonClick}
-        >
+          onClick={HandleBackButtonClick}>
           Voltar
           </button>
         
