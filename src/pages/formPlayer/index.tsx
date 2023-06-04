@@ -378,7 +378,7 @@ const handleImageClick = () => {
             <input 
               className={styles.field} 
               type="text" 
-               value={playerData.instagram}
+              value={playerData.instagram}
               onChange={(e) => handleInputChange(e, 'instagram')} 
             />
           </div>
@@ -399,7 +399,7 @@ const handleImageClick = () => {
           </button>
         
       </div>
-           {
+          {
             isLoading && (
             <Spinner></Spinner>
           )}

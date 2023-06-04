@@ -13,10 +13,18 @@ interface Modality{
   name:string,
 }
 
-interface Player{
-  id:string,
+interface Player {
+  id: string;
+  totalScore:Number,
+  instagram?:string,
+  mpvOfTheGames:Number,
+  mvpOfTheChampionship:Number,
   name:string,
-  photo:string
+  photo?:string,
+  threePointers:Number,
+  topScorersOfTheChampionship:Number,
+  topScorersOfTheGame:Number
+  position:string
 }
 
 async function getCollectionData(modalityId:string) {
@@ -73,7 +81,92 @@ async function getModalityReference(modalityId:string) {
   }
 }
 
+interface PlayerProps {
+  player: Player;
+}
 
+const Player: React.FC<PlayerProps> = ({ player }) => {
+  const [moreInfoVisible, setMoreInfoVisible] = useState(false);
+
+  function toggleMoreInfo() {
+    setMoreInfoVisible(!moreInfoVisible);
+  }
+
+  const [playerData, setPlayerData] = useState<Player[]>([player]); // Use state to store the player data as an array
+
+  async function popup(playerId: string) {
+    if (window.confirm('Deseja mesmo excluir?')) {
+      try {
+        await deleteDoc(doc(db, 'players', playerId));
+        toast.success('Jogador excluído com sucesso!');
+
+        // Update the playerData state by filtering out the deleted player
+        const updatedPlayers = playerData.filter((player) => player.id !== playerId);
+        setPlayerData(updatedPlayers);
+
+        window.location.reload();
+      } catch (error) {
+        toast.error('Erro ao excluir jogador.');
+        console.error(error);
+      }
+    }
+  }
+
+
+  return (
+    <>
+      <div className={styles.newTeam}>
+        <div className={styles.NameGroup}>
+          <img
+            className={`${styles.modalityIcon} ${styles.newPalyerAvatarListItem}`}
+            src={player.photo || "./assets/avatar.jpg"}
+            alt=""
+          />
+          <h1 className={styles.newTeamName}>{player.name}</h1>
+        </div>
+
+        <div className={styles.crudGroup}>
+          <img
+            id='moreInfoButton'
+            className={styles.crudIcon}
+            src="./assets/detalhes.png"
+            alt=""
+            onClick={toggleMoreInfo}
+          />
+          <Link href={{ pathname: `/editPlayer`, query: { id: player.id } }}>
+          <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
+          </Link>
+          <img
+            className={styles.crudIcon}
+            src="./assets/excluir.png"
+            alt=""
+            onClick={() => popup(player.id)}
+          />
+        </div>
+      </div>
+
+      {moreInfoVisible && (
+        <div id='moreInfo' className={styles.moreInfo}>
+          <div className={styles.line}>
+          <p className={styles.dataInfo}>Nome:</p>
+          <p className={styles.dataInfo}>{player.name}</p>
+          </div>
+
+          <div className={styles.line}>
+          <p className={styles.dataInfo}>Instagram</p>
+          <p className={styles.dataInfo}>{player.instagram}</p>
+          </div>
+
+          <div className={styles.line}>
+          <p className={styles.dataInfo}>Posição</p>
+          <p className={styles.dataInfo}>{player.position}</p>
+          </div>
+          
+        </div>
+      )}
+    </>
+  );
+};
 
 export default function NewPlayer({data, players }: { data:Modality,players: [Player] }) {
 
@@ -98,96 +191,30 @@ export default function NewPlayer({data, players }: { data:Modality,players: [Pl
   //   }
   // }
 
-  const [playert, setPlayers] = useState<Player[]>([]); 
-
-  async function popup(PlayerId: string) {
-    if (window.confirm('Deseja mesmo excluir?')) {
-      try {
-
-        await deleteDoc(doc(db, 'players', PlayerId));
-        toast.success('Jogador excluído com sucesso!');
-
-        const equipesAtualizadas = playert.filter(playert => playert.id !== PlayerId);
-        setPlayers(equipesAtualizadas);
-        window.location.reload();
-        
-        
-      } catch (erro) {
-        toast.error('Erro ao excluir jogador.');
-        console.error(erro);
-      }
-    } else {
-
-    }
-  }
-
   return (
     <>
       <div className={styles.Container}>
-
         <div className={styles.Card}>
-
           <div className={styles.titleGroup}>
             <h1 className={styles.title}>Jogadores</h1>
-
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVO JOGADOR</p>
-              <Link href={{ pathname: '/formPlayer', query: { mdl: data.id} }}>
+              <Link href={{ pathname: '/formPlayer', query: { mdl: data.id } }}>
                 <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
               </Link>
             </div>
           </div>
 
-          { players.map(player => (
-            <>
-            <div className={styles.newTeam}>
-              <div className={styles.NameGroup}>
-                <img 
-                  className={styles.modalityIcon ,styles.newPalyerAvatarListItem} 
-                  src={player.photo||"./assets/avatar.jpg" } 
-                  alt="" 
-                />
-                <h1 className={styles.newTeamName}>{player.name}</h1>
-              </div>
-
-              <div className={styles.crudGroup}>
-                <img id='moreInfoButton' className={styles.crudIcon} src="./assets/detalhes.png" alt="" onClick={toggleMoreInfo} />
-                <Link href='/editPlayer'>
-                  <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-                </Link>
-                <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={() => popup(player.id)} />
-              </div>
-            </div>
-       
-
-
-          <div id='moreInfo' className={`${styles.moreInfo} ${moreInfoVisible ? '' : styles.hidden}`}>
-
-            <div className={styles.line}>
-              <p className={styles.dataInfo}>Info</p>
-              <p className={styles.dataInfo}>dados</p>
-            </div>
-            <div className={styles.line}>
-              <p className={styles.dataInfo}>info</p>
-              <p className={styles.dataInfo}>dados</p>
-            </div>
-            <div className={styles.line}>
-              <p className={styles.dataInfo}>info </p>
-              <p className={styles.dataInfo}>dados</p>
-            </div>
-
-          </div>
-                </>
+          {players.map(player => (
+            console.log(player),
+            <Player key={player.id} player={player} />
           ))}
-
-
         </div>
 
         <button className={styles.back} onClick={HandleBackButtonClick}>Voltar</button>
-
       </div>
     </>
-  )
+  );
 }
 
 export async function getServerSideProps(context:GetServerSidePropsContext) {

@@ -1,66 +1,49 @@
 import styles from './styles.module.css';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { GetServerSidePropsContext } from 'next';
-
+import { getDocs, query, where, deleteDoc } from 'firebase/firestore';
 import { collection, db, doc, getDoc } from '@/firebase';
 
 import { toast } from 'react-toastify';
-import { getDocs, query, where, deleteDoc } from '@firebase/firestore';
+import { GetServerSidePropsContext } from 'next';
 
-
-
-
-async function getCollectionData(modalityId:string) {
-
-  console.log("getCollectionData")
-
+async function getCollectionData(modalityId: string) {
   const collectionRef = collection(db, 'modalities');
-  const modalityRef = await getModalityReference(modalityId)
+  const modalityRef = await getModalityReference(modalityId);
 
   if (!modalityRef) {
-    toast.success('Modalidade não encontrado!');
+    toast.success('Modalidade não encontrada!');
     return;
   }
 
-  console.log("players -- buscar jogadores")
-  //console.log(modalityRef)
-
-  const q = query(collection(db, "news"), where('modality', '==', modalityRef));
-  //const q = query(collection(db, "modalities"))
+  const q = query(collection(db, 'news'), where('modality', '==', modalityRef));
   const querySnapshot = await getDocs(q);
-  const documents = querySnapshot.docs.map(doc => {
-    const data = doc.data();
+  const documents = querySnapshot.docs.map((doc1) => {
+    const data = doc1.data();
     const jsonSerializableData = JSON.parse(JSON.stringify(data));
+
     return {
-      id: doc.id,
+      id: doc1.id,
       ...jsonSerializableData,
     };
   });
 
   if (documents.length > 0) {
-    console.log("documentos encontrados")
+    console.log('Documentos encontrados');
   }
   return documents;
 }
 
-
-async function getModalityReference(modalityId:string) {
-
-  // buscar esportes
-  console.log("buscar esportes -"+modalityId)
+async function getModalityReference(modalityId: string) {
   const sportsCollection = 'modalities';
-  const sportRef = doc(db, sportsCollection,modalityId);
+  const sportRef = doc(db, sportsCollection, modalityId);
   const sportDoc = await getDoc(sportRef);
 
-  // console.log("sportDoc")
-  // console.log(sportDoc)
-
   if (sportDoc.exists()) {
-      console.log("Sucesso ao buscar a modalidade -"+modalityId)
-
+    console.log('Sucesso ao buscar a modalidade - ' + modalityId);
     return sportRef;
   } else {
     toast.error('Esporte não encontrado!');
@@ -68,142 +51,146 @@ async function getModalityReference(modalityId:string) {
   }
 }
 
-interface Modality{
-  id:string,
-  name:string,
+interface Modality {
+  id: string;
+  name: string;
 }
 
-interface New {
-  id:string,
-  image:string,
-  title: string
+interface News {
+  id: string;
+  image: string;
+  title: string;
+  description: string;
+  date: string;
 }
 
-
-export default function NewNew({data, news }: {
-  data:Modality, news: [New] }) {
-
-  const [moreInfoVisible, setMoreInfoVisible] = useState(false);
+export default function NewNews({ data, news }: { data: Modality; news: News[] }) {
+  const [moreInfoVisible, setMoreInfoVisible] = useState<{ [key: string]: boolean }>({});
   const router = useRouter();
 
-  function toggleMoreInfo() {
-    setMoreInfoVisible(!moreInfoVisible);
+  function toggleMoreInfo(newsId: string) {
+    setMoreInfoVisible((prevState) => ({
+      ...prevState,
+      [newsId]: !prevState[newsId],
+    }));
   }
+
   function HandleBackButtonClick() {
     window.history.back();
   }
 
-  function popup() {
-    if (confirm('Deseja mesmo excluir?')) {
-      // Ação a ser executada se o usuário clicar em "Sim"
-    } else {
-      // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
+  const [newsData, setNewsData] = useState<News[]>(news); // Use state to store the news data
+
+  async function popup(newsId: string) {
+    if (window.confirm('Deseja mesmo excluir?')) {
+      try {
+        await deleteDoc(doc(db, 'news', newsId)); // Use the correct newsId to delete the document
+        toast.success('Notícia excluída com sucesso!');
+
+        const updatedNews = newsData.filter((newItem) => newItem.id !== newsId);
+        setNewsData(updatedNews);
+        window.location.reload();
+      } catch (error) {
+        toast.error('Erro ao excluir notícia.');
+        console.error(error);
+      }
     }
   }
-
-  const [newst, setnews] = useState<New[]>([]);
-
-  // async function popup(NewsId: string) {
-  //   if (window.confirm('Deseja mesmo excluir?')) {
-  //     try {
-  //       await deleteDoc(doc(db, 'news', NewsId));
-  //       toast.success('Campeonato excluído com sucesso!');
-
-  //       const noticiasAtualizados = news.filter(
-  //         (new) => new.id !== NewsId
-  //       );
-  //       setnews(noticiasAtualizados);
-  //       window.location.reload();
-  //     } catch (erro) {
-  //       toast.error('Erro ao excluir campeonato.');
-  //       console.error(erro);
-  //     }
-  //   } else {
-  //     // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
-  //   }
-  // }
 
   return (
     <>
       <div className={styles.Container}>
-
         <div className={styles.Card}>
-
           <div className={styles.titleGroup}>
             <h1 className={styles.title}>Notícias</h1>
-
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVA NOTÍCIA</p>
-              <Link href={{ pathname: '/formNews', query: { mdl: data.id} }}>
+              <Link href={{ pathname: '/formNews', query: { mdl: data.id } }}>
                 <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
               </Link>
             </div>
           </div>
 
-          <div className={styles.newTeam}>
-            <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon} src="./assets/random.png" alt="" />
-              <h1 className={styles.newTeamName}>JAVA ganha taça</h1>
-            </div>
+          {newsData.map((newItem) => (
+            <>
+            <div className={styles.newTeam} key={newItem.id}>
+              <div className={styles.NameGroup}>
+                <h1 className={styles.newTeamName}>{newItem.title}</h1>
+              </div>
 
-            <div className={styles.crudGroup}>
-              <img id='moreInfoButton' className={styles.crudIcon} src="./assets/detalhes.png" alt="" onClick={toggleMoreInfo} />
-              <Link href='/editNews'>
+              <div className={styles.crudGroup}>
+                <img
+                  id={`moreInfoButton_${newItem.id}`}
+                  className={styles.crudIcon}
+                  src="./assets/detalhes.png"
+                  alt=""
+                  onClick={() => toggleMoreInfo(newItem.id)}
+                />
+                <Link href={{ pathname: `/editNews`, query: { id: newItem.id } }}>
                 <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              </Link>
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={popup} />
+                </Link>
+                <img
+                  className={styles.crudIcon}
+                  src="./assets/excluir.png"
+                  alt=""
+                  onClick={() => popup(newItem.id)}
+                />
+              </div>
+              </div>
+
+                <div id={`moreInfo_${newItem.id}`}className={`${styles.moreInfo} ${moreInfoVisible[newItem.id] ? '' : styles.hidden}`}>
+
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Manchete</p>
+                    <p className={styles.dataInfo}>{newItem.title}</p>
+                  </div>
+
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Descrição</p>
+                    <p className={styles.dataInfo}>{newItem.description}</p>
+                  </div>
+                  
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Data</p>
+                    <p className={styles.dataInfo}>{newItem.date}</p>
+                  </div>
+                                    
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Imagem da Noticia</p>
+                    <img className={`${styles.modalityIcon} 
+                    ${styles.newImageItem}`} 
+                    src={newItem.image} alt="" />
+                  </div>
             </div>
-          </div>
-
-          <div id='moreInfo' className={`${styles.moreInfo} ${moreInfoVisible ? '' : styles.hidden}`}>
-
-            <div className={styles.line}>
-              <p className={styles.dataInfo}>Info</p>
-              <p className={styles.dataInfo}>dados</p>
-            </div>
-            <div className={styles.line}>
-              <p className={styles.dataInfo}>info</p>
-              <p className={styles.dataInfo}>dados</p>
-            </div>
-            <div className={styles.line}>
-              <p className={styles.dataInfo}>info </p>
-              <p className={styles.dataInfo}>dados</p>
-            </div>
-
-          </div>
-
-
-
-
-
+            </>
+          ))}
         </div>
 
-        <button className={styles.back} onClick={HandleBackButtonClick}>Voltar</button>
-
+        <button className={styles.back} onClick={HandleBackButtonClick}>
+          Voltar
+        </button>
       </div>
     </>
-  )
+  );
 }
-export async function getServerSideProps(context:GetServerSidePropsContext) {
-  const { query } = context;
-  const {mdl} = query;
-  console.log("mdl")
-  console.log(mdl)
 
-   let modalityId: string = '';
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const { query } = context;
+  const { mdl } = query;
+
+  let modalityId: string = '';
   if (typeof mdl === 'string') {
     modalityId = mdl;
   } else if (Array.isArray(modalityId)) {
     modalityId = modalityId.join(',');
   }
-  console.log("modalityId")
-  console.log(modalityId)
 
-   const players = await getCollectionData(modalityId);
+  const news = await getCollectionData(modalityId);
 
   return {
     props: {
-      data:{id:mdl},
+      data: { id: mdl },
+      news: news,
     },
   };
 }

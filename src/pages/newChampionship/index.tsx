@@ -80,39 +80,32 @@ interface ChampionShip {
 
 
 
-export default function NewChampionship({data, championships }: { data:Modality,championships: [ChampionShip] }) {
+export default function NewChampionship({ data, championships }: { data: Modality, championships: [ChampionShip] }) {
 
-  const [moreInfoVisible, setMoreInfoVisible] = useState(false);
-
+  const [moreInfoVisible, setMoreInfoVisible] = useState<{ [key: string]: boolean }>({});
   const router = useRouter();
 
-  function toggleMoreInfo() {
-    setMoreInfoVisible(!moreInfoVisible);
+  function toggleMoreInfo(championshipId: string) {
+    setMoreInfoVisible((prevState) => ({
+      ...prevState,
+      [championshipId]: !prevState[championshipId],
+    }));
   }
+
   function HandleBackButtonClick() {
     window.history.back();
   }
 
-  // function popup() {
-  //   if (confirm('Deseja mesmo excluir?')) {
-  //     // Ação a ser executada se o usuário clicar em "Sim"
-  //   } else {
-  //     // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
-  //   }
-  // }
+  let championshipst: ChampionShip[] = [];
 
-  const [championshipst, setchampionships] = useState<ChampionShip[]>([]);
-
-  async function popup(ChampionshipsId: string) {
+  async function popup(championshipId: string) {
     if (window.confirm('Deseja mesmo excluir?')) {
       try {
-        await deleteDoc(doc(db, 'championships', ChampionshipsId));
+        await deleteDoc(doc(db, 'championships', championshipId));
         toast.success('Campeonato excluído com sucesso!');
 
-        const campeonatosAtualizados = championships.filter(
-          (championship) => championship.id !== ChampionshipsId
-        );
-        setchampionships(campeonatosAtualizados);
+        const updatedChampionships = championships.filter((championship) => championship.id !== championshipId);
+        championshipst = updatedChampionships;
         window.location.reload();
       } catch (erro) {
         toast.error('Erro ao excluir campeonato.');
@@ -136,49 +129,48 @@ export default function NewChampionship({data, championships }: { data:Modality,
 
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVO CAMPEONATO</p>
-              <Link href={{ pathname: '/formChampionship', query: { mdl: data.id} }}>
+              <Link href={{ pathname: '/formChampionship', query: { mdl: data.id } }}>
                 <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
               </Link>
             </div>
           </div>
-          { championships.map(championship =>(
+          {championships.map((championship) => (
             <>
-            <div className={styles.newTeam}>
-              <div className={styles.NameGroup}>
-                <img className={styles.modalityIcon, styles.newLogoAvatarListItem} src={championship.logo ||"./assets/avatar.jpg"} alt="" />
-                <h1 className={styles.newTeamName}>{championship.name}</h1>
-              </div>
+              <div className={styles.newTeam}>
+                <div className={styles.NameGroup}>
+                  <img className={`${styles.modalityIcon} ${styles.newLogoAvatarListItem}`} src={championship.logo || "./assets/avatar.jpg"} alt="" />
+                  <h1 className={styles.newTeamName}>{championship.name}</h1>
+                </div>
 
-              <div className={styles.crudGroup}>
-                <img id='moreInfoButton' className={styles.crudIcon} src="./assets/detalhes.png" alt="" onClick={toggleMoreInfo} />
-                <Link href='/editChampionship'>
+                <div className={styles.crudGroup}>
+                  <img
+                    id={`moreInfoButton_${championship.id}`}
+                    className={styles.crudIcon}
+                    src="./assets/detalhes.png"
+                    alt=""
+                    onClick={() => toggleMoreInfo(championship.id)}
+                  />
+                  <Link href={{ pathname: `/editChampionship`, query: { id: championship.id } }}>
                   <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-                </Link>
-                <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={() => popup(championship.id)
-                } />
-              </div>
-            </div>
-
-            <div id='moreInfo' className={`${styles.moreInfo} ${moreInfoVisible ? '' : styles.hidden}`}>
-
-              <div className={styles.line}>
-                <p className={styles.dataInfo}>Info</p>
-                <p className={styles.dataInfo}>dados</p>
-              </div>
-              <div className={styles.line}>
-                <p className={styles.dataInfo}>info</p>
-                <p className={styles.dataInfo}>dados</p>
-              </div>
-              <div className={styles.line}>
-                <p className={styles.dataInfo}>info </p>
-                <p className={styles.dataInfo}>dados</p>
+                  </Link>
+                  <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={() => popup(championship.id)} />
+                </div>
               </div>
 
-            </div>
-          </>
-          ))
-        }
+              <div id={`moreInfo_${championship.id}`} className={`${styles.moreInfo} ${moreInfoVisible[championship.id] ? '' : styles.hidden}`}>
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Nome:</p>
+                  <p className={styles.dataInfo}>{championship.name}</p>
+                </div>
 
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>info</p>
+                  <p className={styles.dataInfo}>dados</p>
+                </div>
+                
+              </div>
+            </>
+          ))}
         </div>
 
         <button className={styles.back} onClick={HandleBackButtonClick}>Voltar</button>

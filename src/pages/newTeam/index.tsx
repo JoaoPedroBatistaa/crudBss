@@ -14,10 +14,16 @@ interface Modality{
 }
 
 
-interface Team{
-  id:string,
-  name:string,
-  logo:string
+interface Team {
+  logo: string;
+  modality: string;
+  name: string;
+  squad: string;
+  cnpj: string;
+  responsibleCpf: string;
+  responsibleName: string;
+  instagram: string;
+  whatsapp: string;
 }
 
 
@@ -81,114 +87,109 @@ async function getModalityReference(modalityId:string) {
 }
 
 
-export default function NewTeam({data, teams }: { data:Modality,teams: [Team] }) {
+export default function NewTeam({ data, teams }: { data: Modality, teams: [Team] }) {
 
-  const [moreInfoVisible, setMoreInfoVisible] = useState(false);
+  const [moreInfoVisible, setMoreInfoVisible] = useState<{ [key: string]: boolean }>({});
   const router = useRouter();
-  function toggleMoreInfo() {
-    setMoreInfoVisible(!moreInfoVisible);
+
+  function toggleMoreInfo(teamId: string) {
+    setMoreInfoVisible((prevState) => ({
+      ...prevState,
+      [teamId]: !prevState[teamId],
+    }));
   }
 
   function HandleBackButtonClick() {
     window.history.back();
   }
 
-  // function popup() {
-  //   if (confirm('Deseja mesmo excluir?')) {
-  //     // Ação a ser executada se o usuário clicar em "Sim"
-  //   } else {
-  //     // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
-  //   }
-  // }
-
-  const [teamst, setTeams] = useState<Team[]>([]); 
+  const [teamst, setTeams] = useState<Team[]>([]);
 
   async function popup(TeamId: string) {
     if (window.confirm('Deseja mesmo excluir?')) {
       try {
-
         await deleteDoc(doc(db, 'teams', TeamId));
         toast.success('Equipe excluída com sucesso!');
 
-        const equipesAtualizadas = teamst.filter(teamst => teamst.id !== TeamId);
+        const equipesAtualizadas = teamst.filter((team) => team.id !== TeamId);
         setTeams(equipesAtualizadas);
         window.location.reload();
-        
-        
       } catch (erro) {
         toast.error('Erro ao excluir a equipe.');
         console.error(erro);
       }
-    } else {
-
     }
   }
-
 
   return (
     <>
       <div className={styles.Container}>
-
         <div className={styles.Card}>
-
           <div className={styles.titleGroup}>
             <h1 className={styles.title}>Times</h1>
-
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVO TIME</p>
-              <Link href={{ pathname: '/FormNewTime', query: { mdl: data.id} }}>
+              <Link href={{ pathname: '/FormNewTime', query: { mdl: data.id } }}>
                 <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
               </Link>
             </div>
           </div>
-          { teams.map(team => (
-          <>  
-          <div className={styles.newTeam}>
-            <div className={styles.NameGroup}>
-              <img className={styles.modalityIcon,styles.newLogoAvatarListItem} src={team.logo} alt="" />
-              <h1 className={styles.newTeamName}>{team.name}</h1>
-            </div>
-
-            <div className={styles.crudGroup}>
-              <img id='moreInfoButton' className={styles.crudIcon} src="./assets/detalhes.png" alt="" onClick={toggleMoreInfo} />
-              <Link href='/editTeam'>
-                <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-              </Link>
-              <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={() => popup(team.id)} />
-            </div>
-          </div>
-
-          <div id='moreInfo' className={`${styles.moreInfo} ${moreInfoVisible ? '' : styles.hidden}`}>
-            <div className={styles.line}>
-              <p className={styles.dataInfo}>Nome do Time</p>
-              <p className={styles.dataInfo}>JAVA Basquetebol</p>
-            </div>
-            <div className={styles.line}>
-              <p className={styles.dataInfo}>Logo do time</p>
-              <img className={styles.modalityIcon} src="./assets/team1.png" alt="" />
-            </div>
-            <div className={styles.line}>
-              <p className={styles.dataInfo}>Elenco</p>
-              <div className={styles.elencoList}>
-                <p className={styles.dataInfo}>Fulano</p>
-                <p className={styles.dataInfo}>Fulano</p>
-                <p className={styles.dataInfo}>Fulano</p>
-                <p className={styles.dataInfo}>Fulano</p>
-                <p className={styles.dataInfo}>Fulano</p>
+          {teams.map((team) => (
+            <>
+              <div className={styles.newTeam}>
+                <div className={styles.NameGroup}>
+                  <img className={`${styles.modalityIcon} ${styles.newLogoAvatarListItem}`} src={team.logo} alt="" />
+                  <h1 className={styles.newTeamName}>{team.name}</h1>
+                </div>
+                <div className={styles.crudGroup}>
+                  <img
+                    id={`moreInfoButton_${team.id}`}
+                    className={styles.crudIcon}
+                    src="./assets/detalhes.png"
+                    alt=""
+                    onClick={() => toggleMoreInfo(team.id)}
+                  />
+                    <Link href={{ pathname: `/editTeam`, query: { id: team.id } }}>
+                    <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
+                    </Link>
+                  <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={() => popup(team.id)} />
+                </div>
               </div>
-            </div>
-          </div>
-        </>
-        ))}
+              <div
+                id={`moreInfo_${team.id}`}
+                className={`${styles.moreInfo} ${moreInfoVisible[team.id] ? '' : styles.hidden}`}
+              >
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Nome do Time</p>
+                  <p className={styles.dataInfo}>{team.name}</p>
+                </div>
 
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Logo do time</p>
+                  <img className={`${styles.modalityIcon} 
+                  ${styles.newLogoAvatarListItem}`} 
+                  src={team.logo} alt="" />
+                </div>
+
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Elenco</p>
+                  <div className={styles.elencoList}>
+                    <p className={styles.dataInfo}>Fulano</p>
+                    <p className={styles.dataInfo}>Fulano</p>
+                    <p className={styles.dataInfo}>Fulano</p>
+                    <p className={styles.dataInfo}>Fulano</p>
+                    <p className={styles.dataInfo}>Fulano</p>
+                  </div>
+                  
+                </div>
+              </div>
+            </>
+          ))}
         </div>
-
         <button className={styles.back} onClick={HandleBackButtonClick}>Voltar</button>
-
       </div>
-   
     </>
-  )
+  );
 }
 
 export async function getServerSideProps(context:GetServerSidePropsContext) {

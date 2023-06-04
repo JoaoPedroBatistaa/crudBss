@@ -159,3 +159,8 @@
 .hidden {
   display: none;
 }
+
+.newImageItem{
+  width: 200px;
+  height: auto;
+}
