@@ -4,7 +4,7 @@ import styles from './styles.module.css';
 import { GetServerSidePropsContext } from 'next';
 import { collection, addDoc, doc, getDoc,db,storage,getDownloadURL, ref, uploadBytesResumable } from '../../firebase'
 import { DocumentData, Firestore } from '@firebase/firestore';
-
+import InputMask from 'react-input-mask';
 import { toast } from 'react-toastify';
 import Spinner from '@/components/Spinner';
 import AvatarEditor from 'react-avatar-editor';
@@ -29,7 +29,9 @@ interface Player {
   threePointers:Number,
   topScorersOfTheChampionship:Number,
   topScorersOfTheGame:Number
-  position:string
+  position:string,
+  cpf: string,
+  birthDate: string
 }
 
 // Modal.setAppElement('#root');
@@ -54,7 +56,9 @@ export default function FormPlayer({ data }: { data: Modality }) {
     topScorersOfTheChampionship: 0,
     topScorersOfTheGame: 0,
     position:'' ,
-    instagram:''
+    instagram:'',
+    cpf: '',
+    birthDate: ''
   });
 
 const handleImageClick = () => {
@@ -132,7 +136,9 @@ const handleImageClick = () => {
       topScorersOfTheChampionship: 0,
       topScorersOfTheGame: 0,
       position:'' ,
-      instagram:''
+      instagram:'',
+      cpf:'',
+      birthDate: ''
     });
         setCroppedImage(null)
     setImage(null)
@@ -145,6 +151,17 @@ const handleImageClick = () => {
       ...playerData,
       [field]: event.target.value,
     });
+  }
+
+  function calculateAge(birthDate: string): number {
+    const today = new Date();
+    const birthDateObject = new Date(birthDate);
+    let age = today.getFullYear() - birthDateObject.getFullYear();
+    const month = today.getMonth() - birthDateObject.getMonth();
+    if (month < 0 || (month === 0 && today.getDate() < birthDateObject.getDate())) {
+      age--;
+    }
+    return age;
   }
 
     async function uploadImage(): Promise<string | null> {
@@ -299,19 +316,23 @@ const handleImageClick = () => {
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>Data de Nascimento</p>
-            <input 
-              className={styles.field} 
-              type="date"
-            />
+          <p className={styles.label}>Data de Nascimento</p>
+          <input 
+            className={styles.field} 
+            type="date"
+            value={playerData.birthDate}
+            onChange={(e) => handleInputChange(e, 'birthDate')}
+          />
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>CPF</p>
-            <input 
-              className={styles.field} 
-              type="text"
-              pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
+          <p className={styles.label}>CPF</p>
+          <InputMask 
+            className={styles.field} 
+            mask="999.999.999-99" 
+            maskChar={null}
+            value={playerData.cpf} 
+            onChange={(e) => handleInputChange(e, 'cpf')} 
             />
           </div>
 
@@ -358,7 +379,7 @@ const handleImageClick = () => {
             <input 
                 className={styles.field} 
                 type="number" 
-                 value={playerData.topScorersOfTheGame.toString()}
+                value={playerData.topScorersOfTheGame.toString()}
                 onChange={(e) => handleInputChange(e, 'topScorersOfTheGame')}    
             />
           </div>

@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { GetServerSidePropsContext } from 'next';
 import { collection, db, doc, getDoc } from '@/firebase';
-
 import { toast } from 'react-toastify';
 import { getDocs, query, where, deleteDoc } from '@firebase/firestore';
 
@@ -13,12 +12,18 @@ interface Modality{
   id:string
 }
 
+interface Player {
+  id: string;
+  name: string;
+  photo: string;
+}
 
 interface Team {
+  id: string;
   logo: string;
   modality: string;
   name: string;
-  squad: string;
+  squad: Player[];
   cnpj: string;
   responsibleCpf: string;
   responsibleName: string;
@@ -27,58 +32,50 @@ interface Team {
 }
 
 
-async function getCollectionData(modalityId:string) {
-
-  console.log("getCollectionData")
-
+async function getCollectionData(modalityId: string) {
   const collectionRef = collection(db, 'modalities');
-  const modalityRef = await getModalityReference(modalityId)
+  const modalityRef = await getModalityReference(modalityId);
 
   if (!modalityRef) {
     toast.error('Modalidade não encontrado!');
     return;
   }
 
-  console.log("team -- buscar jogadores "+ modalityRef)
-  console.log(modalityRef.path)
-
   const q = query(
-      collection(db, "teams"),
-      where('modality','==',modalityRef.path)
-      );
+    collection(db, 'teams'),
+    where('modality', '==', modalityRef.path)
+  );
 
-
-  //const q = query(collection(db, "modalities"))
   const querySnapshot = await getDocs(q);
-  const documents = querySnapshot.docs.map(doc => {
-    const data = doc.data();
-    const jsonSerializableData = JSON.parse(JSON.stringify(data));
+  const documents = querySnapshot.docs.map(async (docSnapshot) => {
+    const data = docSnapshot.data();
+    const players = await Promise.all(data.squad.map(async (playerId: string) => {
+      const playerDocRef = doc(db, playerId);
+      const playerDoc = await getDoc(playerDocRef);
+      return playerDoc.data() as Player;
+    }));
+    const jsonSerializableData = JSON.parse(JSON.stringify({ ...data, squad: players }));
     return {
-      id: doc.id,
+      id: docSnapshot.id,
       ...jsonSerializableData,
     };
   });
+  
 
   if (documents.length > 0) {
-    console.log("teams encontrados")
+    console.log("teams encontrados");
   }
-  return documents;
+
+  return Promise.all(documents);
 }
 
-async function getModalityReference(modalityId:string) {
-
-  // buscar esportes
-  console.log("buscar esportes -"+modalityId)
+async function getModalityReference(modalityId: string) {
   const sportsCollection = 'modalities';
-  const sportRef = doc(db, sportsCollection,modalityId);
+  const sportRef = doc(db, sportsCollection, modalityId);
   const sportDoc = await getDoc(sportRef);
 
-  // console.log("sportDoc")
-  // console.log(sportDoc)
-
   if (sportDoc.exists()) {
-      console.log("Sucesso ao buscar a modalidade -"+modalityId)
-
+    console.log("Sucesso ao buscar a modalidade -" + modalityId);
     return sportRef;
   } else {
     toast.error('Esporte não encontrado!');
@@ -170,18 +167,36 @@ export default function NewTeam({ data, teams }: { data: Modality, teams: [Team]
                   ${styles.newLogoAvatarListItem}`} 
                   src={team.logo} alt="" />
                 </div>
+                
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>CNPJ</p>
+                  <p className={styles.dataInfo}>{team.cnpj}</p>
+                </div>
+
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Responsavel do time</p>
+                  <p className={styles.dataInfo}>{team.responsibleName}</p>
+                </div>
+                
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>CPF do Responsavel</p>
+                  <p className={styles.dataInfo}>{team.responsibleCpf}</p>
+                </div>
+                
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>WhatsApp do Responsavel</p>
+                  <p className={styles.dataInfo}>{team.whatsapp}</p>
+                </div>
 
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Elenco</p>
                   <div className={styles.elencoList}>
-                    <p className={styles.dataInfo}>Fulano</p>
-                    <p className={styles.dataInfo}>Fulano</p>
-                    <p className={styles.dataInfo}>Fulano</p>
-                    <p className={styles.dataInfo}>Fulano</p>
-                    <p className={styles.dataInfo}>Fulano</p>
+                  {team.squad.map((player: Player) => (
+                  player && player.name ? <p key={player.id} className={styles.dataInfo}>{player.name}</p> : null
+                  ))}
                   </div>
-                  
                 </div>
+                
               </div>
             </>
           ))}

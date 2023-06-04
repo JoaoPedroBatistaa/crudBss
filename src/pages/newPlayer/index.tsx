@@ -24,7 +24,9 @@ interface Player {
   threePointers:Number,
   topScorersOfTheChampionship:Number,
   topScorersOfTheGame:Number
-  position:string
+  position:string,
+  cpf: string,
+  birthDate: string
 }
 
 async function getCollectionData(modalityId:string) {
@@ -90,6 +92,17 @@ const Player: React.FC<PlayerProps> = ({ player }) => {
 
   function toggleMoreInfo() {
     setMoreInfoVisible(!moreInfoVisible);
+  }
+
+  function calculateAge(birthDate: string): number {
+    const today = new Date();
+    const birthDateObject = new Date(birthDate);
+    let age = today.getFullYear() - birthDateObject.getFullYear();
+    const month = today.getMonth() - birthDateObject.getMonth();
+    if (month < 0 || (month === 0 && today.getDate() < birthDateObject.getDate())) {
+      age--;
+    }
+    return age;
   }
 
   const [playerData, setPlayerData] = useState<Player[]>([player]); // Use state to store the player data as an array
@@ -162,6 +175,16 @@ const Player: React.FC<PlayerProps> = ({ player }) => {
           <p className={styles.dataInfo}>{player.position}</p>
           </div>
           
+          <div className={styles.line}>
+          <p className={styles.dataInfo}>CPF</p>
+          <p className={styles.dataInfo}>{player.cpf}</p>
+          </div>
+          
+          <div className={styles.line}>
+          <p className={styles.dataInfo}>Idade</p>
+          <p className={styles.dataInfo}>{calculateAge(player.birthDate)}</p>
+          </div>
+
         </div>
       )}
     </>

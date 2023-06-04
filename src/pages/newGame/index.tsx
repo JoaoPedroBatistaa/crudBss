@@ -1,7 +1,7 @@
 import styles from './styles.module.css';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
-
+import React from 'react';
 import Link from 'next/link';
 import { useState } from 'react';
 import {  getDocs, query, where, deleteDoc } from 'firebase/firestore';
@@ -9,6 +9,34 @@ import { collection, db, doc, getDoc } from '@/firebase';
 
 import { toast } from 'react-toastify';
 import { GetServerSidePropsContext } from 'next';
+
+interface Modality {
+  id: string,
+  name: string,
+}
+
+interface Matche {
+  id: string;
+  team_1: {
+    score:number;
+    team_id: string;
+    team_data: Team; // Added property to store team details
+  };
+  team_2: {
+    score:number;
+    team_id: string;
+    team_data: Team; // Added property to store team details
+  };
+  time:string;
+  venue:String;
+  date:string;
+}
+
+interface Team {
+  id:string;
+  name:string;
+  logo:string;
+}
 
 
 
@@ -88,40 +116,10 @@ async function getModalityReference(modalityId: string) {
     return null;
   }
 }
-interface Modality {
-  id: string,
-  name: string,
-}
 
-interface Matche {
-  id: string;
-  team_1: {
-    score:number;
-    team_id: string;
-    team_data: Team; // Added property to store team details
-  };
-  team_2: {
-    score:number;
-    team_id: string;
-    team_data: Team; // Added property to store team details
-  };
-  time:string;
-  venue:String;
-  date:string;
-}
-
-interface Team {
-  id:string;
-  name:string;
-  logo:string;
-}
-
-
-export default function NewGame({ data, matches }: { data: Modality; matches: [Matche] }) {
+export default function NewGame({ data, matches }: { data: Modality; matches: Matche[] }) {
   const [moreInfoVisible, setMoreInfoVisible] = useState<{ [key: string]: boolean }>({});
   const router = useRouter();
-
-  
 
   function toggleMoreInfo(matchId: string) {
     setMoreInfoVisible((prevState) => ({
@@ -169,78 +167,84 @@ export default function NewGame({ data, matches }: { data: Modality; matches: [M
             </div>
           </div>
 
-          {matches.map((matche) => (
-            <>
-              <div className={styles.newTeam}>
-                <div className={styles.NameGroup}>
-                  <div className={styles.Game}>
-                    <div className={styles.TeamLogo}>
-                      <Image
-                        src={matche.team_1.team_data?.logo || "/assets/team1.png"}
-                        alt=""
-                        width={60}
-                        height={60}
-                      />
-                    </div>
-                    <h1>X</h1>
-                    <div className={styles.TeamLogo}>
-                      <Image
-                        src={matche.team_2.team_data?.logo || "/assets/team1.png"}
-                        alt=""
-                        width={60}
-                        height={60}
-                      />
+            {matches.map((matche) => (
+              <>
+              <React.Fragment key={matche.id}>
+                <div className={styles.newTeam}>
+                  <div className={styles.NameGroup}>
+                    <div className={styles.Game}>
+                      <div className={styles.TeamLogo}>
+                        <Image
+                          src={matche.team_1.team_data?.logo || "/assets/team1.png"}
+                          alt=""
+                          width={60}
+                          height={60}
+                        />
+                      </div>
+                      <h1>X</h1>
+                      <div className={styles.TeamLogo}>
+                        <Image
+                          src={matche.team_2.team_data?.logo || "/assets/team1.png"}
+                          alt=""
+                          width={60}
+                          height={60}
+                        />
+                      </div>
                     </div>
                   </div>
+
+                    <div className={styles.crudGroup}>
+                      <img
+                        id={`moreInfoButton_${matche.id}`}
+                        className={styles.crudIcon}
+                        src="./assets/detalhes.png"
+                        alt=""
+                        onClick={() => toggleMoreInfo(matche.id)}
+                      />
+                      <Link href={{ pathname: `/editGame`, query: { id: matche.id } }}>
+                        <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
+                      </Link>
+                      <img 
+                        className={styles.crudIcon} 
+                        src="./assets/excluir.png" 
+                        alt="" 
+                        onClick={() => popup(matche.id)} 
+                      />
+                    </div>
                 </div>
 
-                <div className={styles.crudGroup}>
-                  <img
-                    id={`moreInfoButton_${matche.id}`}
-                    className={styles.crudIcon}
-                    src="./assets/detalhes.png"
-                    alt=""
-                    onClick={() => toggleMoreInfo(matche.id)}
-                  />
-                  <Link href={{ pathname: `/editGame`, query: { id: matche.id } }}>
-                  <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-                  </Link>
-                  <img 
-                  className={styles.crudIcon} 
-                  src="./assets/excluir.png" 
-                  alt="" 
-                  onClick={() => popup(matche.id)} />
-                </div>
-              </div>
-
-              <div
-                id={`moreInfo_${matche.id}`}
-                className={`${styles.moreInfo} ${moreInfoVisible[matche.id] ? '' : styles.hidden}`}
-              >
-
-                <div className={styles.line}>
-                  <p className={styles.dataInfo}>Horario</p>
-                  <p className={styles.dataInfo}>{matche.time}</p>
-                </div>
-                
-                <div className={styles.line}>
-                  <p className={styles.dataInfo}>Local</p>
-                  <p className={styles.dataInfo}>{matche.venue}</p>
-                </div>
-                
-                <div className={styles.line}>
-                  <p className={styles.dataInfo}>Data</p>
-                  <p className={styles.dataInfo}>{matche.date}</p>
-                </div>
-                
-                <div className={styles.line}>
-                  <p className={styles.dataInfo}>Time 2</p>
-                  <p className={styles.dataInfo}>{matche.team_2.team_data?.name}</p>
-                </div>
-                
-              </div>
-            </>
-          ))}
+                  <div
+                    id={`moreInfo_${matche.id}`}
+                    className={`${styles.moreInfo} ${moreInfoVisible[matche.id] ? '' : styles.hidden}`}>
+                      
+                    <div className={styles.line}>
+                      <p className={styles.dataInfo}>Horario</p>
+                      <p className={styles.dataInfo}>{matche.time}</p>
+                    </div>
+                    
+                    <div className={styles.line}>
+                      <p className={styles.dataInfo}>Local</p>
+                      <p className={styles.dataInfo}>{matche.venue}</p>
+                    </div>
+                    
+                    <div className={styles.line}>
+                      <p className={styles.dataInfo}>Data</p>
+                      <p className={styles.dataInfo}>{matche.date}</p>
+                    </div>
+                    
+                    <div className={styles.line}>
+                      <p className={styles.dataInfo}>Time 1</p>
+                      <p className={styles.dataInfo}>{matche.team_1.team_data?.name}</p>
+                    </div>
+                    
+                    <div className={styles.line}>
+                      <p className={styles.dataInfo}>Time 2</p>
+                      <p className={styles.dataInfo}>{matche.team_2.team_data?.name}</p>
+                    </div>
+                  </div>
+              </React.Fragment>
+              </>
+            ))}
         </div>
 
         <button className={styles.back} onClick={HandleBackButtonClick}>

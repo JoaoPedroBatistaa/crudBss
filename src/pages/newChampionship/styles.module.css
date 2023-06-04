@@ -118,7 +118,6 @@
   border-radius: 15px;
   margin-bottom: 30px;
   margin-top: 30px;
-
 }
 
 .back:hover {
@@ -126,7 +125,25 @@
   cursor: pointer;
 }
 
+.generatePDF {
+  width: 9.5rem;
+  height: 2.5rem;
+  border: none;
+  background-color: #FF9F00;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  border-radius: 15px;
+  margin-bottom: 30px;
+  margin-top: 30px;
+}
 
+.generatePDF:hover {
+  background-color: #ca7d00;
+  cursor: pointer;
+}
 
 .moreInfo {
   display: flex;

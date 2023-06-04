@@ -6,6 +6,7 @@ import Header from '../../components/Header';
 import Head from 'next/head';
 import { GetServerSidePropsContext } from 'next';
 import { toast } from 'react-toastify';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { collection, doc, getDoc, getDocs, query, where, deleteDoc } from '@firebase/firestore';
 import { db } from '@/firebase';
 
@@ -66,6 +67,7 @@ async function getModalityReference(modalityId:string) {
     return null;
   }
 }
+
 
 interface Modality{
   id:string,
