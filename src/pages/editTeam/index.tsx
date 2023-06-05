@@ -7,7 +7,19 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { toast } from 'react-toastify';
 
-export default function EditTeam() {
+export async function getServerSideProps() {
+  // ...
+
+  try {
+    const teams = await fetchTeams(); // Função que busca os times no banco de dados
+    return { props: { teams: teams || null } };
+  } catch (error) {
+    console.error('Error fetching teams: ', error);
+    return { props: { teams: null } };
+  }
+}
+
+export default function EditTeam({ teams }) {
   const router = useRouter();
   const { id } = router.query;
 
@@ -16,6 +28,9 @@ export default function EditTeam() {
     logo: null,
     instagram: '',
     whatsapp: '',
+    cnpj: '',
+    responsibleCpf: '',
+    responsibleName: '',
     players: [],
   });
 
@@ -78,7 +93,7 @@ export default function EditTeam() {
       await setDoc(doc(db, 'teams', id as string), teamData);
 
       toast.success('Team updated successfully!');
-      router.push({ pathname: '/newTeam', query: { mdl: id } });;
+      router.push({ pathname: '/newTeam', query: { mdl: id } });
     } catch (error) {
       console.error('Error when updating team: ', error);
       toast.error('Error when updating team.');
@@ -127,6 +142,39 @@ export default function EditTeam() {
                 type="text"
                 name="instagram"
                 value={teamData.instagram}
+                onChange={handleInputChange}
+              />
+            </div>
+                                    
+            <div className={styles.form}>
+              <p className={styles.label}>CNPJ do time</p>
+              <input
+                className={styles.field}
+                type="text"
+                name="cnpj"
+                value={teamData.cnpj}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Nome Responsável</p>
+              <input
+                className={styles.field}
+                type="text"
+                name="responsibleName"
+                value={teamData.responsibleName}
+                onChange={handleInputChange}
+              />
+            </div>
+                        
+            <div className={styles.form}>
+              <p className={styles.label}>CPF Responsável</p>
+              <input
+                className={styles.field}
+                type="text"
+                name="responsibleCpf"
+                value={teamData.responsibleCpf}
                 onChange={handleInputChange}
               />
             </div>

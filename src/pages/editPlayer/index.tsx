@@ -2,6 +2,7 @@ import styles from './styles.module.css';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import 'firebase/storage';
+import InputMask from 'react-input-mask';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import React, { useEffect, useState, FormEvent, ChangeEvent } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -17,6 +18,8 @@ interface Player {
   name: string;
   photo?: File | string | null;
   position: string;
+  cpf: string;
+  birthDate: string
 }
 
 export default function EditPlayer() {
@@ -29,6 +32,8 @@ export default function EditPlayer() {
     photo: null,
     position: '',
     instagram: '',
+    birthDate: '',
+    cpf: ''
   });
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -123,6 +128,23 @@ export default function EditPlayer() {
             <div className={styles.form}>
               <p className={styles.label}>Posição</p>
               <input className={styles.field} type="text" value={playerData.position} name="position" onChange={handleInputChange} />
+            </div>
+            
+            <div className={styles.form}>
+              <p className={styles.label}>Data de Nascimento</p>
+              <input className={styles.field} type="date" value={playerData.birthDate} name="birthDate" onChange={handleInputChange} />
+            </div>
+            
+            <div className={styles.form}>
+              <p className={styles.label}>CPF</p>
+              <InputMask 
+              className={styles.field} 
+              mask="999.999.999-99" 
+              maskChar={null}
+              name="cpf"
+              value={playerData.cpf} 
+              onChange={handleInputChange} 
+              />
             </div>
 
             <div className={styles.form}>

@@ -167,6 +167,11 @@ export default function NewTeam({ data, teams }: { data: Modality, teams: [Team]
                   ${styles.newLogoAvatarListItem}`} 
                   src={team.logo} alt="" />
                 </div>
+                                
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Instagram</p>
+                  <p className={styles.dataInfo}>{team.instagram}</p>
+                </div>
                 
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>CNPJ</p>
