@@ -39,7 +39,6 @@ interface Team {
 }
 
 
-
 async function getCollectionData(modalityId: string) {
 
   const collectionRef = collection(db, 'modalities');
@@ -57,8 +56,9 @@ async function getCollectionData(modalityId: string) {
     const data = doc1.data();
     const jsonSerializableData = JSON.parse(JSON.stringify(data));
 
-    const team1Id = jsonSerializableData.team_1.team_id;
-    const team1Doc = await getDoc(doc(db, 'teams', team1Id.toString()));
+    const team1Id = jsonSerializableData.team_1.team_id._key.path.segments[6];
+    console.log("team 1", JSON.stringify(team1Id));
+    const team1Doc = await getDoc(doc(db, 'teams', team1Id));
     const team1Data = team1Doc.exists() ? team1Doc.data() : null;
 
     if (team1Data && team1Data.createdAt && team1Data.createdAt.toMillis) {
@@ -67,16 +67,17 @@ async function getCollectionData(modalityId: string) {
 
     console.log('Team 1 Data:', team1Data); // Verifica os dados da equipe 1.
 
-    const team2Id = jsonSerializableData.team_2.team_id;
-    const team2Doc = await getDoc(doc(db, 'teams', team2Id.toString()));
+    const team2Id = jsonSerializableData.team_2.team_id._key.path.segments[6];
+    // console.log(team2Id);
+    const team2Doc = await getDoc(doc(db, 'teams', team2Id));
     const team2Data = team2Doc.exists() ? team2Doc.data() : null;
 
     if (team2Data && team2Data.createdAt && team2Data.createdAt.toMillis) {
       team2Data.createdAt = team2Data.createdAt.toMillis();
     }
 
-    console.log(team1Doc);
-    console.log(team2Doc);
+    // console.log(team1Doc);
+    // console.log(team2Doc);
 
     jsonSerializableData.team_1.team_data = team1Data;
     jsonSerializableData.team_2.team_data = team2Data;
@@ -95,6 +96,7 @@ async function getCollectionData(modalityId: string) {
 
   return results;
 }
+
 
 
 async function getModalityReference(modalityId: string) {
@@ -280,4 +282,3 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
   };
 }
-
