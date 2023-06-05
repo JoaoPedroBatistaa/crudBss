@@ -203,7 +203,10 @@ export default function NewPlayer({data, players }: { data:Modality,players: [Pl
     setMoreInfoVisible(!moreInfoVisible);
   }
   function HandleBackButtonClick() {
-    window.history.back();
+    router.push({
+      pathname: '/Categories',
+      query: { mdl: data.id },
+    });
   }
 
   // function popup() {

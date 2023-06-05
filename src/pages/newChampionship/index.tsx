@@ -95,7 +95,10 @@ export default function NewChampionship({ data, championships }: { data: Modalit
   }
 
   function HandleBackButtonClick() {
-    window.history.back();
+    router.push({
+      pathname: '/Categories',
+      query: { mdl: data.id },
+    });
   }
 
   let championshipst: ChampionShip[] = [];

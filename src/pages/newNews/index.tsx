@@ -76,7 +76,10 @@ export default function NewNews({ data, news }: { data: Modality; news: News[] }
   }
 
   function HandleBackButtonClick() {
-    window.history.back();
+    router.push({
+      pathname: '/Categories',
+      query: { mdl: data.id },
+    });
   }
 
   const [newsData, setNewsData] = useState<News[]>(news); // Use state to store the news data

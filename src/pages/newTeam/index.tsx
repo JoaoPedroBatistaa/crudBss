@@ -97,7 +97,10 @@ export default function NewTeam({ data, teams }: { data: Modality, teams: [Team]
   }
 
   function HandleBackButtonClick() {
-    window.history.back();
+    router.push({
+      pathname: '/Categories',
+      query: { mdl: data.id },
+    });
   }
 
   const [teamst, setTeams] = useState<Team[]>([]);

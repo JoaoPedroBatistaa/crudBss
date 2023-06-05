@@ -132,7 +132,10 @@ export default function NewGame({ data, matches }: { data: Modality; matches: Ma
   }
 
   function HandleBackButtonClick() {
-    window.history.back();
+    router.push({
+      pathname: '/Categories',
+      query: { mdl: data.id },
+    });
   }
 
   const [matchet, setMatches] = useState<Matche[]>([]);
