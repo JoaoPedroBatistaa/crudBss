@@ -4,7 +4,7 @@ import Image from 'next/image';
 import React from 'react';
 import Link from 'next/link';
 import { useState } from 'react';
-import {  getDocs, query, where, deleteDoc } from 'firebase/firestore';
+import { getDocs, query, where, deleteDoc } from 'firebase/firestore';
 import { collection, db, doc, getDoc } from '@/firebase';
 
 import { toast } from 'react-toastify';
@@ -18,24 +18,24 @@ interface Modality {
 interface Matche {
   id: string;
   team_1: {
-    score:number;
+    score: number;
     team_id: string;
     team_data: Team; // Added property to store team details
   };
   team_2: {
-    score:number;
+    score: number;
     team_id: string;
     team_data: Team; // Added property to store team details
   };
-  time:string;
-  venue:String;
-  date:string;
+  time: string;
+  venue: String;
+  date: string;
 }
 
 interface Team {
-  id:string;
-  name:string;
-  logo:string;
+  id: string;
+  name: string;
+  logo: string;
 }
 
 
@@ -75,7 +75,8 @@ async function getCollectionData(modalityId: string) {
       team2Data.createdAt = team2Data.createdAt.toMillis();
     }
 
-    console.log('Team 2 Data:', team2Data); // Verifica os dados da equipe 2.
+    console.log(team1Doc);
+    console.log(team2Doc);
 
     jsonSerializableData.team_1.team_data = team1Data;
     jsonSerializableData.team_2.team_data = team2Data;
@@ -150,8 +151,8 @@ export default function NewGame({ data, matches }: { data: Modality; matches: Ma
     } else {
     }
   }
-  
-  
+
+
 
   return (
     <>
@@ -167,8 +168,8 @@ export default function NewGame({ data, matches }: { data: Modality; matches: Ma
             </div>
           </div>
 
-            {matches.map((matche) => (
-              <>
+          {matches.map((matche) => (
+            <>
               <React.Fragment key={matche.id}>
                 <div className={styles.newTeam}>
                   <div className={styles.NameGroup}>
@@ -193,58 +194,58 @@ export default function NewGame({ data, matches }: { data: Modality; matches: Ma
                     </div>
                   </div>
 
-                    <div className={styles.crudGroup}>
-                      <img
-                        id={`moreInfoButton_${matche.id}`}
-                        className={styles.crudIcon}
-                        src="./assets/detalhes.png"
-                        alt=""
-                        onClick={() => toggleMoreInfo(matche.id)}
-                      />
-                      <Link href={{ pathname: `/editGame`, query: { id: matche.id } }}>
-                        <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-                      </Link>
-                      <img 
-                        className={styles.crudIcon} 
-                        src="./assets/excluir.png" 
-                        alt="" 
-                        onClick={() => popup(matche.id)} 
-                      />
-                    </div>
+                  <div className={styles.crudGroup}>
+                    <img
+                      id={`moreInfoButton_${matche.id}`}
+                      className={styles.crudIcon}
+                      src="./assets/detalhes.png"
+                      alt=""
+                      onClick={() => toggleMoreInfo(matche.id)}
+                    />
+                    <Link href={{ pathname: `/editGame`, query: { id: matche.id } }}>
+                      <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
+                    </Link>
+                    <img
+                      className={styles.crudIcon}
+                      src="./assets/excluir.png"
+                      alt=""
+                      onClick={() => popup(matche.id)}
+                    />
+                  </div>
                 </div>
 
-                  <div
-                    id={`moreInfo_${matche.id}`}
-                    className={`${styles.moreInfo} ${moreInfoVisible[matche.id] ? '' : styles.hidden}`}>
-                      
-                    <div className={styles.line}>
-                      <p className={styles.dataInfo}>Horario</p>
-                      <p className={styles.dataInfo}>{matche.time}</p>
-                    </div>
-                    
-                    <div className={styles.line}>
-                      <p className={styles.dataInfo}>Local</p>
-                      <p className={styles.dataInfo}>{matche.venue}</p>
-                    </div>
-                    
-                    <div className={styles.line}>
-                      <p className={styles.dataInfo}>Data</p>
-                      <p className={styles.dataInfo}>{matche.date}</p>
-                    </div>
-                    
-                    <div className={styles.line}>
-                      <p className={styles.dataInfo}>Time 1</p>
-                      <p className={styles.dataInfo}>{matche.team_1.team_data?.name}</p>
-                    </div>
-                    
-                    <div className={styles.line}>
-                      <p className={styles.dataInfo}>Time 2</p>
-                      <p className={styles.dataInfo}>{matche.team_2.team_data?.name}</p>
-                    </div>
+                <div
+                  id={`moreInfo_${matche.id}`}
+                  className={`${styles.moreInfo} ${moreInfoVisible[matche.id] ? '' : styles.hidden}`}>
+
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Horario</p>
+                    <p className={styles.dataInfo}>{matche.time}</p>
                   </div>
+
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Local</p>
+                    <p className={styles.dataInfo}>{matche.venue}</p>
+                  </div>
+
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Data</p>
+                    <p className={styles.dataInfo}>{matche.date}</p>
+                  </div>
+
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Time 1</p>
+                    <p className={styles.dataInfo}>{matche.team_1.team_data?.name}</p>
+                  </div>
+
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Time 2</p>
+                    <p className={styles.dataInfo}>{matche.team_2.team_data?.name}</p>
+                  </div>
+                </div>
               </React.Fragment>
-              </>
-            ))}
+            </>
+          ))}
         </div>
 
         <button className={styles.back} onClick={HandleBackButtonClick}>
@@ -255,13 +256,13 @@ export default function NewGame({ data, matches }: { data: Modality; matches: Ma
   );
 }
 
-export async function getServerSideProps(context:GetServerSidePropsContext) {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { query } = context;
-  const {mdl} = query;
+  const { mdl } = query;
   console.log("mdl")
   console.log(mdl)
 
-   let modalityId: string = '';
+  let modalityId: string = '';
   if (typeof mdl === 'string') {
     modalityId = mdl;
   } else if (Array.isArray(modalityId)) {
@@ -270,12 +271,12 @@ export async function getServerSideProps(context:GetServerSidePropsContext) {
   console.log("modalityId")
   console.log(modalityId)
 
-   const matches = await getCollectionData(modalityId);
+  const matches = await getCollectionData(modalityId);
 
   return {
     props: {
-      data:{id:mdl},
-      matches:matches
+      data: { id: mdl },
+      matches: matches
     },
   };
 }

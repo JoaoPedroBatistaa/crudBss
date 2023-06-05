@@ -95,7 +95,6 @@ export default function EditPlayer() {
       await setDoc(doc(db, 'players', id as string), playerData);
 
       toast.success('Player updated successfully!');
-      router.push('/newPlayer');
     } catch (error) {
       console.error('Error when updating player: ', error);
       toast.error('Error when updating player.');
@@ -129,21 +128,21 @@ export default function EditPlayer() {
               <p className={styles.label}>Posição</p>
               <input className={styles.field} type="text" value={playerData.position} name="position" onChange={handleInputChange} />
             </div>
-            
+
             <div className={styles.form}>
               <p className={styles.label}>Data de Nascimento</p>
               <input className={styles.field} type="date" value={playerData.birthDate} name="birthDate" onChange={handleInputChange} />
             </div>
-            
+
             <div className={styles.form}>
               <p className={styles.label}>CPF</p>
-              <InputMask 
-              className={styles.field} 
-              mask="999.999.999-99" 
-              maskChar={null}
-              name="cpf"
-              value={playerData.cpf} 
-              onChange={handleInputChange} 
+              <InputMask
+                className={styles.field}
+                mask="999.999.999-99"
+                maskChar={null}
+                name="cpf"
+                value={playerData.cpf}
+                onChange={handleInputChange}
               />
             </div>
 
