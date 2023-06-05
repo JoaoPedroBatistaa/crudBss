@@ -93,7 +93,6 @@ export default function EditTeam({ teams }) {
       await setDoc(doc(db, 'teams', id as string), teamData);
 
       toast.success('Team updated successfully!');
-      router.push({ pathname: '/newTeam', query: { mdl: id } });
     } catch (error) {
       console.error('Error when updating team: ', error);
       toast.error('Error when updating team.');

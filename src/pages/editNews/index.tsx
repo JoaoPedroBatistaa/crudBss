@@ -85,7 +85,6 @@ export default function EditNews() {
       await setDoc(doc(db, 'news', id as string), newsData);
 
       toast.success('News updated successfully!');
-      router.push('/news');
     } catch (error) {
       console.error('Error when updating news: ', error);
       toast.error('Error when updating news.');

@@ -112,7 +112,6 @@ export default function EditMatch() {
       await setDoc(doc(db, 'matches', id as string), matchData);
 
       toast.success('Match updated successfully!');
-      router.push('/matches');
     } catch (error) {
       console.error('Error when updating match: ', error);
       toast.error('Error when updating match.');

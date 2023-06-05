@@ -83,7 +83,6 @@ export default function EditChampionship() {
       await setDoc(doc(db, 'championships', id as string), championshipData);
 
       toast.success('Championship updated successfully!');
-      router.push('/championships');
     } catch (error) {
       console.error('Error when updating championship: ', error);
       toast.error('Error when updating championship.');
