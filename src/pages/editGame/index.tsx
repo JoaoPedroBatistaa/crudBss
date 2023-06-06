@@ -35,9 +35,9 @@ export default function EditMatch() {
 
   const [matchData, setMatchData] = useState({
     team1Name: '',
-    team1Logo: null,
+    team1Logo: null as File | string | null,
     team2Name: '',
-    team2Logo: null,
+    team2Logo: null as File | string | null,
     date: '',
     location: '',
   });
@@ -48,9 +48,10 @@ export default function EditMatch() {
   };
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files && event.target.files.length > 0 ? event.target.files[0] : null;
+    const { name, files } = event.target;
+    const file = files && files.length > 0 ? files[0] : null;
     setMatchData((prevState) => ({ ...prevState, [name]: file }));
-  };
+};
 
   useEffect(() => {
     const fetchMatch = async () => {
@@ -63,9 +64,18 @@ export default function EditMatch() {
         const matchDoc = await getDoc(doc(db, 'matches', id as string));
         if (matchDoc.exists()) {
           const match = matchDoc.data();
-          setMatchData(match);
+          if (match) {
+            setMatchData({
+              team1Name: match.team_1 ? match.team_1.team_id : '',
+              team1Logo: match.team_1 ? match.team_1.logo : null,
+              team2Name: match.team_2 ? match.team_2.team_id : '',
+              team2Logo: match.team_2 ? match.team_2.logo : null,
+              date: match.date || '',
+              location: match.venue || '',
+            });
+          }
         } else {
-          console.log('No match exists with this ID.');
+          console.log('Não existe partida com este ID.');
         }
       } catch (error) {
         console.error('Error fetching match details: ', error);

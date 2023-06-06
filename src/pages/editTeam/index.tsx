@@ -1,17 +1,37 @@
 import styles from './styles.module.css';
 import { useRouter } from 'next/router';
 import 'firebase/storage';
+import SearchSelect from '@/components/SearchSelect';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import React, { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { toast } from 'react-toastify';
 
-export async function getServerSideProps() {
-  // ...
+interface TeamData {
+  name: string;
+  logo: null | File | string;
+  instagram: string;
+  whatsapp: string;
+  cnpj: string;
+  responsibleCpf: string;
+  responsibleName: string;
+  players: Player[];
+}
 
+interface Player {
+  id: string;
+  name: string;
+  photo: string;
+}
+
+interface Params {
+  id: string;
+}
+
+export async function getServerSideProps() {
   try {
-    const teams = await fetchTeams(); // Função que busca os times no banco de dados
+    const teams = await fetchTeam();
     return { props: { teams: teams || null } };
   } catch (error) {
     console.error('Error fetching teams: ', error);
@@ -19,11 +39,20 @@ export async function getServerSideProps() {
   }
 }
 
-export default function EditTeam({ teams }) {
-  const router = useRouter();
-  const { id } = router.query;
+async function fetchTeam() {
+  // Implemente o código para buscar os dados dos times no banco de dados
+  // e retorne os times obtidos
+  const response = await fetch('teams'); // Substitua 'api/teams' pela rota correta em seu projeto
+  const teams = await response.json();
+  return teams;
+}
 
-  const [teamData, setTeamData] = useState({
+export default function EditTeam({ teams }: { teams: TeamData[] }) {
+  const router = useRouter();
+  const { id } = router.query as unknown as Params;
+  const [selectedItems, setSelectedItems] = useState<Player[]>([]);
+
+  const [teamData, setTeamData] = useState<TeamData>({
     name: '',
     logo: null,
     instagram: '',
@@ -41,20 +70,20 @@ export default function EditTeam({ teams }) {
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files && event.target.files.length > 0 ? event.target.files[0] : null;
-    setTeamData((prevState) => ({ ...prevState, [name]: file }));
+    setTeamData((prevState) => ({ ...prevState, logo: file }));
   };
 
   useEffect(() => {
-    const fetchTeam = async () => {
+    const fetchTeamData = async () => {
       if (!id) {
         console.log('Team ID is not defined.');
         return;
       }
 
       try {
-        const teamDoc = await getDoc(doc(db, 'teams', id as string));
+        const teamDoc = await getDoc(doc(db, 'teams', id));
         if (teamDoc.exists()) {
-          const team = teamDoc.data();
+          const team = teamDoc.data() as TeamData;
           setTeamData(team);
         } else {
           console.log('No team exists with this ID.');
@@ -65,9 +94,14 @@ export default function EditTeam({ teams }) {
     };
 
     if (router.isReady) {
-      fetchTeam();
+      fetchTeamData();
     }
   }, [router.isReady, id]);
+
+  const handleSelectItems = (items: Player[]) => {
+    setSelectedItems(items);
+  };
+
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -87,10 +121,10 @@ export default function EditTeam({ teams }) {
         await uploadTask;
 
         const downloadURL = await getDownloadURL(fileRef);
-        teamData.logo = downloadURL as string;
+        teamData.logo = downloadURL;
       }
 
-      await setDoc(doc(db, 'teams', id as string), teamData);
+      await setDoc(doc(db, 'teams', id), teamData);
 
       toast.success('Team updated successfully!');
     } catch (error) {
@@ -99,7 +133,7 @@ export default function EditTeam({ teams }) {
     }
   };
 
-  function HandleBackButtonClick() {
+  function handleBackButtonClick() {
     window.history.back();
   }
 
@@ -191,9 +225,7 @@ export default function EditTeam({ teams }) {
 
             <div className={styles.form}>
               <p className={styles.label}>Elenco</p>
-              <select className={styles.select} name="players" multiple>
-                {/* Renderizar opções de jogadores */}
-              </select>
+              <SearchSelect onSelectItems={handleSelectItems}/>
             </div>
 
             <button type="submit" className={styles.save}>
@@ -202,7 +234,7 @@ export default function EditTeam({ teams }) {
           </form>
         </div>
 
-        <button className={styles.back} onClick={HandleBackButtonClick}>
+        <button className={styles.back} onClick={handleBackButtonClick}>
           Voltar
         </button>
       </div>

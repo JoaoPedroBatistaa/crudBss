@@ -67,46 +67,51 @@ const handleImageClick = () => {
     fileInputRef.current?.click();
   }
 };
-  const [image, setImage] = useState(null);
-  const [croppedImage, setCroppedImage] = useState(null);
-  const editorRef = useRef(null);
+const [image, setImage] = useState<string | null>(null);
+  const [croppedImage, setCroppedImage] = useState(""); 
+  const editorRef = useRef<AvatarEditor | null>(null);
 
-  const handleImageUpload = (e) => {
-     setIsFileInputOpen(false);
-    // setCroppedImage(null)
-    // setImage(null)
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result);
-         setModalOpen(true);
-      };
-      reader.readAsDataURL(file);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsFileInputOpen(false);
+    if (e.target.files) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (typeof reader.result === "string") {
+            setImage(reader.result);
+            setModalOpen(true);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
-    const handleSave = () => {
+  const handleSave = () => {
     if (editorRef.current) {
-      const canvas = editorRef.current.getImageScaledToCanvas();
+      const canvas = editorRef.current.getImageScaledToCanvas() as HTMLCanvasElement;
       const finalCanvas = document.createElement('canvas');
       finalCanvas.width = 90;
       finalCanvas.height = 90;
-      const ctx = finalCanvas.getContext('2d');
+      const ctx = finalCanvas.getContext('2d') ?? undefined;
       
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(45, 45, 45, 0, Math.PI * 2, true);
-      ctx.closePath();
-      ctx.clip();
-
-      ctx.drawImage(canvas, 0, 0, 90, 90);
-
-      ctx.restore();
-
-      const croppedImageDataURL = finalCanvas.toDataURL();
-      setCroppedImage(croppedImageDataURL);
-       setModalOpen(false);
+      if (ctx) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(45, 45, 45, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.clip();
+  
+        ctx.drawImage(canvas, 0, 0, 90, 90);
+  
+        ctx.restore();
+  
+        const croppedImageDataURL = finalCanvas.toDataURL();
+        setCroppedImage(croppedImageDataURL);
+        setModalOpen(false);
+      }
     }
   };
 
@@ -128,21 +133,20 @@ const handleImageClick = () => {
 
   function resetForm() {
     setPlayerData({
-    totalScore: 0,
+      totalScore: 0,
       mpvOfTheGames: 0,
       mvpOfTheChampionship: 0,
       name: '',
       threePointers: 0,
       topScorersOfTheChampionship: 0,
       topScorersOfTheGame: 0,
-      position:'' ,
-      instagram:'',
-      cpf:'',
+      position: '',
+      instagram: '',
+      cpf: '',
       birthDate: ''
     });
-        setCroppedImage(null)
-    setImage(null)
-
+    setCroppedImage("");
+    setImage("");
   }
 
 
@@ -355,7 +359,7 @@ const handleImageClick = () => {
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>MVP's partida</p>
+            <p className={styles.label}>MVPs partida</p>
             <input 
               className={styles.field} 
               type="number" 
@@ -365,7 +369,7 @@ const handleImageClick = () => {
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>MVP's campeonato</p>
+            <p className={styles.label}>MVPs campeonato</p>
             <input 
               className={styles.field} 
               type="number" 

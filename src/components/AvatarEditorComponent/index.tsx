@@ -2,46 +2,48 @@ import React, { useState, useRef } from 'react';
 import AvatarEditor from 'react-avatar-editor';
 
 const AvatarEditorComponent = () => {
-  const [image, setImage] = useState(null);
-  const editorRef = useRef(null);
-    const [croppedImage, setCroppedImage] = useState(null);
+  const [image, setImage] = useState("");;
+  const editorRef = useRef<AvatarEditor | null>(null);
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const [croppedImage, setCroppedImage] = useState("");
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result);
+        if (typeof reader.result === 'string') {
+          setImage(reader.result);
+        }
       };
       reader.readAsDataURL(file);
     }
   };
 
-
   const handleSave = () => {
-  if (editorRef.current) {
-    const canvas = editorRef.current.getImageScaledToCanvas();
+    if (editorRef.current) {
+    const canvas = editorRef.current.getImageScaledToCanvas() as HTMLCanvasElement;
     const finalCanvas = document.createElement('canvas');
     finalCanvas.width = 90;
     finalCanvas.height = 90;
     const ctx = finalCanvas.getContext('2d');
+    if (ctx) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(45, 45, 45, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.clip();
     
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(45, 45, 45, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.clip();
-
-    ctx.drawImage(canvas, 0, 0, 90, 90);
-
-    ctx.restore();
-
-    const croppedImageDataURL = finalCanvas.toDataURL();
-    setCroppedImage(croppedImageDataURL);
-
-    console.log("croppedImage")
-    console.log(croppedImage)
-  }
+      ctx.drawImage(canvas, 0, 0, 90, 90);
+    
+      ctx.restore();
+    
+      const croppedImageDataURL = finalCanvas.toDataURL();
+      setCroppedImage(croppedImageDataURL);
+    
+      console.log("croppedImage");
+      console.log(croppedImage);
+    }
 };
 
   return (
@@ -64,6 +66,7 @@ const AvatarEditorComponent = () => {
       )}
     </div>
   );
-};
+};  
+}
 
 export default AvatarEditorComponent;

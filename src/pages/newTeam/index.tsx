@@ -41,32 +41,30 @@ async function getCollectionData(modalityId: string) {
     return;
   }
 
-  const q = query(
-    collection(db, 'teams'),
-    where('modality', '==', modalityRef.path)
-  );
+  console.log("team -- buscar jogadores "+ modalityRef)
+  console.log(modalityRef.path)
 
+  const q = query(
+      collection(db, "teams"),
+      where('modality','==',modalityRef.path)
+      );
+
+
+  //const q = query(collection(db, "modalities"))
   const querySnapshot = await getDocs(q);
-  const documents = querySnapshot.docs.map(async (docSnapshot) => {
-    const data = docSnapshot.data();
-    const players = await Promise.all(data.squad.map(async (playerId: string) => {
-      const playerDocRef = doc(db, playerId);
-      const playerDoc = await getDoc(playerDocRef);
-      return playerDoc.data() as Player;
-    }));
-    const jsonSerializableData = JSON.parse(JSON.stringify({ ...data, squad: players }));
+  const documents = querySnapshot.docs.map(doc => {
+    const data = doc.data();
+    const jsonSerializableData = JSON.parse(JSON.stringify(data));
     return {
-      id: docSnapshot.id,
+      id: doc.id,
       ...jsonSerializableData,
     };
   });
-  
 
   if (documents.length > 0) {
-    console.log("teams encontrados");
+    console.log("teams encontrados")
   }
-
-  return Promise.all(documents);
+  return documents;
 }
 
 async function getModalityReference(modalityId: string) {

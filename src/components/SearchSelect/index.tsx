@@ -20,7 +20,7 @@ const SearchSelect = ({ onSelectItems }: SearchSelectProps) => {
   const [searchResults, setSearchResults] = useState<Item[]>([]);
   const [placeholder, setPlaceholder] = useState('Pesquisar');
 
-  const searchSelectRef = useRef(null);
+  const searchSelectRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.addEventListener('click', handleClickOutside);
@@ -30,7 +30,7 @@ const SearchSelect = ({ onSelectItems }: SearchSelectProps) => {
   }, []);
 
   const handleClickOutside = (event: MouseEvent) => {
-    if (searchSelectRef.current && !searchSelectRef.current.contains(event.target)) {
+    if (searchSelectRef.current && !searchSelectRef.current.contains(event.target as Node)) {
       setSearchText('');
     }
   };

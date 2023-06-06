@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { collection, addDoc, serverTimestamp, doc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp,getDoc , doc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import styles from './styles.module.css';
 import InputMask from 'react-input-mask';
@@ -80,7 +80,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-
+  
     try {
       // Upload da imagem para o Firebase Storage (se necessário)
       let imageUrl = '';
@@ -90,44 +90,53 @@ export default function FormNewTime({ data }: { data: Modality }) {
         const fileSnapshot = await uploadBytes(storageRef, selectedFile);
         imageUrl = await getDownloadURL(fileSnapshot.ref);
       }
-
+  
       // Obter a referência da modalidade
       const modalityRef = doc(db, 'modalities', data.id);
-
+  
       // Obter as referências dos jogadores na squad
-      const squadRefs = selectedItems.map((item) => doc(db, 'players', item.id));
-
+      const squadRefs = await Promise.all(selectedItems.map((item) => getDoc(doc(db, 'players', item.id))));
+  
+      // Criando o array de objetos Item
+      const squad: Item[] = squadRefs.map((doc) => {
+        if (doc.exists()) {
+          const { name, photo } = doc.data();
+          return { id: doc.id, name, photo };
+        }
+        return { id: '', name: '', photo: '' };
+      });
+  
       // Criando o objeto do time com as referências
       const newTeam: Team = {
         logo: imageUrl,
-        modality: modalityRef.path, // <- Adapte de acordo com a estrutura da sua coleção 'modalities'
+        modality: modalityRef.path,
         name: teamName,
-        squad: squadRefs.map((ref) => ref.path), // <- Adapte de acordo com a estrutura da sua coleção 'players'
-        whatsapp:teamWhatsAppResponsible,
-        cnpj:teamCnpj,
-        instagram:teamCpfResponsible,
-        responsibleCpf:teamCpfResponsible,
-        responsibleName:teamNameResponsible
+        squad: squad,
+        whatsapp: teamWhatsAppResponsible,
+        cnpj: teamCnpj,
+        instagram: teamInstagram,
+        responsibleCpf: teamCpfResponsible,
+        responsibleName: teamNameResponsible,
       };
-
+  
       // Adicionando o novo time à coleção 'teams'
       const docRef = await addDoc(collection(db, 'teams'), {
         ...newTeam,
         createdAt: serverTimestamp(),
       });
-
+  
       console.log('Time cadastrado com sucesso! ID:', docRef.id);
-      toast.success('Time cadastrado com sucesso')
-
+      toast.success('Time cadastrado com sucesso');
+  
       setIsLoading(false);
       resetForm();
-      router.push("newTeam?mdl="+data.id)
-} catch (error) {
-  console.error('Erro ao cadastrar o time:', error);
-  toast.error('Erro ao cadastrar o time');
-  setIsLoading(false);
-}
-};
+      router.push("newTeam?mdl=" + data.id);
+    } catch (error) {
+      console.error('Erro ao cadastrar o time:', error);
+      toast.error('Erro ao cadastrar o time');
+      setIsLoading(false);
+    }
+  };
 
  const handleResetSearch = () => {
     // Lógica para resetar a pesquisa ou realizar outras ações necessárias

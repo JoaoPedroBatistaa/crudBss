@@ -1,16 +1,31 @@
 import styles from './styles.module.css';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
-
 import Link from 'next/link';
 import { useState } from 'react';
-import { getDocs, query, where, deleteDoc } from 'firebase/firestore';
-import { collection, db, doc, getDoc } from '@/firebase';
-
-import { toast } from 'react-toastify';
+import Header from '../../components/Header';
+import Head from 'next/head';
 import { GetServerSidePropsContext } from 'next';
+import { toast } from 'react-toastify';
+import { collection, doc, getDoc, getDocs, query, where, deleteDoc } from '@firebase/firestore';
+import { db } from '@/firebase';
+
+interface Modality {
+  id: string;
+  name: string;
+}
+
+interface News {
+  id: string;
+  image: string;
+  title: string;
+  description: string;
+  date: string;
+}
 
 async function getCollectionData(modalityId: string) {
+
+  console.log("getCollectionData")
+
   const collectionRef = collection(db, 'modalities');
   const modalityRef = await getModalityReference(modalityId);
 
@@ -19,20 +34,26 @@ async function getCollectionData(modalityId: string) {
     return;
   }
 
-  const q = query(collection(db, 'news'), where('modality', '==', modalityRef));
-  const querySnapshot = await getDocs(q);
-  const documents = querySnapshot.docs.map((doc1) => {
-    const data = doc1.data();
-    const jsonSerializableData = JSON.parse(JSON.stringify(data));
+  const q = query(
+    collection(db, 'news'), 
+    where('modality', '==', modalityRef)
+    );
 
+  const querySnapshot = await getDocs(q);
+  const documents = querySnapshot.docs.map((doc) => {
+    const data = doc.data();
+    const jsonSerializableData = JSON.parse(JSON.stringify(data));
     return {
-      id: doc1.id,
+      id: doc.id,
       ...jsonSerializableData,
     };
   });
 
   if (documents.length > 0) {
     console.log('Documentos encontrados');
+  }
+  else {
+    console.log("Teams não encontrados")
   }
   return documents;
 }
@@ -51,21 +72,10 @@ async function getModalityReference(modalityId: string) {
   }
 }
 
-interface Modality {
-  id: string;
-  name: string;
-}
-
-interface News {
-  id: string;
-  image: string;
-  title: string;
-  description: string;
-  date: string;
-}
-
 export default function NewNews({ data, news }: { data: Modality; news: News[] }) {
   const [moreInfoVisible, setMoreInfoVisible] = useState<{ [key: string]: boolean }>({});
+  const [newsData, setNewsData] = useState<News[]>(news); // Add the newsData state
+  const [reloadData, setReloadData] = useState(false);
   const router = useRouter();
 
   function toggleMoreInfo(newsId: string) {
@@ -82,15 +92,13 @@ export default function NewNews({ data, news }: { data: Modality; news: News[] }
     });
   }
 
-  const [newsData, setNewsData] = useState<News[]>(news); // Use state to store the news data
-
   async function popup(newsId: string) {
     if (window.confirm('Deseja mesmo excluir?')) {
       try {
-        await deleteDoc(doc(db, 'news', newsId)); // Use the correct newsId to delete the document
+        await deleteDoc(doc(db, 'news', newsId));
         toast.success('Notícia excluída com sucesso!');
 
-        const updatedNews = newsData.filter((newItem) => newItem.id !== newsId);
+        const updatedNews = newsData.filter((newItem) => newItem.id !== newsId); // Update the newsData state
         setNewsData(updatedNews);
         window.location.reload();
       } catch (error) {
@@ -98,10 +106,13 @@ export default function NewNews({ data, news }: { data: Modality; news: News[] }
         console.error(error);
       }
     }
+    setReloadData(true);
   }
 
   return (
     <>
+      <Header></Header>
+
       <div className={styles.Container}>
         <div className={styles.Card}>
           <div className={styles.titleGroup}>
@@ -114,57 +125,54 @@ export default function NewNews({ data, news }: { data: Modality; news: News[] }
             </div>
           </div>
 
-          {newsData.map((newItem) => (
+          {news.map((news) => (
             <>
-            <div className={styles.newTeam} key={newItem.id}>
-              <div className={styles.NameGroup}>
-                <h1 className={styles.newTeamName}>{newItem.title}</h1>
+              <div className={styles.newTeam}>
+                <div className={styles.NameGroup}>
+                  <h1 className={styles.newTeamName}>{news.title}</h1>
+                </div>
+
+                <div className={styles.crudGroup}>
+                  <img
+                    id={`moreInfoButton_${news.id}`}
+                    className={styles.crudIcon}
+                    src="./assets/detalhes.png"
+                    alt=""
+                    onClick={() => toggleMoreInfo(news.id)}
+                  />
+                  <Link href={{ pathname: `/editNews`, query: { id: news.id } }}>
+                    <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
+                  </Link>
+                  <img
+                    className={styles.crudIcon}
+                    src="./assets/excluir.png"
+                    alt=""
+                    onClick={() => popup(news.id)}
+                  />
+                </div>
               </div>
 
-              <div className={styles.crudGroup}>
-                <img
-                  id={`moreInfoButton_${newItem.id}`}
-                  className={styles.crudIcon}
-                  src="./assets/detalhes.png"
-                  alt=""
-                  onClick={() => toggleMoreInfo(newItem.id)}
-                />
-                <Link href={{ pathname: `/editNews`, query: { id: newItem.id } }}>
-                <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-                </Link>
-                <img
-                  className={styles.crudIcon}
-                  src="./assets/excluir.png"
-                  alt=""
-                  onClick={() => popup(newItem.id)}
-                />
+              <div id={`moreInfo_${news.id}`} className={`${styles.moreInfo} ${moreInfoVisible[news.id] ? '' : styles.hidden}`}>
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Manchete:</p>
+                  <p className={styles.dataInfo}>{news.title}</p>
+                </div>
+
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Descrição:</p>
+                  <p className={styles.dataInfo}>{news.description}</p>
+                </div>
+
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Data:</p>
+                  <p className={styles.dataInfo}>{news.date}</p>
+                </div>
+
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Imagem da Notícia:</p>
+                  <img className={styles.newImageItem} src={news.image} alt="" />
+                </div>
               </div>
-              </div>
-
-                <div id={`moreInfo_${newItem.id}`}className={`${styles.moreInfo} ${moreInfoVisible[newItem.id] ? '' : styles.hidden}`}>
-
-                  <div className={styles.line}>
-                    <p className={styles.dataInfo}>Manchete</p>
-                    <p className={styles.dataInfo}>{newItem.title}</p>
-                  </div>
-
-                  <div className={styles.line}>
-                    <p className={styles.dataInfo}>Descrição</p>
-                    <p className={styles.dataInfo}>{newItem.description}</p>
-                  </div>
-                  
-                  <div className={styles.line}>
-                    <p className={styles.dataInfo}>Data</p>
-                    <p className={styles.dataInfo}>{newItem.date}</p>
-                  </div>
-                                    
-                  <div className={styles.line}>
-                    <p className={styles.dataInfo}>Imagem da Noticia</p>
-                    <img className={`${styles.modalityIcon} 
-                    ${styles.newImageItem}`} 
-                    src={newItem.image} alt="" />
-                  </div>
-            </div>
             </>
           ))}
         </div>
@@ -184,8 +192,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   let modalityId: string = '';
   if (typeof mdl === 'string') {
     modalityId = mdl;
-  } else if (Array.isArray(modalityId)) {
-    modalityId = modalityId.join(',');
+  } else if (Array.isArray(mdl)) {
+    modalityId = mdl.join(',');
   }
 
   const news = await getCollectionData(modalityId);
@@ -193,7 +201,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   return {
     props: {
       data: { id: mdl },
-      news: news,
+      news: news
     },
   };
 }
