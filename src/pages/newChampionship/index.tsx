@@ -78,6 +78,8 @@ interface ChampionShip {
   id: string;
   logo: string;
   name: string;
+  criterion:string;
+  description:string;
 }
 
 
@@ -166,6 +168,16 @@ export default function NewChampionship({ data, championships }: { data: Modalit
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Nome:</p>
                   <p className={styles.dataInfo}>{championship.name}</p>
+                </div>
+
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Criterio</p>
+                  <p className={styles.dataInfo}>{championship.criterion}</p>
+                </div>
+
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Descrição</p>
+                  <p className={styles.description}>{championship.description}</p>
                 </div>
 
                 <div className={styles.line}>

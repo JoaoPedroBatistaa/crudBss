@@ -28,7 +28,8 @@ interface Player {
   photo?:string,
   threePointers:Number,
   topScorersOfTheChampionship:Number,
-  topScorersOfTheGame:Number
+  topScorersOfTheGame:Number,
+  kingplayer:Number,
   position:string,
   cpf: string,
   birthDate: string
@@ -55,6 +56,7 @@ export default function FormPlayer({ data }: { data: Modality }) {
     threePointers: 0,
     topScorersOfTheChampionship: 0,
     topScorersOfTheGame: 0,
+    kingplayer: 0,
     position:'' ,
     instagram:'',
     cpf: '',
@@ -140,6 +142,7 @@ const [image, setImage] = useState<string | null>(null);
       threePointers: 0,
       topScorersOfTheChampionship: 0,
       topScorersOfTheGame: 0,
+      kingplayer: 0,
       position: '',
       instagram: '',
       cpf: '',
@@ -279,6 +282,7 @@ const [image, setImage] = useState<string | null>(null);
      
              
               <label onClick={handleImageClick} className={styles.playerAvatar} >
+                <p className={styles.label}>Foto do Jogador</p>
                 <img className={styles.playerAvatar} src={croppedImage ? croppedImage: "./assets/avatar.jpg"} alt="Avatar"  />
                 
               </label>
@@ -366,6 +370,14 @@ const [image, setImage] = useState<string | null>(null);
               value={playerData.mpvOfTheGames.toString()}
               onChange={(e) => handleInputChange(e, 'mpvOfTheGames')}
             />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Rei(a) dos Três Jogadores</p>
+            <input className={styles.field} 
+              type="number"  
+              value={playerData.kingplayer.toString()}
+              onChange={(e) => handleInputChange(e, 'kingplayer')}/>
           </div>
 
           <div className={styles.form}>

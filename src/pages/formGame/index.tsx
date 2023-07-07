@@ -38,6 +38,8 @@ interface Item {
 
 export default function FormNewMatche({ data }: { data: Modality }) {
   const [selectedTime, setSelectedTime] = useState('');
+  const [selectedTeam1Score, setSelectedTeam1Score] = useState('');
+  const [selectedTeam2Score, setSelectedTeam2Score] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedVenue, setSelectedVenue] = useState('');
   const [selectedTeamOne, setSelectedTeamOne] = useState<Item | null>(null);
@@ -63,11 +65,11 @@ export default function FormNewMatche({ data }: { data: Modality }) {
         date: selectedDate,
         modality: modalityRef,
         team_1: {
-          score: 0,
+          score: selectedTeam1Score,
           team_id: teamOneRef,
         },
         team_2: {
-          score: 0,
+          score: selectedTeam2Score,
           team_id: teamTwoRef,
         },
         venue: selectedVenue,
@@ -137,11 +139,13 @@ export default function FormNewMatche({ data }: { data: Modality }) {
                 <p className={styles.newTitle}>NOVO JOGO</p>
                 <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
               </div>
+
             </div>
             <div className={styles.form}>
               <p className={styles.label}>Campeonato:</p>
               <SearchSelectChampionship onSelectItem={handleSelectChampionship} />
             </div>
+
             <div className={styles.form}>
               <p className={styles.label}>Time 1:</p>
               <SearchSelectTeam onSelectItem={handleSelectTeamOne} />
@@ -150,6 +154,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
               <p className={styles.label}>Time 2:</p>
               <SearchSelectTeam onSelectItem={handleSelectTeamTwo} />
             </div>
+
             <div className={styles.form}>
               <p className={styles.label}>Data do Jogo</p>
               <input
@@ -159,6 +164,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
                 onChange={(e) => setSelectedDate(e.target.value)}
               />
             </div>
+
             <div className={styles.form}>
               <p className={styles.label}>Horário do Jogo</p>
               <input
@@ -168,6 +174,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
                 onChange={(e) => setSelectedTime(e.target.value)}
               />
             </div>
+
             <div className={styles.form}>
               <p className={styles.label}>Local do Jogo</p>
               <input
@@ -177,6 +184,27 @@ export default function FormNewMatche({ data }: { data: Modality }) {
                 onChange={(e) => setSelectedVenue(e.target.value)}
               />
             </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Pontuação Time 1</p>
+              <input
+                className={styles.field}
+                type="number"
+                value={selectedTeam1Score.toString()}
+                onChange={(e) => setSelectedTeam1Score(e.target.value)}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Pontuação Time 2</p>
+              <input
+                className={styles.field}
+                type="number"
+                value={selectedTeam2Score.toString()}
+                onChange={(e) => setSelectedTeam2Score(e.target.value)}
+              />
+            </div>
+
             <div className={styles.form}>
               <p className={styles.label}>PDF do Jogo</p>
               <input

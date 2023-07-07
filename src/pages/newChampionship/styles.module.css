@@ -168,6 +168,16 @@
   width: 33.3rem;
 }
 
+.description{
+  margin-left: 20px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  color: #000000;
+  font-size: 20px;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+}
+
 .dataInfo {
   color: #000000;
   font-size: 20px;

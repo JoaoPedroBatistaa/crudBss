@@ -36,8 +36,10 @@ export default function EditMatch() {
   const [matchData, setMatchData] = useState({
     team1Name: '',
     team1Logo: null as File | string | null,
+    team1Score: 0,
     team2Name: '',
     team2Logo: null as File | string | null,
+    team2Score: 0,
     date: '',
     location: '',
   });
@@ -68,8 +70,10 @@ export default function EditMatch() {
             setMatchData({
               team1Name: match.team_1 ? match.team_1.team_id : '',
               team1Logo: match.team_1 ? match.team_1.logo : null,
+              team1Score: match.team_1 ? match.team_1.score : 0,
               team2Name: match.team_2 ? match.team_2.team_id : '',
               team2Logo: match.team_2 ? match.team_2.logo : null,
+              team2Score: match.team_2 ? match.team_2.score : 0,
               date: match.date || '',
               location: match.venue || '',
             });
@@ -152,16 +156,6 @@ export default function EditMatch() {
               />
             </div>
 
-            <div className={styles.form}>
-              <p className={styles.label}>Logo time 1</p>
-              <input
-                className={styles.fieldFile}
-                type="file"
-                accept="image/*"
-                name="team1Logo"
-                onChange={handleImageChange}
-              />
-            </div>
 
             <div className={styles.form}>
               <p className={styles.label}>Nome do Time 2</p>
@@ -175,14 +169,26 @@ export default function EditMatch() {
             </div>
 
             <div className={styles.form}>
-              <p className={styles.label}>Logo time 2</p>
-              <input
-                className={styles.fieldFile}
-                type="file"
-                accept="image/*"
-                name="team2Logo"
-                onChange={handleImageChange}
-              />
+            <p className={styles.label}>Pontuação do Time 1</p>
+            <input
+              className={styles.field}
+              type="number"
+              name="team1Score"
+              value={matchData.team1Score}
+              onChange={handleInputChange}
+            />
+            </div>
+
+
+            <div className={styles.form}>
+            <p className={styles.label}>Pontuação do Time 2</p>
+            <input
+              className={styles.field}
+              type="number"
+              name="team2Score"
+              value={matchData.team2Score}
+              onChange={handleInputChange}
+            />
             </div>
 
             <div className={styles.form}>

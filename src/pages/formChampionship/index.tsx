@@ -18,6 +18,8 @@ interface ChampionShip {
 
   logo:string;
   name:string;
+  criterion:string;
+  description:string;
 }
 
 export default function NewFormChampionship({ modalityForm }: { modalityForm: Modality }) {
@@ -29,7 +31,9 @@ export default function NewFormChampionship({ modalityForm }: { modalityForm: Mo
   
   const [championShipData, setChampionShipData] = useState<ChampionShip>({
     logo:"",
-    name:""
+    name:"",
+    criterion:"",
+    description: ""
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -53,6 +57,20 @@ export default function NewFormChampionship({ modalityForm }: { modalityForm: Mo
 
 
    function handleInputChange(event: React.ChangeEvent<HTMLInputElement>, field: keyof ChampionShip) {
+    setChampionShipData({
+      ...championShipData,
+      [field]: event.target.value,
+    });
+  }
+
+  function handleSelectChange(event: React.ChangeEvent<HTMLSelectElement>, field: keyof ChampionShip) {
+    setChampionShipData({
+      ...championShipData,
+      [field]: event.target.value,
+    });
+  }
+
+  function handleTextAreaChange(event: React.ChangeEvent<HTMLTextAreaElement>, field: keyof ChampionShip) {
     setChampionShipData({
       ...championShipData,
       [field]: event.target.value,
@@ -99,7 +117,9 @@ export default function NewFormChampionship({ modalityForm }: { modalityForm: Mo
     function resetForm() {
     setChampionShipData({
       logo:"",
-     name:""
+    name:"",
+    criterion:"",
+    description: ""
     });
 
     setPreviewImage(null)
@@ -174,6 +194,28 @@ export default function NewFormChampionship({ modalityForm }: { modalityForm: Mo
               onChange={(e) => handleInputChange(e, 'name')}
             />
           </div>
+
+          <div className={styles.form}>
+          <p className={styles.label}>Critério do Campeonato</p>
+          <select 
+            className={styles.field} 
+            onChange={(e) => handleSelectChange(e, 'criterion')}
+          >
+            <option value="">Selecione um critério</option>
+            <option value="critério1">Critério 1</option>
+            <option value="critério2">Critério 2</option>
+            <option value="critério3">Critério 3</option>
+          </select>
+        </div>
+
+        <div className={styles.form}>
+        <p className={styles.label}>Descrição do Campeonato</p>
+        <textarea 
+          className={styles.field}
+          onChange={(e) => handleTextAreaChange(e, 'description')}
+        />
+      </div>
+
 
         </div>
 

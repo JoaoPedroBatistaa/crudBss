@@ -19,6 +19,7 @@ interface Player {
   photo?: File | string | null;
   position: string;
   cpf: string;
+  kingplayer:Number,
   birthDate: string
 }
 
@@ -30,6 +31,7 @@ export default function EditPlayer() {
   const [playerData, setPlayerData] = useState<Player>({
     name: '',
     photo: null,
+    kingplayer: 0,
     position: '',
     instagram: '',
     birthDate: '',
@@ -132,6 +134,11 @@ export default function EditPlayer() {
             <div className={styles.form}>
               <p className={styles.label}>Data de Nascimento</p>
               <input className={styles.field} type="date" value={playerData.birthDate} name="birthDate" onChange={handleInputChange} />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Rei(a) dos Três Jogadores</p>
+              <input className={styles.field} type="number" value={playerData.kingplayer.toString()} name="kingplayer" onChange={handleInputChange} />
             </div>
 
             <div className={styles.form}>

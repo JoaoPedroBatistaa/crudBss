@@ -48,14 +48,14 @@ export default function Categories({ data }: { data: Modality }) {
 
          <Link href={{ pathname: '/newPlayer', query: { mdl: data.id} }}>
             <div className={styles.categorie}>
-              <img className={styles.categorieIcon} src="./assets/masc.png" alt="" />
+              <img className={styles.categorieIcon} src="./assets/jogador-de-basquete.png" alt="" />
 
               <h1 className={styles.categorieName}>Jogadores</h1>
             </div>
           </Link>
           <Link href={{ pathname: '/newChampionship', query: { mdl: data.id} }}>
             <div className={styles.categorie}>
-              <img className={styles.categorieIcon} src="./assets/campeonatos.png" alt="" />
+              <img className={styles.categorieIcon} src="./assets/campeonato.png" alt="" />
 
               <h1 className={styles.categorieName}>Campeonatos</h1>
             </div>
@@ -70,7 +70,7 @@ export default function Categories({ data }: { data: Modality }) {
           </Link>
            <Link href={{ pathname: '/newGame', query: { mdl: data.id} }}>
             <div className={styles.categorie}>
-              <img className={styles.categorieIcon} src="./assets/jogos.png" alt="" />
+              <img className={styles.categorieIcon} src="./assets/versus.png" alt="" />
 
               <h1 className={styles.categorieName}>Jogos</h1>
             </div>

@@ -187,7 +187,11 @@ export default function NewGame({ data, matches }: { data: Modality; matches: Ma
                           height={60}
                         />
                       </div>
-                      <h1>X</h1>
+                      <div className={styles.Scoreboard}>
+                        <h2>{matche.team_1.score}</h2>
+                        <h1>X</h1>
+                        <h2>{matche.team_2.score}</h2>
+                      </div>
                       <div className={styles.TeamLogo}>
                         <Image
                           src={matche.team_2.team_data?.logo || "/assets/team1.png"}

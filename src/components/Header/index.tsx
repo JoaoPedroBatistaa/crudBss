@@ -7,7 +7,7 @@ export default function Header() {
     <>
       <header className={styles.header}>
         <div className={styles.Logo}>
-          <img className={styles.logoIcon} src='./assets/logo.png' alt="Logo" ></img>
+          <img className={styles.logoIcon} src='./assets/brenda.png' alt="Logo" ></img>
         </div>
       </header>
     </>

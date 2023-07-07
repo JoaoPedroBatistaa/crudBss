@@ -24,6 +24,7 @@ interface Player {
   threePointers:Number,
   topScorersOfTheChampionship:Number,
   topScorersOfTheGame:Number
+  kingplayer:Number,
   position:string,
   cpf: string,
   birthDate: string
@@ -37,7 +38,7 @@ async function getCollectionData(modalityId:string) {
   const modalityRef = await getModalityReference(modalityId)
 
   if (!modalityRef) {
-     toast.success('Modalidade não encontrado!');
+    toast.success('Modalidade não encontrado!');
     return;
   }
 

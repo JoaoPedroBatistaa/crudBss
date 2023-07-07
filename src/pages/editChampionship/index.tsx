@@ -12,6 +12,8 @@ interface Championship {
   id: string;
   name: string;
   logo?: File | string | null;
+  criterion:string;
+  description?: string;
 }
 
 export default function EditChampionship() {
@@ -19,12 +21,24 @@ export default function EditChampionship() {
     id: '',
     name: '',
     logo: null,
+    criterion:"",
+    description: ""
   });
 
   const router = useRouter();
   const { id } = router.query;
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setChampionshipData((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = event.target;
+    setChampionshipData((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const handleTextAreaChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = event.target;
     setChampionshipData((prevState) => ({ ...prevState, [name]: value }));
   };
@@ -111,6 +125,31 @@ export default function EditChampionship() {
               <p className={styles.label}>Logo do Campeonato</p>
               <input className={styles.fieldFile} type="file" accept="image/*" onChange={handleLogoChange} />
             </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Critério do Campeonato</p>
+              <select 
+                className={styles.field} 
+                name="criterion"
+                value={championshipData.criterion}
+                onChange={handleSelectChange}
+              >
+                <option value="">Selecione um critério</option>
+                <option value="critério1">Critério 1</option>
+                <option value="critério2">Critério 2</option>
+                <option value="critério3">Critério 3</option>
+              </select>
+            </div>
+
+            <div className={styles.form}>
+            <p className={styles.label}>Descrição do Campeonato</p>
+            <textarea 
+              className={styles.field}
+              value={championshipData.description}
+              name="description"
+              onChange={handleTextAreaChange}
+            />
+          </div>
 
             <button type="submit" className={styles.save}>
               SALVAR
