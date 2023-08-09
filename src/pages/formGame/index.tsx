@@ -51,60 +51,66 @@ export default function FormNewMatche({ data }: { data: Modality }) {
   const router = useRouter();
 
   async function handleSubmit() {
-    try {
-      setIsLoading(true);
-      const matcheRef = collection(db, 'matches');
+    if (selectedTeam1Score && selectedTeam2Score) {
+      try {
+        setIsLoading(true);
+        const matcheRef = collection(db, 'matches');
 
-      const modalityRef = doc(db, 'modalities', data.id);
-      const teamOneRef = doc(db, 'teams', selectedTeamOne?.id || '');
-      const teamTwoRef = doc(db, 'teams', selectedTeamTwo?.id || '');
-      const championshipRef = doc(db, 'championships', selectedChampionship?.id || '');
+        const modalityRef = doc(db, 'modalities', data.id);
+        const teamOneRef = doc(db, 'teams', selectedTeamOne?.id || '');
+        const teamTwoRef = doc(db, 'teams', selectedTeamTwo?.id || '');
+        const championshipRef = doc(db, 'championships', selectedChampionship?.id || '');
 
-      const newMatche = {
-        championship: championshipRef,
-        date: selectedDate,
-        modality: modalityRef,
-        team_1: {
-          score: selectedTeam1Score,
-          team_id: teamOneRef,
-        },
-        team_2: {
-          score: selectedTeam2Score,
-          team_id: teamTwoRef,
-        },
-        venue: selectedVenue,
-        time: selectedTime,
-      };
+        const newMatche = {
+          championship: championshipRef,
+          date: selectedDate,
+          modality: modalityRef,
+          team_1: {
+            score: selectedTeam1Score,
+            team_id: teamOneRef,
+          },
+          team_2: {
+            score: selectedTeam2Score,
+            team_id: teamTwoRef,
+          },
+          venue: selectedVenue,
+          time: selectedTime,
+        };
 
-      const docRef = await addDoc(matcheRef, {
-        ...newMatche,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
+        const docRef = await addDoc(matcheRef, {
+          ...newMatche,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
 
-      if (selectedFile) {
-        const storageRef = ref(storage, `matches/${docRef.id}/${selectedFile.name}`);
-        await uploadBytes(storageRef, selectedFile);
-        const downloadURL = await getDownloadURL(storageRef);
-        await setDoc(docRef, { fileURL: downloadURL }, { merge: true });
+        if (selectedFile) {
+          const storageRef = ref(storage, `matches/${docRef.id}/${selectedFile.name}`);
+          await uploadBytes(storageRef, selectedFile);
+          const downloadURL = await getDownloadURL(storageRef);
+          await setDoc(docRef, { fileURL: downloadURL }, { merge: true });
+        }
+
+        setIsLoading(false);
+        setSelectedTime('');
+        setSelectedDate('');
+        setSelectedVenue('');
+        setSelectedTeamOne(null);
+        setSelectedTeamTwo(null);
+        setSelectedChampionship(null);
+        setSelectedFile(null);
+        setSelectedFileName(''); // Limpar o nome do arquivo selecionado
+        toast.success("Jogo cadastrado com sucesso!");
+        router.push("newGame?mdl=" + data.id);
+        console.log('Novo jogo salvo com sucesso no Firestore!');
+      } catch (error) {
+        setIsLoading(false);
+        toast.error("Erro ao cadastrar jogo!");
+        console.error('Erro ao salvar o novo jogo:', error);
       }
-
-      setIsLoading(false);
-      setSelectedTime('');
-      setSelectedDate('');
-      setSelectedVenue('');
-      setSelectedTeamOne(null);
-      setSelectedTeamTwo(null);
-      setSelectedChampionship(null);
-      setSelectedFile(null);
-      setSelectedFileName(''); // Limpar o nome do arquivo selecionado
-      toast.success("Jogo cadastrado com sucesso!");
-      router.push("newGame?mdl=" + data.id);
-      console.log('Novo jogo salvo com sucesso no Firestore!');
-    } catch (error) {
-      setIsLoading(false);
-      toast.error("Erro ao cadastrar jogo!");
-      console.error('Erro ao salvar o novo jogo:', error);
+    } else if (!selectedTeam1Score) {
+      toast.error("Preencha o placar do time 01");
+    } else if (!selectedTeam2Score) {
+      toast.error("Preencha o placar do time 02");
     }
   }
 
@@ -127,6 +133,8 @@ export default function FormNewMatche({ data }: { data: Modality }) {
   function HandleBackButtonClick() {
     window.history.back();
   }
+
+  console.log(selectedTeam1Score, selectedTeam2Score);
 
   return (
     isLoading ? <Spinner /> :
@@ -208,7 +216,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
             <div className={styles.form}>
               <p className={styles.label}>PDF do Jogo</p>
               <input
-              className={styles.fieldFile}
+                className={styles.fieldFile}
                 type="file"
                 accept="application/pdf"
                 onChange={handleFileChange}
