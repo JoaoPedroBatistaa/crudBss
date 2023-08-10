@@ -175,14 +175,15 @@ export default function EditChampionship() {
 
           <form onSubmit={handleSubmit}>
             <div className={styles.form}>
+              <p className={styles.label}>Logo do Campeonato</p>
+              <input className={styles.fieldFile} type="file" accept="image/*" onChange={handleLogoChange} />
+            </div>
+
+            <div className={styles.form}>
               <p className={styles.label}>Nome do Campeonato</p>
               <input className={styles.field} type="text" value={championshipData.name} name="name" onChange={handleInputChange} />
             </div>
 
-            <div className={styles.form}>
-              <p className={styles.label}>Logo do Campeonato</p>
-              <input className={styles.fieldFile} type="file" accept="image/*" onChange={handleLogoChange} />
-            </div>
 
             <div className={styles.form}>
               <p className={styles.label}>Critério do Campeonato</p>
