@@ -8,22 +8,49 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { toast } from 'react-toastify';
 
+import SearchSelectTeam from '@/components/SearchSelectTable';
+
+
 interface Championship {
   id: string;
   name: string;
   logo?: File | string | null;
-  criterion:string;
+  criterion: string;
   description?: string;
+  dataMatrix: TableData[];
+  count: number; // Adicione esta linha
 }
+
+
+interface Item {
+  id: string;
+  name: string;
+  logo: string;
+}
+
+type TableData = {
+  time: string;
+  position: string;
+  victories: string;
+  logo: string;  // Adicione esta linha
+};
+
+
 
 export default function EditChampionship() {
   const [championshipData, setChampionshipData] = useState<Championship>({
     id: '',
     name: '',
     logo: null,
-    criterion:"",
-    description: ""
+    criterion: "",
+    description: "",
+    dataMatrix: [],
+    count: 0 // Adicione esta linha para inicializar dataMatrix como um array vazio
   });
+
+
+  const [selectedTeamOne, setSelectedTeamOne] = useState<Item | null>(null);
+
 
   const router = useRouter();
   const { id } = router.query;
@@ -60,6 +87,8 @@ export default function EditChampionship() {
         if (championshipDoc.exists()) {
           const championship = championshipDoc.data() as Championship;
           setChampionshipData(championship);
+          setDataMatrix(championship.dataMatrix || []);
+          setCount(championship.count || 0);
         } else {
           console.log('No championship exists with this ID.');
         }
@@ -78,34 +107,63 @@ export default function EditChampionship() {
 
     if (!id) {
       console.error('Error: Championship ID is not defined');
-      toast.error('Error when updating championship.');
+      toast.error('Erro ao atualizar o campeonato.');
       return;
     }
 
     try {
-      if (championshipData.logo instanceof File) {
-        const storage = getStorage();
-        const fileRef = ref(storage, `championships/${championshipData.logo.name}`);
+      let updatedChampionshipData = { ...championshipData, dataMatrix, count };
 
-        const uploadTask = uploadBytesResumable(fileRef, championshipData.logo);
+      if (updatedChampionshipData.logo instanceof File) {
+        const storage = getStorage();
+        const fileRef = ref(storage, `championships/${updatedChampionshipData.logo.name}`);
+
+        const uploadTask = uploadBytesResumable(fileRef, updatedChampionshipData.logo);
         await uploadTask;
 
         const downloadURL = await getDownloadURL(fileRef);
-        championshipData.logo = downloadURL as string;
+        updatedChampionshipData.logo = downloadURL as string;
       }
 
-      await setDoc(doc(db, 'championships', id as string), championshipData);
+      await setDoc(doc(db, 'championships', id as string), updatedChampionshipData);
 
-      toast.success('Championship updated successfully!');
+      toast.success('Campeonato atualizado com sucesso!');
     } catch (error) {
-      console.error('Error when updating championship: ', error);
-      toast.error('Error when updating championship.');
+      console.error('Erro ao atualizar o campeonato: ', error);
+      toast.error('Erro ao atualizar o campeonato.');
     }
   };
+
 
   function HandleBackButtonClick() {
     window.history.back();
   }
+
+  const handleSelectTeamOne = (item: Item) => {
+    setSelectedTeamOne(item);
+  };
+
+  const [count, setCount] = useState(0);
+  const [dataMatrix, setDataMatrix] = useState<TableData[]>([]);
+
+  const handleInputTableChange = (e: { target: HTMLInputElement; }) => {
+    const input = e.target as HTMLInputElement;
+    const value = parseInt(input.value);
+    if (!isNaN(value)) {
+      setCount(value);
+    }
+  };
+
+  const handleTableInputChange = (index: number, type: keyof TableData, e: React.ChangeEvent<HTMLInputElement>) => {
+    const updatedMatrix = [...dataMatrix];
+    if (!updatedMatrix[index]) {
+      updatedMatrix[index] = { time: '', position: '', victories: '', logo: '' };
+    }
+    updatedMatrix[index][type] = e.target.value;
+    setDataMatrix(updatedMatrix);
+  };
+
+  console.log(dataMatrix);
 
   return (
     <>
@@ -128,8 +186,8 @@ export default function EditChampionship() {
 
             <div className={styles.form}>
               <p className={styles.label}>Critério do Campeonato</p>
-              <select 
-                className={styles.field} 
+              <select
+                className={styles.field}
                 name="criterion"
                 value={championshipData.criterion}
                 onChange={handleSelectChange}
@@ -141,15 +199,85 @@ export default function EditChampionship() {
               </select>
             </div>
 
+
             <div className={styles.form}>
-            <p className={styles.label}>Descrição do Campeonato</p>
-            <textarea 
-              className={styles.field}
-              value={championshipData.description}
-              name="description"
-              onChange={handleTextAreaChange}
-            />
-          </div>
+              <p className={styles.label}>Descrição do Campeonato</p>
+              <textarea
+                className={styles.field}
+                value={championshipData.description}
+                name="description"
+                onChange={handleTextAreaChange}
+              />
+            </div>
+
+
+            <div className={styles.form}>
+              <div className={styles.headTable}>
+                <p className={styles.label}>Tabela do Campeonato - "insira o Nº posições"</p>
+                <input
+                  value={championshipData.count}
+
+                  type="text"
+                  id='positions'
+                  className={styles.position}
+                  pattern="\d*"
+                  onInput={(e) => {
+                    const input = e.currentTarget as HTMLInputElement;
+                    const value = parseInt(input.value);
+                    if (!isNaN(value)) {
+                      setCount(value);
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Aqui começamos a renderização condicional */}
+              {Array.from({ length: count }).map((_, index) => (
+                <div key={index} className={styles.table}>
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Posição</p>
+                    <input
+                      type="text"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.position || ''}
+                      onChange={(e) => handleTableInputChange(index, 'position', e)}
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Vitórias</p>
+                    <input
+                      type="text"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.victories || ''}
+                      onChange={(e) => handleTableInputChange(index, 'victories', e)}
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>
+                      Time {dataMatrix[index]?.time ? `(${dataMatrix[index]?.time})` : ''}
+                    </p>
+
+                    <SearchSelectTeam
+                      initialValue={dataMatrix[index]?.time}
+
+                      onSelectItem={(team: Item) => {
+                        const updatedMatrix = [...dataMatrix];
+                        if (!updatedMatrix[index]) {
+                          updatedMatrix[index] = { time: '', position: '', victories: '', logo: '' };
+                        }
+                        updatedMatrix[index].time = team.name;
+                        updatedMatrix[index].logo = team.logo;
+                        setDataMatrix(updatedMatrix);
+                      }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
 
             <button type="submit" className={styles.save}>
               SALVAR
@@ -159,8 +287,8 @@ export default function EditChampionship() {
           <button className={styles.back} onClick={HandleBackButtonClick}>
             Voltar
           </button>
-        </div>
-      </div>
+        </div >
+      </div >
     </>
   );
 }
