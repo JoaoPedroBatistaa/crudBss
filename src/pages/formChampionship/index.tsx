@@ -279,7 +279,7 @@ export default function NewFormChampionship({ modalityForm }: { modalityForm: Mo
 
             <div className={styles.form}>
               <div className={styles.headTable}>
-                <p className={styles.label}>Tabela do Campeonato - "insira o Nº posições"</p>
+                <p className={styles.label}>Tabela do Campeonato - insira o Nº posições</p>
                 <input
                   type="text"
                   id='positions'

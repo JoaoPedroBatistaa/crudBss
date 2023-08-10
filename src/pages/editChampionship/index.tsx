@@ -213,7 +213,7 @@ export default function EditChampionship() {
 
             <div className={styles.form}>
               <div className={styles.headTable}>
-                <p className={styles.label}>Tabela do Campeonato - "insira o Nº posições"</p>
+                <p className={styles.label}>Tabela do Campeonato - insira o Nº posições</p>
                 <input
                   value={championshipData.count}
 
