@@ -32,7 +32,11 @@ type TableData = {
   time: string;
   position: string;
   victories: string;
-  logo: string;  // Adicione esta linha
+  logo: string;
+  jogos: string;
+  derrotas: string;
+  saldo: string;
+  pontos: string; // Adicione esta linha
 };
 
 
@@ -157,7 +161,7 @@ export default function EditChampionship() {
   const handleTableInputChange = (index: number, type: keyof TableData, e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedMatrix = [...dataMatrix];
     if (!updatedMatrix[index]) {
-      updatedMatrix[index] = { time: '', position: '', victories: '', logo: '' };
+      updatedMatrix[index] = { time: '', position: '', victories: '', logo: '', saldo: '', derrotas: '', pontos: '', jogos: '' };
     }
     updatedMatrix[index][type] = e.target.value;
     setDataMatrix(updatedMatrix);
@@ -218,9 +222,9 @@ export default function EditChampionship() {
                 <input
                   value={championshipData.count}
 
-                  type="text"
+                  type="number"
                   id='positions'
-                  className={styles.position}
+                  className={styles.pos}
                   pattern="\d*"
                   onInput={(e) => {
                     const input = e.currentTarget as HTMLInputElement;
@@ -238,22 +242,11 @@ export default function EditChampionship() {
                   <div className={styles.tableItem}>
                     <p className={styles.tableLabel}>Posição</p>
                     <input
-                      type="text"
+                      type="number"
                       className={styles.position}
                       pattern="\d*"
                       value={dataMatrix[index]?.position || ''}
                       onChange={(e) => handleTableInputChange(index, 'position', e)}
-                    />
-                  </div>
-
-                  <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Vitórias</p>
-                    <input
-                      type="text"
-                      className={styles.position}
-                      pattern="\d*"
-                      value={dataMatrix[index]?.victories || ''}
-                      onChange={(e) => handleTableInputChange(index, 'victories', e)}
                     />
                   </div>
 
@@ -268,13 +261,69 @@ export default function EditChampionship() {
                       onSelectItem={(team: Item) => {
                         const updatedMatrix = [...dataMatrix];
                         if (!updatedMatrix[index]) {
-                          updatedMatrix[index] = { time: '', position: '', victories: '', logo: '' };
+                          updatedMatrix[index] = { time: '', position: '', victories: '', logo: '', saldo: '', derrotas: '', pontos: '', jogos: '' };
                         }
                         updatedMatrix[index].time = team.name;
                         updatedMatrix[index].logo = team.logo;
                         setDataMatrix(updatedMatrix);
                       }} />
                   </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Pontos</p>
+                    <input
+                      type="number"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.pontos || ''}
+                      onChange={(e) => handleTableInputChange(index, 'pontos', e)}
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Vitórias</p>
+                    <input
+                      type="number"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.victories || ''}
+                      onChange={(e) => handleTableInputChange(index, 'victories', e)}
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Derrotas</p>
+                    <input
+                      type="number"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.derrotas || ''}
+                      onChange={(e) => handleTableInputChange(index, 'derrotas', e)}
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Saldo</p>
+                    <input
+                      type="number"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.saldo || ''}
+                      onChange={(e) => handleTableInputChange(index, 'saldo', e)}
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Jogos</p>
+                    <input
+                      type="number"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.jogos || ''}
+                      onChange={(e) => handleTableInputChange(index, 'jogos', e)}
+                    />
+                  </div>
+
                 </div>
               ))}
             </div>
