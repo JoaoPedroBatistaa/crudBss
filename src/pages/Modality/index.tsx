@@ -13,6 +13,8 @@ import { toast } from "react-toastify";
 import { db } from "../../firebase";
 import styles from "./styles.module.css";
 
+import HomeButton from "../../components/HomeButton";
+
 async function getCollectionData(sport: string) {
   console.log("Iniciando getCollectionData com sport: ", sport); // Log para verificar o valor de sport
 
@@ -100,6 +102,8 @@ export default function Modality({ data }: { data: [Modality] }) {
 
   return (
     <>
+      <HomeButton></HomeButton>
+
       <div className={styles.Container}>
         <div className={styles.Card}>
           <h1 className={styles.title}>Modalidades</h1>

@@ -1,12 +1,19 @@
-import styles from './styles.module.css';
-import { useRouter } from 'next/router';
-import 'firebase/storage';
-import SearchSelect from '@/components/SearchSelect';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import React, { useState, useEffect, FormEvent, ChangeEvent } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/firebase';
-import { toast } from 'react-toastify';
+import SearchSelect from "@/components/SearchSelect";
+import { db } from "@/firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import "firebase/storage";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
+import { useRouter } from "next/router";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import styles from "./styles.module.css";
+
+import HomeButton from "../../components/HomeButton";
 
 interface TeamData {
   name: string;
@@ -34,7 +41,7 @@ export async function getServerSideProps() {
     const teams = await fetchTeam();
     return { props: { teams: teams || null } };
   } catch (error) {
-    console.error('Error fetching teams: ', error);
+    console.error("Error fetching teams: ", error);
     return { props: { teams: null } };
   }
 }
@@ -42,7 +49,7 @@ export async function getServerSideProps() {
 async function fetchTeam() {
   // Implemente o código para buscar os dados dos times no banco de dados
   // e retorne os times obtidos
-  const response = await fetch('teams'); // Substitua 'api/teams' pela rota correta em seu projeto
+  const response = await fetch("teams"); // Substitua 'api/teams' pela rota correta em seu projeto
   const teams = await response.json();
   return teams;
 }
@@ -53,13 +60,13 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
   const [selectedItems, setSelectedItems] = useState<Player[]>([]);
 
   const [teamData, setTeamData] = useState<TeamData>({
-    name: '',
+    name: "",
     logo: null,
-    instagram: '',
-    whatsapp: '',
-    cnpj: '',
-    responsibleCpf: '',
-    responsibleName: '',
+    instagram: "",
+    whatsapp: "",
+    cnpj: "",
+    responsibleCpf: "",
+    responsibleName: "",
     players: [],
   });
 
@@ -69,27 +76,30 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
   };
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files && event.target.files.length > 0 ? event.target.files[0] : null;
+    const file =
+      event.target.files && event.target.files.length > 0
+        ? event.target.files[0]
+        : null;
     setTeamData((prevState) => ({ ...prevState, logo: file }));
   };
 
   useEffect(() => {
     const fetchTeamData = async () => {
       if (!id) {
-        console.log('Team ID is not defined.');
+        console.log("Team ID is not defined.");
         return;
       }
 
       try {
-        const teamDoc = await getDoc(doc(db, 'teams', id));
+        const teamDoc = await getDoc(doc(db, "teams", id));
         if (teamDoc.exists()) {
           const team = teamDoc.data() as TeamData;
           setTeamData(team);
         } else {
-          console.log('No team exists with this ID.');
+          console.log("No team exists with this ID.");
         }
       } catch (error) {
-        console.error('Error fetching team details: ', error);
+        console.error("Error fetching team details: ", error);
       }
     };
 
@@ -102,13 +112,12 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
     setSelectedItems(items);
   };
 
-
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!id) {
-      console.error('Error: Team ID is not defined');
-      toast.error('Error when updating team.');
+      console.error("Error: Team ID is not defined");
+      toast.error("Error when updating team.");
       return;
     }
 
@@ -124,12 +133,12 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
         teamData.logo = downloadURL;
       }
 
-      await setDoc(doc(db, 'teams', id), teamData);
+      await setDoc(doc(db, "teams", id), teamData);
 
-      toast.success('Team updated successfully!');
+      toast.success("Team updated successfully!");
     } catch (error) {
-      console.error('Error when updating team: ', error);
-      toast.error('Error when updating team.');
+      console.error("Error when updating team: ", error);
+      toast.error("Error when updating team.");
     }
   };
 
@@ -139,6 +148,8 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
 
   return (
     <>
+      <HomeButton></HomeButton>
+
       <div className={styles.Container}>
         <div className={styles.Card}>
           <div className={styles.titleGroup}>
@@ -178,7 +189,7 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
                 onChange={handleInputChange}
               />
             </div>
-                                    
+
             <div className={styles.form}>
               <p className={styles.label}>CNPJ do time</p>
               <input
@@ -200,7 +211,7 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
                 onChange={handleInputChange}
               />
             </div>
-                        
+
             <div className={styles.form}>
               <p className={styles.label}>CPF Responsável</p>
               <input
@@ -225,7 +236,7 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
 
             <div className={styles.form}>
               <p className={styles.label}>Elenco</p>
-              <SearchSelect onSelectItems={handleSelectItems}/>
+              <SearchSelect onSelectItems={handleSelectItems} />
             </div>
 
             <button type="submit" className={styles.save}>

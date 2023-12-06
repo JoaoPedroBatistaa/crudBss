@@ -1,15 +1,20 @@
-import styles from './styles.module.css';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import 'firebase/storage';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import React, { useEffect, useState, FormEvent, ChangeEvent } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/firebase';
-import { toast } from 'react-toastify';
+import { db } from "@/firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import "firebase/storage";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
+import { useRouter } from "next/router";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import styles from "./styles.module.css";
 
-import SearchSelectTeam from '@/components/SearchSelectTable';
+import SearchSelectTeam from "@/components/SearchSelectTable";
 
+import HomeButton from "../../components/HomeButton";
 
 interface Championship {
   id: string;
@@ -20,7 +25,6 @@ interface Championship {
   dataMatrix: TableData[];
   count: number; // Adicione esta linha
 }
-
 
 interface Item {
   id: string;
@@ -39,22 +43,18 @@ type TableData = {
   pontos: string; // Adicione esta linha
 };
 
-
-
 export default function EditChampionship() {
   const [championshipData, setChampionshipData] = useState<Championship>({
-    id: '',
-    name: '',
+    id: "",
+    name: "",
     logo: null,
     criterion: "",
     description: "",
     dataMatrix: [],
-    count: 0 // Adicione esta linha para inicializar dataMatrix como um array vazio
+    count: 0, // Adicione esta linha para inicializar dataMatrix como um array vazio
   });
 
-
   const [selectedTeamOne, setSelectedTeamOne] = useState<Item | null>(null);
-
 
   const router = useRouter();
   const { id } = router.query;
@@ -75,29 +75,34 @@ export default function EditChampionship() {
   };
 
   const handleLogoChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files && event.target.files.length > 0 ? event.target.files[0] : null;
+    const file =
+      event.target.files && event.target.files.length > 0
+        ? event.target.files[0]
+        : null;
     setChampionshipData((prevState) => ({ ...prevState, logo: file }));
   };
 
   useEffect(() => {
     const fetchChampionship = async () => {
       if (!id) {
-        console.log('Championship ID is not defined.');
+        console.log("Championship ID is not defined.");
         return;
       }
 
       try {
-        const championshipDoc = await getDoc(doc(db, 'championships', id as string));
+        const championshipDoc = await getDoc(
+          doc(db, "championships", id as string)
+        );
         if (championshipDoc.exists()) {
           const championship = championshipDoc.data() as Championship;
           setChampionshipData(championship);
           setDataMatrix(championship.dataMatrix || []);
           setCount(championship.count || 0);
         } else {
-          console.log('No championship exists with this ID.');
+          console.log("No championship exists with this ID.");
         }
       } catch (error) {
-        console.error('Error fetching championship details: ', error);
+        console.error("Error fetching championship details: ", error);
       }
     };
 
@@ -110,8 +115,8 @@ export default function EditChampionship() {
     event.preventDefault();
 
     if (!id) {
-      console.error('Error: Championship ID is not defined');
-      toast.error('Erro ao atualizar o campeonato.');
+      console.error("Error: Championship ID is not defined");
+      toast.error("Erro ao atualizar o campeonato.");
       return;
     }
 
@@ -120,24 +125,32 @@ export default function EditChampionship() {
 
       if (updatedChampionshipData.logo instanceof File) {
         const storage = getStorage();
-        const fileRef = ref(storage, `championships/${updatedChampionshipData.logo.name}`);
+        const fileRef = ref(
+          storage,
+          `championships/${updatedChampionshipData.logo.name}`
+        );
 
-        const uploadTask = uploadBytesResumable(fileRef, updatedChampionshipData.logo);
+        const uploadTask = uploadBytesResumable(
+          fileRef,
+          updatedChampionshipData.logo
+        );
         await uploadTask;
 
         const downloadURL = await getDownloadURL(fileRef);
         updatedChampionshipData.logo = downloadURL as string;
       }
 
-      await setDoc(doc(db, 'championships', id as string), updatedChampionshipData);
+      await setDoc(
+        doc(db, "championships", id as string),
+        updatedChampionshipData
+      );
 
-      toast.success('Campeonato atualizado com sucesso!');
+      toast.success("Campeonato atualizado com sucesso!");
     } catch (error) {
-      console.error('Erro ao atualizar o campeonato: ', error);
-      toast.error('Erro ao atualizar o campeonato.');
+      console.error("Erro ao atualizar o campeonato: ", error);
+      toast.error("Erro ao atualizar o campeonato.");
     }
   };
-
 
   function HandleBackButtonClick() {
     window.history.back();
@@ -150,7 +163,7 @@ export default function EditChampionship() {
   const [count, setCount] = useState(0);
   const [dataMatrix, setDataMatrix] = useState<TableData[]>([]);
 
-  const handleInputTableChange = (e: { target: HTMLInputElement; }) => {
+  const handleInputTableChange = (e: { target: HTMLInputElement }) => {
     const input = e.target as HTMLInputElement;
     const value = parseInt(input.value);
     if (!isNaN(value)) {
@@ -158,10 +171,23 @@ export default function EditChampionship() {
     }
   };
 
-  const handleTableInputChange = (index: number, type: keyof TableData, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTableInputChange = (
+    index: number,
+    type: keyof TableData,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const updatedMatrix = [...dataMatrix];
     if (!updatedMatrix[index]) {
-      updatedMatrix[index] = { time: '', position: '', victories: '', logo: '', saldo: '', derrotas: '', pontos: '', jogos: '' };
+      updatedMatrix[index] = {
+        time: "",
+        position: "",
+        victories: "",
+        logo: "",
+        saldo: "",
+        derrotas: "",
+        pontos: "",
+        jogos: "",
+      };
     }
     updatedMatrix[index][type] = e.target.value;
     setDataMatrix(updatedMatrix);
@@ -171,6 +197,8 @@ export default function EditChampionship() {
 
   return (
     <>
+      <HomeButton></HomeButton>
+
       <div className={styles.Container}>
         <div className={styles.Card}>
           <div className={styles.titleGroup}>
@@ -180,14 +208,24 @@ export default function EditChampionship() {
           <form onSubmit={handleSubmit}>
             <div className={styles.form}>
               <p className={styles.label}>Logo do Campeonato</p>
-              <input className={styles.fieldFile} type="file" accept="image/*" onChange={handleLogoChange} />
+              <input
+                className={styles.fieldFile}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoChange}
+              />
             </div>
 
             <div className={styles.form}>
               <p className={styles.label}>Nome do Campeonato</p>
-              <input className={styles.field} type="text" value={championshipData.name} name="name" onChange={handleInputChange} />
+              <input
+                className={styles.field}
+                type="text"
+                value={championshipData.name}
+                name="name"
+                onChange={handleInputChange}
+              />
             </div>
-
 
             <div className={styles.form}>
               <p className={styles.label}>Critério do Campeonato</p>
@@ -204,7 +242,6 @@ export default function EditChampionship() {
               </select>
             </div>
 
-
             <div className={styles.form}>
               <p className={styles.label}>Descrição do Campeonato</p>
               <textarea
@@ -215,15 +252,15 @@ export default function EditChampionship() {
               />
             </div>
 
-
             <div className={styles.form}>
               <div className={styles.headTable}>
-                <p className={styles.label}>Tabela do Campeonato - insira o Nº posições</p>
+                <p className={styles.label}>
+                  Tabela do Campeonato - insira o Nº posições
+                </p>
                 <input
                   value={championshipData.count}
-
                   type="number"
-                  id='positions'
+                  id="positions"
                   className={styles.pos}
                   pattern="\d*"
                   onInput={(e) => {
@@ -245,28 +282,42 @@ export default function EditChampionship() {
                       type="number"
                       className={styles.position}
                       pattern="\d*"
-                      value={dataMatrix[index]?.position || ''}
-                      onChange={(e) => handleTableInputChange(index, 'position', e)}
+                      value={dataMatrix[index]?.position || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "position", e)
+                      }
                     />
                   </div>
 
                   <div className={styles.tableItem}>
                     <p className={styles.tableLabel}>
-                      Time {dataMatrix[index]?.time ? `(${dataMatrix[index]?.time})` : ''}
+                      Time{" "}
+                      {dataMatrix[index]?.time
+                        ? `(${dataMatrix[index]?.time})`
+                        : ""}
                     </p>
 
                     <SearchSelectTeam
                       initialValue={dataMatrix[index]?.time}
-
                       onSelectItem={(team: Item) => {
                         const updatedMatrix = [...dataMatrix];
                         if (!updatedMatrix[index]) {
-                          updatedMatrix[index] = { time: '', position: '', victories: '', logo: '', saldo: '', derrotas: '', pontos: '', jogos: '' };
+                          updatedMatrix[index] = {
+                            time: "",
+                            position: "",
+                            victories: "",
+                            logo: "",
+                            saldo: "",
+                            derrotas: "",
+                            pontos: "",
+                            jogos: "",
+                          };
                         }
                         updatedMatrix[index].time = team.name;
                         updatedMatrix[index].logo = team.logo;
                         setDataMatrix(updatedMatrix);
-                      }} />
+                      }}
+                    />
                   </div>
 
                   <div className={styles.tableItem}>
@@ -275,8 +326,10 @@ export default function EditChampionship() {
                       type="number"
                       className={styles.position}
                       pattern="\d*"
-                      value={dataMatrix[index]?.pontos || ''}
-                      onChange={(e) => handleTableInputChange(index, 'pontos', e)}
+                      value={dataMatrix[index]?.pontos || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "pontos", e)
+                      }
                     />
                   </div>
 
@@ -286,8 +339,10 @@ export default function EditChampionship() {
                       type="number"
                       className={styles.position}
                       pattern="\d*"
-                      value={dataMatrix[index]?.victories || ''}
-                      onChange={(e) => handleTableInputChange(index, 'victories', e)}
+                      value={dataMatrix[index]?.victories || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "victories", e)
+                      }
                     />
                   </div>
 
@@ -297,8 +352,10 @@ export default function EditChampionship() {
                       type="number"
                       className={styles.position}
                       pattern="\d*"
-                      value={dataMatrix[index]?.derrotas || ''}
-                      onChange={(e) => handleTableInputChange(index, 'derrotas', e)}
+                      value={dataMatrix[index]?.derrotas || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "derrotas", e)
+                      }
                     />
                   </div>
 
@@ -308,8 +365,10 @@ export default function EditChampionship() {
                       type="number"
                       className={styles.position}
                       pattern="\d*"
-                      value={dataMatrix[index]?.saldo || ''}
-                      onChange={(e) => handleTableInputChange(index, 'saldo', e)}
+                      value={dataMatrix[index]?.saldo || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "saldo", e)
+                      }
                     />
                   </div>
 
@@ -319,15 +378,15 @@ export default function EditChampionship() {
                       type="number"
                       className={styles.position}
                       pattern="\d*"
-                      value={dataMatrix[index]?.jogos || ''}
-                      onChange={(e) => handleTableInputChange(index, 'jogos', e)}
+                      value={dataMatrix[index]?.jogos || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "jogos", e)
+                      }
                     />
                   </div>
-
                 </div>
               ))}
             </div>
-
 
             <button type="submit" className={styles.save}>
               SALVAR
@@ -337,8 +396,8 @@ export default function EditChampionship() {
           <button className={styles.back} onClick={HandleBackButtonClick}>
             Voltar
           </button>
-        </div >
-      </div >
+        </div>
+      </div>
     </>
   );
 }

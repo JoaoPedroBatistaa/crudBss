@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { auth, signOut } from "../../firebase";
 
+import HomeButton from "../../components/HomeButton";
+
 function Sports() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -38,6 +40,7 @@ function Sports() {
   return (
     <>
       <Header></Header>
+      <HomeButton></HomeButton>
 
       <div className={styles.Container}>
         <div className={styles.Card}>

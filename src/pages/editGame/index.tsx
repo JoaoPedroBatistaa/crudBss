@@ -1,11 +1,18 @@
-import styles from './styles.module.css';
-import { useRouter } from 'next/router';
-import 'firebase/storage';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import React, { useEffect, useState, FormEvent, ChangeEvent } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/firebase';
-import { toast } from 'react-toastify';
+import { db } from "@/firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import "firebase/storage";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
+import { useRouter } from "next/router";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import styles from "./styles.module.css";
+
+import HomeButton from "../../components/HomeButton";
 
 interface Matche {
   championship: string;
@@ -34,14 +41,14 @@ export default function EditMatch() {
   const { id } = router.query;
 
   const [matchData, setMatchData] = useState({
-    team1Name: '',
+    team1Name: "",
     team1Logo: null as File | string | null,
     team1Score: 0,
-    team2Name: '',
+    team2Name: "",
     team2Logo: null as File | string | null,
     team2Score: 0,
-    date: '',
-    location: '',
+    date: "",
+    location: "",
   });
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -53,36 +60,36 @@ export default function EditMatch() {
     const { name, files } = event.target;
     const file = files && files.length > 0 ? files[0] : null;
     setMatchData((prevState) => ({ ...prevState, [name]: file }));
-};
+  };
 
   useEffect(() => {
     const fetchMatch = async () => {
       if (!id) {
-        console.log('Match ID is not defined.');
+        console.log("Match ID is not defined.");
         return;
       }
 
       try {
-        const matchDoc = await getDoc(doc(db, 'matches', id as string));
+        const matchDoc = await getDoc(doc(db, "matches", id as string));
         if (matchDoc.exists()) {
           const match = matchDoc.data();
           if (match) {
             setMatchData({
-              team1Name: match.team_1 ? match.team_1.team_id : '',
+              team1Name: match.team_1 ? match.team_1.team_id : "",
               team1Logo: match.team_1 ? match.team_1.logo : null,
               team1Score: match.team_1 ? match.team_1.score : 0,
-              team2Name: match.team_2 ? match.team_2.team_id : '',
+              team2Name: match.team_2 ? match.team_2.team_id : "",
               team2Logo: match.team_2 ? match.team_2.logo : null,
               team2Score: match.team_2 ? match.team_2.score : 0,
-              date: match.date || '',
-              location: match.venue || '',
+              date: match.date || "",
+              location: match.venue || "",
             });
           }
         } else {
-          console.log('Não existe partida com este ID.');
+          console.log("Não existe partida com este ID.");
         }
       } catch (error) {
-        console.error('Error fetching match details: ', error);
+        console.error("Error fetching match details: ", error);
       }
     };
 
@@ -95,8 +102,8 @@ export default function EditMatch() {
     event.preventDefault();
 
     if (!id) {
-      console.error('Error: Match ID is not defined');
-      toast.error('Error when updating match.');
+      console.error("Error: Match ID is not defined");
+      toast.error("Error when updating match.");
       return;
     }
 
@@ -123,12 +130,12 @@ export default function EditMatch() {
         matchData.team2Logo = downloadURL as string;
       }
 
-      await setDoc(doc(db, 'matches', id as string), matchData);
+      await setDoc(doc(db, "matches", id as string), matchData);
 
-      toast.success('Match updated successfully!');
+      toast.success("Match updated successfully!");
     } catch (error) {
-      console.error('Error when updating match: ', error);
-      toast.error('Error when updating match.');
+      console.error("Error when updating match: ", error);
+      toast.error("Error when updating match.");
     }
   };
 
@@ -138,6 +145,8 @@ export default function EditMatch() {
 
   return (
     <>
+      <HomeButton></HomeButton>
+
       <div className={styles.Container}>
         <div className={styles.Card}>
           <div className={styles.titleGroup}>
@@ -156,7 +165,6 @@ export default function EditMatch() {
               />
             </div>
 
-
             <div className={styles.form}>
               <p className={styles.label}>Nome do Time 2</p>
               <input
@@ -169,26 +177,25 @@ export default function EditMatch() {
             </div>
 
             <div className={styles.form}>
-            <p className={styles.label}>Pontuação do Time 1</p>
-            <input
-              className={styles.field}
-              type="number"
-              name="team1Score"
-              value={matchData.team1Score}
-              onChange={handleInputChange}
-            />
+              <p className={styles.label}>Pontuação do Time 1</p>
+              <input
+                className={styles.field}
+                type="number"
+                name="team1Score"
+                value={matchData.team1Score}
+                onChange={handleInputChange}
+              />
             </div>
 
-
             <div className={styles.form}>
-            <p className={styles.label}>Pontuação do Time 2</p>
-            <input
-              className={styles.field}
-              type="number"
-              name="team2Score"
-              value={matchData.team2Score}
-              onChange={handleInputChange}
-            />
+              <p className={styles.label}>Pontuação do Time 2</p>
+              <input
+                className={styles.field}
+                type="number"
+                name="team2Score"
+                value={matchData.team2Score}
+                onChange={handleInputChange}
+              />
             </div>
 
             <div className={styles.form}>

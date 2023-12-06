@@ -1,37 +1,44 @@
-import styles from './styles.module.css';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { useState } from 'react';
-import Header from '../../components/Header';
-import Head from 'next/head';
-import { GetServerSidePropsContext } from 'next';
-import { toast } from 'react-toastify';
-import { PDFDocument, StandardFonts } from 'pdf-lib';
-import { collection, doc, getDoc, getDocs, query, where, deleteDoc } from '@firebase/firestore';
-import { db } from '@/firebase';
+import { db } from "@/firebase";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "@firebase/firestore";
+import { GetServerSidePropsContext } from "next";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import Header from "../../components/Header";
+import styles from "./styles.module.css";
 
+import HomeButton from "../../components/HomeButton";
 
+async function getCollectionData(modalityId: string) {
+  console.log("getCollectionData");
 
-
-async function getCollectionData(modalityId:string) {
-
-  console.log("getCollectionData")
-
-  const collectionRef = collection(db, 'modalities');
-  const modalityRef = await getModalityReference(modalityId)
+  const collectionRef = collection(db, "modalities");
+  const modalityRef = await getModalityReference(modalityId);
 
   if (!modalityRef) {
-     toast.success('Modalidade não encontrado!');
+    toast.success("Modalidade não encontrado!");
     return;
   }
 
-  console.log("players -- buscar jogadores")
+  console.log("players -- buscar jogadores");
   //console.log(modalityRef)
 
-  const q = query(collection(db, "championships"), where('modality', '==', modalityRef));
+  const q = query(
+    collection(db, "championships"),
+    where("modality", "==", modalityRef)
+  );
   //const q = query(collection(db, "modalities"))
   const querySnapshot = await getDocs(q);
-  const documents = querySnapshot.docs.map(doc => {
+  const documents = querySnapshot.docs.map((doc) => {
     const data = doc.data();
     const jsonSerializableData = JSON.parse(JSON.stringify(data));
     return {
@@ -41,52 +48,54 @@ async function getCollectionData(modalityId:string) {
   });
 
   if (documents.length > 0) {
-    console.log("documentos encontrados")
+    console.log("documentos encontrados");
   }
   return documents;
 }
 
-
-async function getModalityReference(modalityId:string) {
-
+async function getModalityReference(modalityId: string) {
   // buscar esportes
-  console.log("buscar esportes -"+modalityId)
-  const sportsCollection = 'modalities';
-  const sportRef = doc(db, sportsCollection,modalityId);
+  console.log("buscar esportes -" + modalityId);
+  const sportsCollection = "modalities";
+  const sportRef = doc(db, sportsCollection, modalityId);
   const sportDoc = await getDoc(sportRef);
 
   // console.log("sportDoc")
   // console.log(sportDoc)
 
   if (sportDoc.exists()) {
-      console.log("Sucesso ao buscar a modalidade -"+modalityId)
+    console.log("Sucesso ao buscar a modalidade -" + modalityId);
 
     return sportRef;
   } else {
-    toast.error('Esporte não encontrado!');
+    toast.error("Esporte não encontrado!");
     return null;
   }
 }
 
-
-interface Modality{
-  id:string,
-  name:string,
+interface Modality {
+  id: string;
+  name: string;
 }
 
 interface ChampionShip {
   id: string;
   logo: string;
   name: string;
-  criterion:string;
-  description:string;
+  criterion: string;
+  description: string;
 }
 
-
-
-export default function NewChampionship({ data, championships }: { data: Modality, championships: [ChampionShip] }) {
-
-  const [moreInfoVisible, setMoreInfoVisible] = useState<{ [key: string]: boolean }>({});
+export default function NewChampionship({
+  data,
+  championships,
+}: {
+  data: Modality;
+  championships: [ChampionShip];
+}) {
+  const [moreInfoVisible, setMoreInfoVisible] = useState<{
+    [key: string]: boolean;
+  }>({});
   const router = useRouter();
 
   function toggleMoreInfo(championshipId: string) {
@@ -98,7 +107,7 @@ export default function NewChampionship({ data, championships }: { data: Modalit
 
   function HandleBackButtonClick() {
     router.push({
-      pathname: '/Categories',
+      pathname: "/Categories",
       query: { mdl: data.id },
     });
   }
@@ -106,16 +115,18 @@ export default function NewChampionship({ data, championships }: { data: Modalit
   let championshipst: ChampionShip[] = [];
 
   async function popup(championshipId: string) {
-    if (window.confirm('Deseja mesmo excluir?')) {
+    if (window.confirm("Deseja mesmo excluir?")) {
       try {
-        await deleteDoc(doc(db, 'championships', championshipId));
-        toast.success('Campeonato excluído com sucesso!');
+        await deleteDoc(doc(db, "championships", championshipId));
+        toast.success("Campeonato excluído com sucesso!");
 
-        const updatedChampionships = championships.filter((championship) => championship.id !== championshipId);
+        const updatedChampionships = championships.filter(
+          (championship) => championship.id !== championshipId
+        );
         championshipst = updatedChampionships;
         window.location.reload();
       } catch (erro) {
-        toast.error('Erro ao excluir campeonato.');
+        toast.error("Erro ao excluir campeonato.");
         console.error(erro);
       }
     } else {
@@ -126,18 +137,26 @@ export default function NewChampionship({ data, championships }: { data: Modalit
   return (
     <>
       <Header></Header>
+      <HomeButton></HomeButton>
 
       <div className={styles.Container}>
-
         <div className={styles.Card}>
-
           <div className={styles.titleGroup}>
             <h1 className={styles.title}>Campeonatos</h1>
 
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVO CAMPEONATO</p>
-              <Link href={{ pathname: '/formChampionship', query: { mdl: data.id } }}>
-                <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
+              <Link
+                href={{
+                  pathname: "/formChampionship",
+                  query: { mdl: data.id },
+                }}
+              >
+                <img
+                  className={styles.crudIcon}
+                  src="./assets/novo.png"
+                  alt=""
+                />
               </Link>
             </div>
           </div>
@@ -145,7 +164,11 @@ export default function NewChampionship({ data, championships }: { data: Modalit
             <>
               <div className={styles.newTeam}>
                 <div className={styles.NameGroup}>
-                  <img className={`${styles.modalityIcon} ${styles.newLogoAvatarListItem}`} src={championship.logo || "./assets/avatar.jpg"} alt="" />
+                  <img
+                    className={`${styles.modalityIcon} ${styles.newLogoAvatarListItem}`}
+                    src={championship.logo || "./assets/avatar.jpg"}
+                    alt=""
+                  />
                   <h1 className={styles.newTeamName}>{championship.name}</h1>
                 </div>
 
@@ -157,14 +180,33 @@ export default function NewChampionship({ data, championships }: { data: Modalit
                     alt=""
                     onClick={() => toggleMoreInfo(championship.id)}
                   />
-                  <Link href={{ pathname: `/editChampionship`, query: { id: championship.id } }}>
-                  <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
+                  <Link
+                    href={{
+                      pathname: `/editChampionship`,
+                      query: { id: championship.id },
+                    }}
+                  >
+                    <img
+                      className={styles.crudIcon}
+                      src="./assets/editar.png"
+                      alt=""
+                    />
                   </Link>
-                  <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={() => popup(championship.id)} />
+                  <img
+                    className={styles.crudIcon}
+                    src="./assets/excluir.png"
+                    alt=""
+                    onClick={() => popup(championship.id)}
+                  />
                 </div>
               </div>
 
-              <div id={`moreInfo_${championship.id}`} className={`${styles.moreInfo} ${moreInfoVisible[championship.id] ? '' : styles.hidden}`}>
+              <div
+                id={`moreInfo_${championship.id}`}
+                className={`${styles.moreInfo} ${
+                  moreInfoVisible[championship.id] ? "" : styles.hidden
+                }`}
+              >
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Nome:</p>
                   <p className={styles.dataInfo}>{championship.name}</p>
@@ -177,50 +219,49 @@ export default function NewChampionship({ data, championships }: { data: Modalit
 
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Descrição</p>
-                  <p className={styles.description}>{championship.description}</p>
+                  <p className={styles.description}>
+                    {championship.description}
+                  </p>
                 </div>
 
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>info</p>
                   <p className={styles.dataInfo}>dados</p>
                 </div>
-                
               </div>
             </>
           ))}
         </div>
 
-        <button className={styles.back} onClick={HandleBackButtonClick}>Voltar</button>
-
+        <button className={styles.back} onClick={HandleBackButtonClick}>
+          Voltar
+        </button>
       </div>
     </>
-  )
+  );
 }
 
-export async function getServerSideProps(context:GetServerSidePropsContext) {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { query } = context;
-  const {mdl} = query;
-  console.log("mdl")
-  console.log(mdl)
+  const { mdl } = query;
+  console.log("mdl");
+  console.log(mdl);
 
-   let modalityId: string = '';
-  if (typeof mdl === 'string') {
+  let modalityId: string = "";
+  if (typeof mdl === "string") {
     modalityId = mdl;
   } else if (Array.isArray(modalityId)) {
-    modalityId = modalityId.join(',');
+    modalityId = modalityId.join(",");
   }
-  console.log("modalityId")
-  console.log(modalityId)
+  console.log("modalityId");
+  console.log(modalityId);
 
-   const championships = await getCollectionData(modalityId);
+  const championships = await getCollectionData(modalityId);
 
   return {
     props: {
-      data:{id:mdl},
-     championships: championships
+      data: { id: mdl },
+      championships: championships,
     },
   };
 }
-
-
-

@@ -23,6 +23,8 @@ import { useRouter } from "next/router";
 
 import SearchSelectTeam from "@/components/SearchSelectTeam";
 
+import HomeButton from "../../components/HomeButton";
+
 interface Modality {
   id: string;
 }
@@ -267,6 +269,8 @@ export default function FormPlayer({ data }: { data: Modality }) {
 
   return (
     <>
+      <HomeButton></HomeButton>
+
       <div className={styles.Container}>
         <div className={styles.Card}>
           <div className={styles.titleGroup}>

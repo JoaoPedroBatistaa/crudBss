@@ -1,13 +1,22 @@
-import styles from './styles.module.css';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { useState } from 'react';
-import Header from '../../components/Header';
-import Head from 'next/head';
-import { GetServerSidePropsContext } from 'next';
-import { toast } from 'react-toastify';
-import { collection, doc, getDoc, getDocs, query, where, deleteDoc } from '@firebase/firestore';
-import { db } from '@/firebase';
+import { db } from "@/firebase";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "@firebase/firestore";
+import { GetServerSidePropsContext } from "next";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import Header from "../../components/Header";
+import styles from "./styles.module.css";
+
+import HomeButton from "../../components/HomeButton";
 
 interface Modality {
   id: string;
@@ -23,21 +32,17 @@ interface News {
 }
 
 async function getCollectionData(modalityId: string) {
+  console.log("getCollectionData");
 
-  console.log("getCollectionData")
-
-  const collectionRef = collection(db, 'modalities');
+  const collectionRef = collection(db, "modalities");
   const modalityRef = await getModalityReference(modalityId);
 
   if (!modalityRef) {
-    toast.success('Modalidade não encontrada!');
+    toast.success("Modalidade não encontrada!");
     return;
   }
 
-  const q = query(
-    collection(db, 'news'), 
-    where('modality', '==', modalityRef)
-    );
+  const q = query(collection(db, "news"), where("modality", "==", modalityRef));
 
   const querySnapshot = await getDocs(q);
   const documents = querySnapshot.docs.map((doc) => {
@@ -50,30 +55,37 @@ async function getCollectionData(modalityId: string) {
   });
 
   if (documents.length > 0) {
-    console.log('Documentos encontrados');
-  }
-  else {
-    console.log("Teams não encontrados")
+    console.log("Documentos encontrados");
+  } else {
+    console.log("Teams não encontrados");
   }
   return documents;
 }
 
 async function getModalityReference(modalityId: string) {
-  const sportsCollection = 'modalities';
+  const sportsCollection = "modalities";
   const sportRef = doc(db, sportsCollection, modalityId);
   const sportDoc = await getDoc(sportRef);
 
   if (sportDoc.exists()) {
-    console.log('Sucesso ao buscar a modalidade - ' + modalityId);
+    console.log("Sucesso ao buscar a modalidade - " + modalityId);
     return sportRef;
   } else {
-    toast.error('Esporte não encontrado!');
+    toast.error("Esporte não encontrado!");
     return null;
   }
 }
 
-export default function NewNews({ data, news }: { data: Modality; news: News[] }) {
-  const [moreInfoVisible, setMoreInfoVisible] = useState<{ [key: string]: boolean }>({});
+export default function NewNews({
+  data,
+  news,
+}: {
+  data: Modality;
+  news: News[];
+}) {
+  const [moreInfoVisible, setMoreInfoVisible] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [newsData, setNewsData] = useState<News[]>(news); // Add the newsData state
   const [reloadData, setReloadData] = useState(false);
   const router = useRouter();
@@ -87,22 +99,22 @@ export default function NewNews({ data, news }: { data: Modality; news: News[] }
 
   function HandleBackButtonClick() {
     router.push({
-      pathname: '/Categories',
+      pathname: "/Categories",
       query: { mdl: data.id },
     });
   }
 
   async function popup(newsId: string) {
-    if (window.confirm('Deseja mesmo excluir?')) {
+    if (window.confirm("Deseja mesmo excluir?")) {
       try {
-        await deleteDoc(doc(db, 'news', newsId));
-        toast.success('Notícia excluída com sucesso!');
+        await deleteDoc(doc(db, "news", newsId));
+        toast.success("Notícia excluída com sucesso!");
 
         const updatedNews = newsData.filter((newItem) => newItem.id !== newsId); // Update the newsData state
         setNewsData(updatedNews);
         window.location.reload();
       } catch (error) {
-        toast.error('Erro ao excluir notícia.');
+        toast.error("Erro ao excluir notícia.");
         console.error(error);
       }
     }
@@ -112,6 +124,7 @@ export default function NewNews({ data, news }: { data: Modality; news: News[] }
   return (
     <>
       <Header></Header>
+      <HomeButton></HomeButton>
 
       <div className={styles.Container}>
         <div className={styles.Card}>
@@ -119,8 +132,12 @@ export default function NewNews({ data, news }: { data: Modality; news: News[] }
             <h1 className={styles.title}>Notícias</h1>
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVA NOTÍCIA</p>
-              <Link href={{ pathname: '/formNews', query: { mdl: data.id } }}>
-                <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
+              <Link href={{ pathname: "/formNews", query: { mdl: data.id } }}>
+                <img
+                  className={styles.crudIcon}
+                  src="./assets/novo.png"
+                  alt=""
+                />
               </Link>
             </div>
           </div>
@@ -140,8 +157,14 @@ export default function NewNews({ data, news }: { data: Modality; news: News[] }
                     alt=""
                     onClick={() => toggleMoreInfo(news.id)}
                   />
-                  <Link href={{ pathname: `/editNews`, query: { id: news.id } }}>
-                    <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
+                  <Link
+                    href={{ pathname: `/editNews`, query: { id: news.id } }}
+                  >
+                    <img
+                      className={styles.crudIcon}
+                      src="./assets/editar.png"
+                      alt=""
+                    />
                   </Link>
                   <img
                     className={styles.crudIcon}
@@ -152,7 +175,12 @@ export default function NewNews({ data, news }: { data: Modality; news: News[] }
                 </div>
               </div>
 
-              <div id={`moreInfo_${news.id}`} className={`${styles.moreInfo} ${moreInfoVisible[news.id] ? '' : styles.hidden}`}>
+              <div
+                id={`moreInfo_${news.id}`}
+                className={`${styles.moreInfo} ${
+                  moreInfoVisible[news.id] ? "" : styles.hidden
+                }`}
+              >
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Manchete:</p>
                   <p className={styles.dataInfo}>{news.title}</p>
@@ -170,7 +198,11 @@ export default function NewNews({ data, news }: { data: Modality; news: News[] }
 
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Imagem da Notícia:</p>
-                  <img className={styles.newImageItem} src={news.image} alt="" />
+                  <img
+                    className={styles.newImageItem}
+                    src={news.image}
+                    alt=""
+                  />
                 </div>
               </div>
             </>
@@ -189,11 +221,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { query } = context;
   const { mdl } = query;
 
-  let modalityId: string = '';
-  if (typeof mdl === 'string') {
+  let modalityId: string = "";
+  if (typeof mdl === "string") {
     modalityId = mdl;
   } else if (Array.isArray(mdl)) {
-    modalityId = mdl.join(',');
+    modalityId = mdl.join(",");
   }
 
   const news = await getCollectionData(modalityId);
@@ -201,7 +233,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   return {
     props: {
       data: { id: mdl },
-      news: news
+      news: news,
     },
   };
 }

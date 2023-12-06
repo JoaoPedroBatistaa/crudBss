@@ -1,15 +1,16 @@
-import { useState } from 'react';
-import styles from './styles.module.css';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { GetServerSidePropsContext } from 'next';
-import { collection, db, doc, getDoc } from '@/firebase';
-import { toast } from 'react-toastify';
-import { getDocs, query, where, deleteDoc } from '@firebase/firestore';
+import { collection, db, doc, getDoc } from "@/firebase";
+import { deleteDoc, getDocs, query, where } from "@firebase/firestore";
+import { GetServerSidePropsContext } from "next";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import styles from "./styles.module.css";
 
+import HomeButton from "../../components/HomeButton";
 
-interface Modality{
-  id:string
+interface Modality {
+  id: string;
 }
 
 interface Player {
@@ -31,28 +32,26 @@ interface Team {
   whatsapp: string;
 }
 
-
 async function getCollectionData(modalityId: string) {
-  const collectionRef = collection(db, 'modalities');
+  const collectionRef = collection(db, "modalities");
   const modalityRef = await getModalityReference(modalityId);
 
   if (!modalityRef) {
-    toast.error('Modalidade não encontrado!');
+    toast.error("Modalidade não encontrado!");
     return;
   }
 
-  console.log("team -- buscar jogadores "+ modalityRef)
-  console.log(modalityRef.path)
+  console.log("team -- buscar jogadores " + modalityRef);
+  console.log(modalityRef.path);
 
   const q = query(
-      collection(db, "teams"),
-      where('modality','==',modalityRef.path)
-      );
-
+    collection(db, "teams"),
+    where("modality", "==", modalityRef.path)
+  );
 
   //const q = query(collection(db, "modalities"))
   const querySnapshot = await getDocs(q);
-  const documents = querySnapshot.docs.map(doc => {
+  const documents = querySnapshot.docs.map((doc) => {
     const data = doc.data();
     const jsonSerializableData = JSON.parse(JSON.stringify(data));
     return {
@@ -62,13 +61,13 @@ async function getCollectionData(modalityId: string) {
   });
 
   if (documents.length > 0) {
-    console.log("teams encontrados")
+    console.log("teams encontrados");
   }
   return documents;
 }
 
 async function getModalityReference(modalityId: string) {
-  const sportsCollection = 'modalities';
+  const sportsCollection = "modalities";
   const sportRef = doc(db, sportsCollection, modalityId);
   const sportDoc = await getDoc(sportRef);
 
@@ -76,15 +75,21 @@ async function getModalityReference(modalityId: string) {
     console.log("Sucesso ao buscar a modalidade -" + modalityId);
     return sportRef;
   } else {
-    toast.error('Esporte não encontrado!');
+    toast.error("Esporte não encontrado!");
     return null;
   }
 }
 
-
-export default function NewTeam({ data, teams }: { data: Modality, teams: [Team] }) {
-
-  const [moreInfoVisible, setMoreInfoVisible] = useState<{ [key: string]: boolean }>({});
+export default function NewTeam({
+  data,
+  teams,
+}: {
+  data: Modality;
+  teams: [Team];
+}) {
+  const [moreInfoVisible, setMoreInfoVisible] = useState<{
+    [key: string]: boolean;
+  }>({});
   const router = useRouter();
 
   function toggleMoreInfo(teamId: string) {
@@ -96,7 +101,7 @@ export default function NewTeam({ data, teams }: { data: Modality, teams: [Team]
 
   function HandleBackButtonClick() {
     router.push({
-      pathname: '/Categories',
+      pathname: "/Categories",
       query: { mdl: data.id },
     });
   }
@@ -104,16 +109,16 @@ export default function NewTeam({ data, teams }: { data: Modality, teams: [Team]
   const [teamst, setTeams] = useState<Team[]>([]);
 
   async function popup(TeamId: string) {
-    if (window.confirm('Deseja mesmo excluir?')) {
+    if (window.confirm("Deseja mesmo excluir?")) {
       try {
-        await deleteDoc(doc(db, 'teams', TeamId));
-        toast.success('Equipe excluída com sucesso!');
+        await deleteDoc(doc(db, "teams", TeamId));
+        toast.success("Equipe excluída com sucesso!");
 
         const equipesAtualizadas = teamst.filter((team) => team.id !== TeamId);
         setTeams(equipesAtualizadas);
         window.location.reload();
       } catch (erro) {
-        toast.error('Erro ao excluir a equipe.');
+        toast.error("Erro ao excluir a equipe.");
         console.error(erro);
       }
     }
@@ -121,14 +126,22 @@ export default function NewTeam({ data, teams }: { data: Modality, teams: [Team]
 
   return (
     <>
+      <HomeButton></HomeButton>
+
       <div className={styles.Container}>
         <div className={styles.Card}>
           <div className={styles.titleGroup}>
             <h1 className={styles.title}>Times</h1>
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVO TIME</p>
-              <Link href={{ pathname: '/FormNewTime', query: { mdl: data.id } }}>
-                <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
+              <Link
+                href={{ pathname: "/FormNewTime", query: { mdl: data.id } }}
+              >
+                <img
+                  className={styles.crudIcon}
+                  src="./assets/novo.png"
+                  alt=""
+                />
               </Link>
             </div>
           </div>
@@ -136,7 +149,11 @@ export default function NewTeam({ data, teams }: { data: Modality, teams: [Team]
             <>
               <div className={styles.newTeam}>
                 <div className={styles.NameGroup}>
-                  <img className={`${styles.modalityIcon} ${styles.newLogoAvatarListItem}`} src={team.logo} alt="" />
+                  <img
+                    className={`${styles.modalityIcon} ${styles.newLogoAvatarListItem}`}
+                    src={team.logo}
+                    alt=""
+                  />
                   <h1 className={styles.newTeamName}>{team.name}</h1>
                 </div>
                 <div className={styles.crudGroup}>
@@ -147,15 +164,28 @@ export default function NewTeam({ data, teams }: { data: Modality, teams: [Team]
                     alt=""
                     onClick={() => toggleMoreInfo(team.id)}
                   />
-                    <Link href={{ pathname: `/editTeam`, query: { id: team.id } }}>
-                    <img className={styles.crudIcon} src="./assets/editar.png" alt="" />
-                    </Link>
-                  <img className={styles.crudIcon} src="./assets/excluir.png" alt="" onClick={() => popup(team.id)} />
+                  <Link
+                    href={{ pathname: `/editTeam`, query: { id: team.id } }}
+                  >
+                    <img
+                      className={styles.crudIcon}
+                      src="./assets/editar.png"
+                      alt=""
+                    />
+                  </Link>
+                  <img
+                    className={styles.crudIcon}
+                    src="./assets/excluir.png"
+                    alt=""
+                    onClick={() => popup(team.id)}
+                  />
                 </div>
               </div>
               <div
                 id={`moreInfo_${team.id}`}
-                className={`${styles.moreInfo} ${moreInfoVisible[team.id] ? '' : styles.hidden}`}
+                className={`${styles.moreInfo} ${
+                  moreInfoVisible[team.id] ? "" : styles.hidden
+                }`}
               >
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Nome do Time</p>
@@ -164,16 +194,19 @@ export default function NewTeam({ data, teams }: { data: Modality, teams: [Team]
 
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Logo do time</p>
-                  <img className={`${styles.modalityIcon} 
-                  ${styles.newLogoAvatarListItem}`} 
-                  src={team.logo} alt="" />
+                  <img
+                    className={`${styles.modalityIcon}
+                  ${styles.newLogoAvatarListItem}`}
+                    src={team.logo}
+                    alt=""
+                  />
                 </div>
-                                
+
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Instagram</p>
                   <p className={styles.dataInfo}>{team.instagram}</p>
                 </div>
-                
+
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>CNPJ</p>
                   <p className={styles.dataInfo}>{team.cnpj}</p>
@@ -183,12 +216,12 @@ export default function NewTeam({ data, teams }: { data: Modality, teams: [Team]
                   <p className={styles.dataInfo}>Responsavel do time</p>
                   <p className={styles.dataInfo}>{team.responsibleName}</p>
                 </div>
-                
+
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>CPF do Responsavel</p>
                   <p className={styles.dataInfo}>{team.responsibleCpf}</p>
                 </div>
-                
+
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>WhatsApp do Responsavel</p>
                   <p className={styles.dataInfo}>{team.whatsapp}</p>
@@ -197,44 +230,48 @@ export default function NewTeam({ data, teams }: { data: Modality, teams: [Team]
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Elenco</p>
                   <div className={styles.elencoList}>
-                  {team.squad.map((player: Player) => (
-                  player && player.name ? <p key={player.id} className={styles.dataInfo}>{player.name}</p> : null
-                  ))}
+                    {team.squad.map((player: Player) =>
+                      player && player.name ? (
+                        <p key={player.id} className={styles.dataInfo}>
+                          {player.name}
+                        </p>
+                      ) : null
+                    )}
                   </div>
                 </div>
-                
               </div>
             </>
           ))}
         </div>
-        <button className={styles.back} onClick={HandleBackButtonClick}>Voltar</button>
+        <button className={styles.back} onClick={HandleBackButtonClick}>
+          Voltar
+        </button>
       </div>
     </>
   );
 }
 
-export async function getServerSideProps(context:GetServerSidePropsContext) {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { query } = context;
-  const {mdl} = query;
-  console.log("mdl")
-  console.log(mdl)
+  const { mdl } = query;
+  console.log("mdl");
+  console.log(mdl);
 
-   let modalityId: string = '';
-  if (typeof mdl === 'string') {
+  let modalityId: string = "";
+  if (typeof mdl === "string") {
     modalityId = mdl;
   } else if (Array.isArray(modalityId)) {
-    modalityId = modalityId.join(',');
+    modalityId = modalityId.join(",");
   }
-  console.log("modalityId")
-  console.log(modalityId)
+  console.log("modalityId");
+  console.log(modalityId);
 
-   const teams = await getCollectionData(modalityId);
+  const teams = await getCollectionData(modalityId);
 
   return {
     props: {
-      data:{id:mdl},
-     teams: teams
+      data: { id: mdl },
+      teams: teams,
     },
   };
 }
-
