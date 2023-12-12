@@ -38,6 +38,7 @@ interface Team {
   responsibleName: string;
   instagram: string;
   whatsapp: string;
+  informations: string;
 }
 
 export default function FormNewTime({ data }: { data: Modality }) {
@@ -47,6 +48,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
   const [teamNameResponsible, setTeamNameResponsible] = useState("");
   const [teamWhatsAppResponsible, setTeamWhatsAppResponsible] = useState("");
   const [teamInstagram, setTeamInstagram] = useState("");
+  const [informations, setInformations] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
@@ -124,6 +126,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
         instagram: teamInstagram,
         responsibleCpf: teamCpfResponsible,
         responsibleName: teamNameResponsible,
+        informations: informations,
       };
 
       // Adicionando o novo time à coleção 'teams'
@@ -158,6 +161,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
     setTeamNameResponsible("");
     setTeamWhatsAppResponsible("");
     setTeamInstagram("");
+    setInformations("");
     setSelectedFile(null);
     setPreviewImage(null);
     setSelectedItems([]);
@@ -211,6 +215,15 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 type="text"
                 value={teamInstagram}
                 onChange={(event) => setTeamInstagram(event.target.value)}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Informações</p>
+              <textarea
+                className={styles.field}
+                value={teamInstagram}
+                onChange={(event) => setInformations(event.target.value)}
               />
             </div>
 

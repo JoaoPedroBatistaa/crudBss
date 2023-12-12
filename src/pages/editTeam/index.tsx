@@ -19,6 +19,7 @@ interface TeamData {
   name: string;
   logo: null | File | string;
   instagram: string;
+  informations: string;
   whatsapp: string;
   cnpj: string;
   responsibleCpf: string;
@@ -63,6 +64,7 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
     name: "",
     logo: null,
     instagram: "",
+    informations: "",
     whatsapp: "",
     cnpj: "",
     responsibleCpf: "",
@@ -186,6 +188,17 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
                 type="text"
                 name="instagram"
                 value={teamData.instagram}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Informações</p>
+              <input
+                className={styles.field}
+                type="text"
+                name="informations"
+                value={teamData.informations}
                 onChange={handleInputChange}
               />
             </div>

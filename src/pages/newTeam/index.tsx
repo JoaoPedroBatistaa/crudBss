@@ -30,6 +30,7 @@ interface Team {
   responsibleName: string;
   instagram: string;
   whatsapp: string;
+  informations: string;
 }
 
 async function getCollectionData(modalityId: string) {
@@ -205,6 +206,11 @@ export default function NewTeam({
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Instagram</p>
                   <p className={styles.dataInfo}>{team.instagram}</p>
+                </div>
+
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Informações</p>
+                  <p className={styles.dataInfo}>{team.informations}</p>
                 </div>
 
                 <div className={styles.line}>
