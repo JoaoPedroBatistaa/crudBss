@@ -11,7 +11,7 @@ import {
 import { GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Header from "../../components/Header";
 import styles from "./styles.module.css";
@@ -30,7 +30,6 @@ async function getCollectionData(modalityId: string) {
   }
 
   console.log("players -- buscar jogadores");
-  //console.log(modalityRef)
 
   const q = query(
     collection(db, "championships"),
@@ -38,7 +37,12 @@ async function getCollectionData(modalityId: string) {
   );
   //const q = query(collection(db, "modalities"))
   const querySnapshot = await getDocs(q);
+  querySnapshot.docs.forEach((doc) => {
+    console.log("Doc ID:", doc.id); // Log para verificar cada ID de documento
+  });
+
   const documents = querySnapshot.docs.map((doc) => {
+    console.log("Doc ID:", doc.id); // Log para verificar o ID de cada documento
     const data = doc.data();
     const jsonSerializableData = JSON.parse(JSON.stringify(data));
     return {
@@ -97,6 +101,10 @@ export default function NewChampionship({
     [key: string]: boolean;
   }>({});
   const router = useRouter();
+
+  useEffect(() => {
+    console.log("Championships State:", championships); // Log para verificar o estado
+  }, [championships]);
 
   function toggleMoreInfo(championshipId: string) {
     setMoreInfoVisible((prevState) => ({

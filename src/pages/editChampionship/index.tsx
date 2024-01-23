@@ -13,17 +13,22 @@ import { toast } from "react-toastify";
 import styles from "./styles.module.css";
 
 import SearchSelectTeam from "@/components/SearchSelectTable";
-
 import HomeButton from "../../components/HomeButton";
 
-interface Championship {
+interface ChampionShip {
   id: string;
   name: string;
-  logo?: File | string | null;
+  logo: string | File | null;
   criterion: string;
-  description?: string;
-  dataMatrix: TableData[];
-  count: number; // Adicione esta linha
+  description: string;
+  dataMatrix: TableData[]; // Usado para "todosContraTodos"
+  groups?: { groupName: string; count: number; dataMatrix: TableData[] }[]; // Opcional, usado para "grupo"
+  mataMataData?: {
+    faseName: string;
+    partidas: { timeA: string; timeB: string }[];
+  }[]; // Opcional, usado para "mataMata"
+  count: number;
+  championshipType?: string; // Inclua também o tipo de campeonato
 }
 
 interface Item {
@@ -44,14 +49,17 @@ type TableData = {
 };
 
 export default function EditChampionship() {
-  const [championshipData, setChampionshipData] = useState<Championship>({
+  const [championshipData, setChampionshipData] = useState<ChampionShip>({
     id: "",
     name: "",
     logo: null,
     criterion: "",
     description: "",
     dataMatrix: [],
-    count: 0, // Adicione esta linha para inicializar dataMatrix como um array vazio
+    groups: [], // Inicialize grupos
+    mataMataData: [], // Inicialize mataMataData
+    count: 0,
+    championshipType: "todosContraTodos", // Inicialize o tipo de campeonato
   });
 
   const [selectedTeamOne, setSelectedTeamOne] = useState<Item | null>(null);
@@ -94,7 +102,7 @@ export default function EditChampionship() {
           doc(db, "championships", id as string)
         );
         if (championshipDoc.exists()) {
-          const championship = championshipDoc.data() as Championship;
+          const championship = championshipDoc.data() as ChampionShip;
           setChampionshipData(championship);
           setDataMatrix(championship.dataMatrix || []);
           setCount(championship.count || 0);
@@ -169,6 +177,91 @@ export default function EditChampionship() {
     if (!isNaN(value)) {
       setCount(value);
     }
+  };
+
+  const addNewGroup = () => {
+    const updatedChampionshipData: ChampionShip = { ...championshipData };
+
+    if (!updatedChampionshipData.groups) {
+      updatedChampionshipData.groups = [];
+    }
+
+    updatedChampionshipData.groups.push({
+      groupName: "",
+      count: 0,
+      dataMatrix: [],
+    });
+
+    setChampionshipData(updatedChampionshipData);
+  };
+
+  const handleGroupInputChange = (
+    groupIndex: number,
+    rowIndex: number,
+    field: keyof TableData,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const updatedChampionshipData: ChampionShip = { ...championshipData };
+
+    if (
+      updatedChampionshipData.groups &&
+      updatedChampionshipData.groups[groupIndex]
+    ) {
+      if (!updatedChampionshipData.groups[groupIndex].dataMatrix) {
+        updatedChampionshipData.groups[groupIndex].dataMatrix = [];
+      }
+
+      if (!updatedChampionshipData.groups[groupIndex].dataMatrix[rowIndex]) {
+        updatedChampionshipData.groups[groupIndex].dataMatrix[rowIndex] = {
+          time: "",
+          position: "",
+          victories: "",
+          logo: "",
+          saldo: "",
+          derrotas: "",
+          pontos: "",
+          jogos: "",
+        };
+      }
+
+      updatedChampionshipData.groups[groupIndex].dataMatrix[rowIndex][field] =
+        e.target.value;
+
+      setChampionshipData(updatedChampionshipData);
+    }
+  };
+
+  const addFase = () => {
+    const newFase = {
+      faseName: "",
+      partidas: [],
+    };
+
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      mataMataData: [...(prevState.mataMataData || []), newFase],
+    }));
+  };
+
+  const addPartida = (faseIndex: any) => {
+    const newPartida = {
+      timeA: "",
+      timeB: "",
+    };
+
+    setChampionshipData((prevState) => {
+      const updatedMataMataData = [...(prevState.mataMataData || [])];
+      if (updatedMataMataData[faseIndex]) {
+        updatedMataMataData[faseIndex].partidas = [
+          ...(updatedMataMataData[faseIndex].partidas || []),
+          newPartida,
+        ];
+      }
+      return {
+        ...prevState,
+        mataMataData: updatedMataMataData,
+      };
+    });
   };
 
   const handleTableInputChange = (
@@ -253,140 +346,512 @@ export default function EditChampionship() {
             </div>
 
             <div className={styles.form}>
-              <div className={styles.headTable}>
-                <p className={styles.label}>
-                  Tabela do Campeonato - insira o Nº posições
-                </p>
-                <input
-                  value={championshipData.count}
-                  type="number"
-                  id="positions"
-                  className={styles.pos}
-                  pattern="\d*"
-                  onInput={(e) => {
-                    const input = e.currentTarget as HTMLInputElement;
-                    const value = parseInt(input.value);
-                    if (!isNaN(value)) {
-                      setCount(value);
-                    }
-                  }}
-                />
-              </div>
-
-              {/* Aqui começamos a renderização condicional */}
-              {Array.from({ length: count }).map((_, index) => (
-                <div key={index} className={styles.table}>
-                  <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Posição</p>
-                    <input
-                      type="number"
-                      className={styles.position}
-                      pattern="\d*"
-                      value={dataMatrix[index]?.position || ""}
-                      onChange={(e) =>
-                        handleTableInputChange(index, "position", e)
-                      }
-                    />
-                  </div>
-
-                  <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>
-                      Time{" "}
-                      {dataMatrix[index]?.time
-                        ? `(${dataMatrix[index]?.time})`
-                        : ""}
-                    </p>
-
-                    <SearchSelectTeam
-                      initialValue={dataMatrix[index]?.time}
-                      onSelectItem={(team: Item) => {
-                        const updatedMatrix = [...dataMatrix];
-                        if (!updatedMatrix[index]) {
-                          updatedMatrix[index] = {
-                            time: "",
-                            position: "",
-                            victories: "",
-                            logo: "",
-                            saldo: "",
-                            derrotas: "",
-                            pontos: "",
-                            jogos: "",
-                          };
-                        }
-                        updatedMatrix[index].time = team.name;
-                        updatedMatrix[index].logo = team.logo;
-                        setDataMatrix(updatedMatrix);
-                      }}
-                    />
-                  </div>
-
-                  <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Pontos</p>
-                    <input
-                      type="number"
-                      className={styles.position}
-                      pattern="\d*"
-                      value={dataMatrix[index]?.pontos || ""}
-                      onChange={(e) =>
-                        handleTableInputChange(index, "pontos", e)
-                      }
-                    />
-                  </div>
-
-                  <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Vitórias</p>
-                    <input
-                      type="number"
-                      className={styles.position}
-                      pattern="\d*"
-                      value={dataMatrix[index]?.victories || ""}
-                      onChange={(e) =>
-                        handleTableInputChange(index, "victories", e)
-                      }
-                    />
-                  </div>
-
-                  <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Derrotas</p>
-                    <input
-                      type="number"
-                      className={styles.position}
-                      pattern="\d*"
-                      value={dataMatrix[index]?.derrotas || ""}
-                      onChange={(e) =>
-                        handleTableInputChange(index, "derrotas", e)
-                      }
-                    />
-                  </div>
-
-                  <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Saldo</p>
-                    <input
-                      type="number"
-                      className={styles.position}
-                      pattern="\d*"
-                      value={dataMatrix[index]?.saldo || ""}
-                      onChange={(e) =>
-                        handleTableInputChange(index, "saldo", e)
-                      }
-                    />
-                  </div>
-
-                  <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Jogos</p>
-                    <input
-                      type="number"
-                      className={styles.position}
-                      pattern="\d*"
-                      value={dataMatrix[index]?.jogos || ""}
-                      onChange={(e) =>
-                        handleTableInputChange(index, "jogos", e)
-                      }
-                    />
-                  </div>
-                </div>
-              ))}
+              <p className={styles.label}>Tipo de Classificação</p>
+              <select
+                id="championshipType"
+                className={styles.field}
+                value={championshipData.championshipType}
+                onChange={(e) =>
+                  setChampionshipData((prevState) => ({
+                    ...prevState,
+                    championshipType: e.target.value,
+                  }))
+                }
+              >
+                <option value="todosContraTodos">Todos contra todos</option>
+                <option value="grupo">Grupo</option>
+                <option value="mataMata">Mata Mata</option>
+              </select>
             </div>
+
+            {championshipData.championshipType === "todosContraTodos" && (
+              <div className={styles.form}>
+                <div className={styles.headTable}>
+                  <p className={styles.label}>
+                    Tabela do Campeonato - insira o Nº posições
+                  </p>
+                  <input
+                    type="text"
+                    id="positions"
+                    className={styles.pos}
+                    pattern="\d*"
+                    onInput={(e) => {
+                      const input = e.currentTarget as HTMLInputElement;
+                      const value = parseInt(input.value);
+                      if (!isNaN(value)) {
+                        setCount(value);
+                      }
+                    }}
+                  />
+                </div>
+
+                {/* Renderização condicional para edição */}
+                {Array.from({ length: count }).map((_, index) => (
+                  <div key={index} className={styles.table}>
+                    <div className={styles.tableItem}>
+                      <p className={styles.tableLabel}>Posição</p>
+                      <input
+                        type="number"
+                        className={styles.position}
+                        pattern="\d*"
+                        value={
+                          championshipData.dataMatrix[index]?.position || ""
+                        }
+                        onChange={(e) =>
+                          handleTableInputChange(index, "position", e)
+                        }
+                      />
+                    </div>
+
+                    <div className={styles.tableItem}>
+                      <p className={styles.tableLabel}>Time</p>
+                      <SearchSelectTeam
+                        onSelectItem={(team: Item) => {
+                          const updatedMatrix = [
+                            ...championshipData.dataMatrix,
+                          ];
+                          if (!updatedMatrix[index]) {
+                            updatedMatrix[index] = {
+                              time: "",
+                              position: "",
+                              victories: "",
+                              logo: "",
+                              saldo: "",
+                              derrotas: "",
+                              pontos: "",
+                              jogos: "",
+                            };
+                          }
+                          updatedMatrix[index].time = team.name;
+                          updatedMatrix[index].logo = team.logo; // Salva o logo
+                          setChampionshipData((prevState) => ({
+                            ...prevState,
+                            dataMatrix: updatedMatrix,
+                          }));
+                        }}
+                      />
+                    </div>
+
+                    <div className={styles.tableItem}>
+                      <p className={styles.tableLabel}>Pontos</p>
+                      <input
+                        type="number"
+                        className={styles.position}
+                        pattern="\d*"
+                        value={championshipData.dataMatrix[index]?.pontos || ""}
+                        onChange={(e) =>
+                          handleTableInputChange(index, "pontos", e)
+                        }
+                      />
+                    </div>
+
+                    <div className={styles.tableItem}>
+                      <p className={styles.tableLabel}>Vitórias</p>
+                      <input
+                        type="number"
+                        className={styles.position}
+                        pattern="\d*"
+                        value={
+                          championshipData.dataMatrix[index]?.victories || ""
+                        }
+                        onChange={(e) =>
+                          handleTableInputChange(index, "victories", e)
+                        }
+                      />
+                    </div>
+
+                    <div className={styles.tableItem}>
+                      <p className={styles.tableLabel}>Derrotas</p>
+                      <input
+                        type="number"
+                        className={styles.position}
+                        pattern="\d*"
+                        value={
+                          championshipData.dataMatrix[index]?.derrotas || ""
+                        }
+                        onChange={(e) =>
+                          handleTableInputChange(index, "derrotas", e)
+                        }
+                      />
+                    </div>
+
+                    <div className={styles.tableItem}>
+                      <p className={styles.tableLabel}>Saldo</p>
+                      <input
+                        type="number"
+                        className={styles.position}
+                        pattern="\d*"
+                        value={championshipData.dataMatrix[index]?.saldo || ""}
+                        onChange={(e) =>
+                          handleTableInputChange(index, "saldo", e)
+                        }
+                      />
+                    </div>
+
+                    <div className={styles.tableItem}>
+                      <p className={styles.tableLabel}>Jogos</p>
+                      <input
+                        type="number"
+                        className={styles.position}
+                        pattern="\d*"
+                        value={championshipData.dataMatrix[index]?.jogos || ""}
+                        onChange={(e) =>
+                          handleTableInputChange(index, "jogos", e)
+                        }
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {championshipData.groups &&
+              championshipData.championshipType === "grupo" && (
+                <>
+                  {(championshipData.groups || []).map((group, groupIndex) => (
+                    <div key={groupIndex}>
+                      <div className={styles.form}>
+                        <p className={styles.label}>Nome do Grupo</p>
+                        <input
+                          type="text"
+                          className={styles.field}
+                          value={group.groupName}
+                          onChange={(e) => {
+                            const updatedGroups = [
+                              ...(championshipData.groups || []),
+                            ];
+                            updatedGroups[groupIndex].groupName =
+                              e.target.value;
+                            setChampionshipData((prevState) => ({
+                              ...prevState,
+                              groups: updatedGroups,
+                            }));
+                          }}
+                        />
+                      </div>
+
+                      <div className={styles.headTable}>
+                        <p className={styles.label}>
+                          Tabela do Grupo - insira o Nº posições
+                        </p>
+                        <input
+                          type="text"
+                          className={styles.pos}
+                          pattern="\d*"
+                          onInput={(e) => {
+                            const value = parseInt(e.currentTarget.value);
+                            if (!isNaN(value)) {
+                              const updatedGroups = [
+                                ...(championshipData.groups || []),
+                              ];
+                              updatedGroups[groupIndex].count = value;
+                              setChampionshipData((prevState) => ({
+                                ...prevState,
+                                groups: updatedGroups,
+                              }));
+                            }
+                          }}
+                        />
+                      </div>
+
+                      {Array.from({ length: group.count }).map(
+                        (_, rowIndex) => (
+                          <div key={rowIndex} className={styles.table}>
+                            <div className={styles.tableItem}>
+                              <p className={styles.tableLabel}>Posição</p>
+                              <input
+                                type="number"
+                                className={styles.position}
+                                pattern="\d*"
+                                value={
+                                  (championshipData.groups &&
+                                    championshipData.groups[groupIndex]
+                                      ?.dataMatrix[rowIndex]?.position) ||
+                                  ""
+                                }
+                                onChange={(e) =>
+                                  handleGroupInputChange(
+                                    groupIndex,
+                                    rowIndex,
+                                    "position",
+                                    e
+                                  )
+                                }
+                              />
+                            </div>
+
+                            <div className={styles.tableItem}>
+                              <p className={styles.tableLabel}>Time</p>
+                              <SearchSelectTeam
+                                onSelectItem={(team: Item) => {
+                                  const updatedGroups = [
+                                    ...(championshipData.groups || []),
+                                  ];
+                                  if (
+                                    !updatedGroups[groupIndex].dataMatrix[
+                                      rowIndex
+                                    ]
+                                  ) {
+                                    updatedGroups[groupIndex].dataMatrix[
+                                      rowIndex
+                                    ] = {
+                                      time: "",
+                                      position: "",
+                                      victories: "",
+                                      logo: "",
+                                      saldo: "",
+                                      derrotas: "",
+                                      pontos: "",
+                                      jogos: "",
+                                    };
+                                  }
+                                  updatedGroups[groupIndex].dataMatrix[
+                                    rowIndex
+                                  ].time = team.name;
+                                  updatedGroups[groupIndex].dataMatrix[
+                                    rowIndex
+                                  ].logo = team.logo;
+                                  setChampionshipData((prevState) => ({
+                                    ...prevState,
+                                    groups: updatedGroups,
+                                  }));
+                                }}
+                              />
+                            </div>
+                            <div className={styles.tableItem}>
+                              <p className={styles.tableLabel}>Pontos</p>
+                              <input
+                                type="number"
+                                className={styles.position}
+                                pattern="\d*"
+                                value={
+                                  (championshipData.groups &&
+                                    championshipData.groups[groupIndex]
+                                      ?.dataMatrix[rowIndex]?.pontos) ||
+                                  ""
+                                }
+                                onChange={(e) =>
+                                  handleGroupInputChange(
+                                    groupIndex,
+                                    rowIndex,
+                                    "pontos",
+                                    e
+                                  )
+                                }
+                              />
+                            </div>
+
+                            <div className={styles.tableItem}>
+                              <p className={styles.tableLabel}>Vitórias</p>
+                              <input
+                                type="number"
+                                className={styles.position}
+                                pattern="\d*"
+                                value={
+                                  (championshipData.groups &&
+                                    championshipData.groups[groupIndex]
+                                      ?.dataMatrix[rowIndex]?.victories) ||
+                                  ""
+                                }
+                                onChange={(e) =>
+                                  handleGroupInputChange(
+                                    groupIndex,
+                                    rowIndex,
+                                    "victories",
+                                    e
+                                  )
+                                }
+                              />
+                            </div>
+
+                            <div className={styles.tableItem}>
+                              <p className={styles.tableLabel}>Derrotas</p>
+                              <input
+                                type="number"
+                                className={styles.position}
+                                pattern="\d*"
+                                value={
+                                  (championshipData.groups &&
+                                    championshipData.groups[groupIndex]
+                                      ?.dataMatrix[rowIndex]?.derrotas) ||
+                                  ""
+                                }
+                                onChange={(e) =>
+                                  handleGroupInputChange(
+                                    groupIndex,
+                                    rowIndex,
+                                    "derrotas",
+                                    e
+                                  )
+                                }
+                              />
+                            </div>
+
+                            <div className={styles.tableItem}>
+                              <p className={styles.tableLabel}>Saldo</p>
+                              <input
+                                type="number"
+                                className={styles.position}
+                                pattern="\d*"
+                                value={
+                                  (championshipData.groups &&
+                                    championshipData.groups[groupIndex]
+                                      ?.dataMatrix[rowIndex]?.saldo) ||
+                                  ""
+                                }
+                                onChange={(e) =>
+                                  handleGroupInputChange(
+                                    groupIndex,
+                                    rowIndex,
+                                    "saldo",
+                                    e
+                                  )
+                                }
+                              />
+                            </div>
+
+                            <div className={styles.tableItem}>
+                              <p className={styles.tableLabel}>Jogos</p>
+                              <input
+                                type="number"
+                                className={styles.position}
+                                pattern="\d*"
+                                value={
+                                  (championshipData.groups &&
+                                    championshipData.groups[groupIndex]
+                                      ?.dataMatrix[rowIndex]?.jogos) ||
+                                  ""
+                                }
+                                onChange={(e) =>
+                                  handleGroupInputChange(
+                                    groupIndex,
+                                    rowIndex,
+                                    "jogos",
+                                    e
+                                  )
+                                }
+                              />
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  ))}
+
+                  <button onClick={addNewGroup} className={styles.save}>
+                    Adicionar Novo Grupo
+                  </button>
+                </>
+              )}
+
+            {championshipData.championshipType === "mataMata" && (
+              <>
+                {(championshipData.mataMataData || []).map(
+                  (fase, faseIndex) => (
+                    <div key={faseIndex}>
+                      <div className={styles.form}>
+                        <p className={styles.label}>Nome da fase</p>
+                        <input
+                          type="text"
+                          className={styles.field}
+                          value={fase.faseName}
+                          onChange={(e) => {
+                            const updatedMataMataData = [
+                              ...(championshipData.mataMataData || []),
+                            ];
+                            updatedMataMataData[faseIndex].faseName =
+                              e.target.value;
+                            setChampionshipData((prevState) => ({
+                              ...prevState,
+                              mataMataData: updatedMataMataData,
+                            }));
+                          }}
+                          placeholder="Nome da Fase"
+                        />
+                      </div>
+
+                      {fase.partidas.map((partida, partidaIndex) => (
+                        <div key={partidaIndex}>
+                          <div className={styles.tableItem}>
+                            <p className={styles.tableLabel}>
+                              Time A ({partida.timeA})
+                            </p>
+                            <SearchSelectTeam
+                              onSelectItem={(team: Item) => {
+                                const updatedMataMataData = [
+                                  ...(championshipData.mataMataData || []),
+                                ];
+                                if (
+                                  !updatedMataMataData[faseIndex].partidas[
+                                    partidaIndex
+                                  ]
+                                ) {
+                                  updatedMataMataData[faseIndex].partidas[
+                                    partidaIndex
+                                  ] = {
+                                    timeA: "",
+                                    timeB: "",
+                                  };
+                                }
+                                updatedMataMataData[faseIndex].partidas[
+                                  partidaIndex
+                                ].timeA = team.name;
+                                setChampionshipData((prevState) => ({
+                                  ...prevState,
+                                  mataMataData: updatedMataMataData,
+                                }));
+                              }}
+                            />
+                          </div>
+                          <div className={styles.tableItem}>
+                            <p className={styles.tableLabel}>
+                              Time B ({partida.timeB})
+                            </p>
+                            <SearchSelectTeam
+                              onSelectItem={(team: Item) => {
+                                const updatedMataMataData = [
+                                  ...(championshipData.mataMataData || []),
+                                ];
+                                if (
+                                  !updatedMataMataData[faseIndex].partidas[
+                                    partidaIndex
+                                  ]
+                                ) {
+                                  updatedMataMataData[faseIndex].partidas[
+                                    partidaIndex
+                                  ] = {
+                                    timeA: "",
+                                    timeB: "",
+                                  };
+                                }
+                                updatedMataMataData[faseIndex].partidas[
+                                  partidaIndex
+                                ].timeB = team.name;
+                                setChampionshipData((prevState) => ({
+                                  ...prevState,
+                                  mataMataData: updatedMataMataData,
+                                }));
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+
+                      <button
+                        onClick={() => addPartida(faseIndex)}
+                        className={styles.save}
+                      >
+                        Adicionar Partida
+                      </button>
+                    </div>
+                  )
+                )}
+
+                <button onClick={addFase} className={styles.save}>
+                  Adicionar Fase
+                </button>
+              </>
+            )}
 
             <button type="submit" className={styles.save}>
               SALVAR

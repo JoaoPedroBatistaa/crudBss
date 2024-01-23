@@ -1,7 +1,12 @@
 import PhotoUpload from "@/components/PhotoUpload";
 import Spinner from "@/components/Spinner";
 import { addDoc, collection, db, doc, storage } from "@/firebase";
-import { DocumentData, Firestore, getDoc } from "@firebase/firestore";
+import {
+  DocumentData,
+  Firestore,
+  getDoc,
+  updateDoc,
+} from "@firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { GetServerSidePropsContext } from "next";
 import router from "next/router";
@@ -21,8 +26,14 @@ interface ChampionShip {
   logo: string | null;
   criterion: string;
   description: string;
-  dataMatrix: TableData[];
-  count: number; // Adicionado aqui. Use "?" para torná-lo opcional.
+  dataMatrix: TableData[]; // Usado para "todosContraTodos"
+  groups?: { groupName: string; count: number; dataMatrix: TableData[] }[]; // Opcional, usado para "grupo"
+  mataMataData?: {
+    faseName: string;
+    partidas: { timeA: string; timeB: string }[];
+  }[]; // Opcional, usado para "mataMata"
+  count: number;
+  championshipType?: string; // Inclua também o tipo de campeonato
 }
 
 interface Item {
@@ -57,9 +68,38 @@ export default function NewFormChampionship({
     logo: null,
     criterion: "",
     description: "",
-    dataMatrix: [], // Já está presente no seu código
-    count: 0, // Adicionado para armazenar a contagem de posições
+    dataMatrix: [],
+    count: 0,
   });
+
+  const [championshipType, setChampionshipType] = useState("todosContraTodos");
+  const [groupName, setGroupName] = useState("");
+
+  const [groups, setGroups] = useState<
+    { groupName: string; count: number; dataMatrix: TableData[] }[]
+  >([{ groupName: "", count: 0, dataMatrix: [] }]);
+
+  const addNewGroup = () => {
+    setGroups([...groups, { groupName: "", count: 0, dataMatrix: [] }]);
+  };
+
+  const [mataMataData, setMataMataData] = useState([
+    { faseName: "", partidas: [{ timeA: "", timeB: "" }] },
+    // ...outras fases conforme necessário
+  ]);
+
+  const addPartida = (faseIndex: any) => {
+    const newMataMataData = [...mataMataData];
+    newMataMataData[faseIndex].partidas.push({ timeA: "", timeB: "" });
+    setMataMataData(newMataMataData);
+  };
+
+  const addFase = () => {
+    setMataMataData([
+      ...mataMataData,
+      { faseName: "", partidas: [{ timeA: "", timeB: "" }] },
+    ]);
+  };
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -150,40 +190,76 @@ export default function NewFormChampionship({
     setChampionShipData((prev) => ({ ...prev, dataMatrix: updatedMatrix })); // Adicione essa linha
   };
 
+  const handleGroupInputChange = (
+    groupIndex: number,
+    rowIndex: number,
+    type: keyof TableData,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newGroups = [...groups];
+
+    if (!newGroups[groupIndex]) {
+      newGroups[groupIndex] = { groupName: "", count: 0, dataMatrix: [] };
+    }
+
+    const updatedMatrix = [...newGroups[groupIndex].dataMatrix];
+
+    if (!updatedMatrix[rowIndex]) {
+      updatedMatrix[rowIndex] = {
+        time: "",
+        position: "",
+        victories: "",
+        logo: "",
+        saldo: "",
+        derrotas: "",
+        pontos: "",
+        jogos: "",
+      };
+    }
+
+    updatedMatrix[rowIndex][type] = e.target.value;
+    newGroups[groupIndex].dataMatrix = updatedMatrix;
+    setGroups(newGroups);
+  };
+
   console.log(dataMatrix);
 
   const handleSubmit = async () => {
     setIsLoading(true);
 
-    console.log(isLoading);
-
     let imageUrl = "";
     if (selectedFile) {
-      //const storage = getStorage();
       const storageRef = ref(storage, `championships/${selectedFile.name}`);
       const fileSnapshot = await uploadBytes(storageRef, selectedFile);
       imageUrl = await getDownloadURL(fileSnapshot.ref);
     }
 
-    console.log("imageUrl");
-    console.log(imageUrl);
+    let dataToSave: ChampionShip = {
+      ...championShipData,
+      logo: imageUrl,
+      championshipType: championshipType,
+    };
 
-    const referenceCollectionName = "modalities";
-    const referenceId = modalityForm.id;
-
-    const championShipDataWithPhoto = { ...championShipData, logo: imageUrl };
+    if (championshipType === "todosContraTodos") {
+      dataToSave.dataMatrix = dataMatrix;
+    } else if (championshipType === "grupo") {
+      dataToSave.groups = groups;
+    } else if (championshipType === "mataMata") {
+      dataToSave.mataMataData = mataMataData;
+    }
 
     await addNewDocumentWithReference(
       db,
       "championships",
-      championShipDataWithPhoto,
-      referenceCollectionName,
-      referenceId
+      dataToSave,
+      "modalities",
+      modalityForm.id
     );
 
     resetForm();
     setIsLoading(false);
   };
+
   function resetForm() {
     setChampionShipData({
       id: "",
@@ -210,7 +286,7 @@ export default function NewFormChampionship({
     const referenceDoc = await getDoc(reference);
 
     if (!referenceDoc.exists()) {
-      toast.error("Modalidade nãoe encontrada!");
+      toast.error("Modalidade não encontrada!");
       console.error("Objeto de referência não encontrado");
       return;
     }
@@ -218,6 +294,11 @@ export default function NewFormChampionship({
     try {
       const newData = { ...data, modality: reference };
       const docRef = await addDoc(collection(db, collectionName), newData);
+
+      // Adicionar ID ao documento e atualizar
+      const updatedData = { ...newData, id: docRef.id };
+      await updateDoc(docRef, updatedData);
+
       console.log("Documento criado com sucesso. ID:", docRef.id);
       toast.success("Campeonato criado com sucesso!");
       router.push("newChampionship?mdl=" + modalityForm.id);
@@ -291,127 +372,402 @@ export default function NewFormChampionship({
           </div>
 
           <div className={styles.form}>
-            <div className={styles.headTable}>
-              <p className={styles.label}>
-                Tabela do Campeonato - insira o Nº posições
-              </p>
-              <input
-                type="text"
-                id="positions"
-                className={styles.pos}
-                pattern="\d*"
-                onInput={(e) => {
-                  const input = e.currentTarget as HTMLInputElement;
-                  const value = parseInt(input.value);
-                  if (!isNaN(value)) {
-                    setCount(value);
-                  }
-                }}
-              />
-            </div>
-
-            {/* Aqui começamos a renderização condicional */}
-            {Array.from({ length: count }).map((_, index) => (
-              <div key={index} className={styles.table}>
-                <div className={styles.tableItem}>
-                  <p className={styles.tableLabel}>Posição</p>
-                  <input
-                    type="number"
-                    className={styles.position}
-                    pattern="\d*"
-                    value={dataMatrix[index]?.position || ""}
-                    onChange={(e) =>
-                      handleTableInputChange(index, "position", e)
-                    }
-                  />
-                </div>
-
-                <div className={styles.tableItem}>
-                  <p className={styles.tableLabel}>Time</p>
-                  <SearchSelectTeam
-                    onSelectItem={(team: Item) => {
-                      const updatedMatrix = [...dataMatrix];
-                      if (!updatedMatrix[index]) {
-                        updatedMatrix[index] = {
-                          time: "",
-                          position: "",
-                          victories: "",
-                          logo: "",
-                          saldo: "",
-                          derrotas: "",
-                          pontos: "",
-                          jogos: "",
-                        };
-                      }
-                      updatedMatrix[index].time = team.name;
-                      updatedMatrix[index].logo = team.logo; // Adicione esta linha para salvar o logo
-                      // supondo que você queira salvar o nome do time
-                      setDataMatrix(updatedMatrix);
-                    }}
-                  />
-                </div>
-
-                <div className={styles.tableItem}>
-                  <p className={styles.tableLabel}>Pontos</p>
-                  <input
-                    type="number"
-                    className={styles.position}
-                    pattern="\d*"
-                    value={dataMatrix[index]?.pontos || ""}
-                    onChange={(e) => handleTableInputChange(index, "pontos", e)}
-                  />
-                </div>
-
-                <div className={styles.tableItem}>
-                  <p className={styles.tableLabel}>Vitórias</p>
-                  <input
-                    type="number"
-                    className={styles.position}
-                    pattern="\d*"
-                    value={dataMatrix[index]?.victories || ""}
-                    onChange={(e) =>
-                      handleTableInputChange(index, "victories", e)
-                    }
-                  />
-                </div>
-
-                <div className={styles.tableItem}>
-                  <p className={styles.tableLabel}>Derrotas</p>
-                  <input
-                    type="number"
-                    className={styles.position}
-                    pattern="\d*"
-                    value={dataMatrix[index]?.derrotas || ""}
-                    onChange={(e) =>
-                      handleTableInputChange(index, "derrotas", e)
-                    }
-                  />
-                </div>
-
-                <div className={styles.tableItem}>
-                  <p className={styles.tableLabel}>Saldo</p>
-                  <input
-                    type="number"
-                    className={styles.position}
-                    pattern="\d*"
-                    value={dataMatrix[index]?.saldo || ""}
-                    onChange={(e) => handleTableInputChange(index, "saldo", e)}
-                  />
-                </div>
-
-                <div className={styles.tableItem}>
-                  <p className={styles.tableLabel}>Jogos</p>
-                  <input
-                    type="number"
-                    className={styles.position}
-                    pattern="\d*"
-                    value={dataMatrix[index]?.jogos || ""}
-                    onChange={(e) => handleTableInputChange(index, "jogos", e)}
-                  />
-                </div>
-              </div>
-            ))}
+            <p className={styles.label}>Tipo de Classificação</p>
+            <select
+              id="championshipType"
+              className={styles.field}
+              onChange={(e) => setChampionshipType(e.target.value)}
+            >
+              <option value="todosContraTodos">Todos contra todos</option>
+              <option value="grupo">Grupo</option>
+              <option value="mataMata">Mata Mata</option>
+            </select>
           </div>
+
+          {championshipType === "todosContraTodos" && (
+            <div className={styles.form}>
+              <div className={styles.headTable}>
+                <p className={styles.label}>
+                  Tabela do Campeonato - insira o Nº posições
+                </p>
+                <input
+                  type="text"
+                  id="positions"
+                  className={styles.pos}
+                  pattern="\d*"
+                  onInput={(e) => {
+                    const input = e.currentTarget as HTMLInputElement;
+                    const value = parseInt(input.value);
+                    if (!isNaN(value)) {
+                      setCount(value);
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Aqui começamos a renderização condicional */}
+              {Array.from({ length: count }).map((_, index) => (
+                <div key={index} className={styles.table}>
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Posição</p>
+                    <input
+                      type="number"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.position || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "position", e)
+                      }
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Time</p>
+                    <SearchSelectTeam
+                      onSelectItem={(team: Item) => {
+                        const updatedMatrix = [...dataMatrix];
+                        if (!updatedMatrix[index]) {
+                          updatedMatrix[index] = {
+                            time: "",
+                            position: "",
+                            victories: "",
+                            logo: "",
+                            saldo: "",
+                            derrotas: "",
+                            pontos: "",
+                            jogos: "",
+                          };
+                        }
+                        updatedMatrix[index].time = team.name;
+                        updatedMatrix[index].logo = team.logo; // Adicione esta linha para salvar o logo
+                        // supondo que você queira salvar o nome do time
+                        setDataMatrix(updatedMatrix);
+                      }}
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Pontos</p>
+                    <input
+                      type="number"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.pontos || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "pontos", e)
+                      }
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Vitórias</p>
+                    <input
+                      type="number"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.victories || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "victories", e)
+                      }
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Derrotas</p>
+                    <input
+                      type="number"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.derrotas || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "derrotas", e)
+                      }
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Saldo</p>
+                    <input
+                      type="number"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.saldo || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "saldo", e)
+                      }
+                    />
+                  </div>
+
+                  <div className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Jogos</p>
+                    <input
+                      type="number"
+                      className={styles.position}
+                      pattern="\d*"
+                      value={dataMatrix[index]?.jogos || ""}
+                      onChange={(e) =>
+                        handleTableInputChange(index, "jogos", e)
+                      }
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {championshipType === "grupo" && (
+            <>
+              {groups.map((group, groupIndex) => (
+                <div key={groupIndex}>
+                  <div className={styles.form}>
+                    <p className={styles.label}>Nome do Grupo</p>
+                    <input
+                      type="text"
+                      className={styles.field}
+                      value={group.groupName}
+                      onChange={(e) => {
+                        const newGroups = [...groups];
+                        newGroups[groupIndex].groupName = e.target.value;
+                        setGroups(newGroups);
+                      }}
+                    />
+                  </div>
+
+                  <div className={styles.headTable}>
+                    <p className={styles.label}>
+                      Tabela do Grupo - insira o Nº posições
+                    </p>
+                    <input
+                      type="text"
+                      className={styles.pos}
+                      pattern="\d*"
+                      onInput={(e) => {
+                        const value = parseInt(e.currentTarget.value);
+                        if (!isNaN(value)) {
+                          const newGroups = [...groups];
+                          newGroups[groupIndex].count = value;
+                          setGroups(newGroups);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  {Array.from({ length: group.count }).map((_, rowIndex) => (
+                    <div key={rowIndex} className={styles.table}>
+                      <div className={styles.tableItem}>
+                        <p className={styles.tableLabel}>Posição</p>
+                        <input
+                          type="number"
+                          className={styles.position}
+                          pattern="\d*"
+                          value={group.dataMatrix[rowIndex]?.position || ""}
+                          onChange={(e) =>
+                            handleGroupInputChange(
+                              groupIndex,
+                              rowIndex,
+                              "position",
+                              e
+                            )
+                          }
+                        />
+                      </div>
+                      <div className={styles.tableItem}>
+                        <p className={styles.tableLabel}>Time</p>
+                        <SearchSelectTeam
+                          onSelectItem={(team: Item) => {
+                            const newGroups = [...groups];
+                            if (!newGroups[groupIndex].dataMatrix[rowIndex]) {
+                              newGroups[groupIndex].dataMatrix[rowIndex] = {
+                                time: "",
+                                position: "",
+                                victories: "",
+                                logo: "",
+                                saldo: "",
+                                derrotas: "",
+                                pontos: "",
+                                jogos: "",
+                              };
+                            }
+                            newGroups[groupIndex].dataMatrix[rowIndex].time =
+                              team.name;
+                            newGroups[groupIndex].dataMatrix[rowIndex].logo =
+                              team.logo;
+                            setGroups(newGroups);
+                          }}
+                        />
+                      </div>
+                      <div className={styles.tableItem}>
+                        <p className={styles.tableLabel}>Pontos</p>
+                        <input
+                          type="number"
+                          className={styles.position}
+                          pattern="\d*"
+                          value={group.dataMatrix[rowIndex]?.pontos || ""}
+                          onChange={(e) =>
+                            handleGroupInputChange(
+                              groupIndex,
+                              rowIndex,
+                              "pontos",
+                              e
+                            )
+                          }
+                        />
+                      </div>
+                      <div className={styles.tableItem}>
+                        <p className={styles.tableLabel}>Vitórias</p>
+                        <input
+                          type="number"
+                          className={styles.position}
+                          pattern="\d*"
+                          value={group.dataMatrix[rowIndex]?.victories || ""}
+                          onChange={(e) =>
+                            handleGroupInputChange(
+                              groupIndex,
+                              rowIndex,
+                              "victories",
+                              e
+                            )
+                          }
+                        />
+                      </div>
+                      <div className={styles.tableItem}>
+                        <p className={styles.tableLabel}>Derrotas</p>
+                        <input
+                          type="number"
+                          className={styles.position}
+                          pattern="\d*"
+                          value={group.dataMatrix[rowIndex]?.derrotas || ""}
+                          onChange={(e) =>
+                            handleGroupInputChange(
+                              groupIndex,
+                              rowIndex,
+                              "derrotas",
+                              e
+                            )
+                          }
+                        />
+                      </div>
+                      <div className={styles.tableItem}>
+                        <p className={styles.tableLabel}>Saldo</p>
+                        <input
+                          type="number"
+                          className={styles.position}
+                          pattern="\d*"
+                          value={group.dataMatrix[rowIndex]?.saldo || ""}
+                          onChange={(e) =>
+                            handleGroupInputChange(
+                              groupIndex,
+                              rowIndex,
+                              "saldo",
+                              e
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div className={styles.tableItem}>
+                        <p className={styles.tableLabel}>Jogos</p>
+                        <input
+                          type="number"
+                          className={styles.position}
+                          pattern="\d*"
+                          value={group.dataMatrix[rowIndex]?.jogos || ""}
+                          onChange={(e) =>
+                            handleGroupInputChange(
+                              groupIndex,
+                              rowIndex,
+                              "jogos",
+                              e
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+
+              <button onClick={addNewGroup} className={styles.save}>
+                Adicionar Novo Grupo
+              </button>
+            </>
+          )}
+          {championshipType === "mataMata" && (
+            <>
+              {mataMataData.map((fase, faseIndex) => (
+                <div key={faseIndex}>
+                  <div className={styles.form}>
+                    <p className={styles.label}>Nome da fase</p>
+                    <input
+                      type="text"
+                      className={styles.field}
+                      value={fase.faseName}
+                      onChange={(e) => {
+                        const newMataMataData = [...mataMataData];
+                        newMataMataData[faseIndex].faseName = e.target.value;
+                        setMataMataData(newMataMataData);
+                      }}
+                      placeholder="Nome da Fase"
+                    />
+                  </div>
+
+                  {fase.partidas.map((partida, partidaIndex) => (
+                    <div key={partidaIndex}>
+                      <div className={styles.tableItem}>
+                        <p className={styles.tableLabel}>Time A</p>
+                        <SearchSelectTeam
+                          onSelectItem={(team: Item) => {
+                            const newMataMataData = [...mataMataData];
+                            if (
+                              !newMataMataData[faseIndex].partidas[partidaIndex]
+                            ) {
+                              newMataMataData[faseIndex].partidas[
+                                partidaIndex
+                              ] = { timeA: "", timeB: "" };
+                            }
+                            newMataMataData[faseIndex].partidas[
+                              partidaIndex
+                            ].timeA = team.name;
+                            setMataMataData(newMataMataData);
+                          }}
+                        />
+                      </div>
+                      <div className={styles.tableItem}>
+                        <p className={styles.tableLabel}>Time B</p>
+                        <SearchSelectTeam
+                          onSelectItem={(team: Item) => {
+                            const newMataMataData = [...mataMataData];
+                            if (
+                              !newMataMataData[faseIndex].partidas[partidaIndex]
+                            ) {
+                              newMataMataData[faseIndex].partidas[
+                                partidaIndex
+                              ] = { timeA: "", timeB: "" };
+                            }
+                            newMataMataData[faseIndex].partidas[
+                              partidaIndex
+                            ].timeB = team.name;
+                            setMataMataData(newMataMataData);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    onClick={() => addPartida(faseIndex)}
+                    className={styles.save}
+                  >
+                    Adicionar Partida
+                  </button>
+                </div>
+              ))}
+
+              <button onClick={addFase} className={styles.save}>
+                Adicionar Fase
+              </button>
+            </>
+          )}
         </div>
 
         <button
