@@ -21,6 +21,10 @@
 
 }
 
+.pdf {
+  max-width: 5rem;
+}
+
 .titleGroup {
   display: flex;
   justify-content: space-between;

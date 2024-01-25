@@ -18,6 +18,7 @@ interface Matche {
   championship: string;
   date: Date;
   modality: string;
+  fileURL: string;
   team_1: {
     score: number;
     team_id: string;
@@ -49,6 +50,7 @@ export default function EditMatch() {
     team2Score: 0,
     date: "",
     location: "",
+    fileURL: "",
   });
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +85,7 @@ export default function EditMatch() {
               team2Score: match.team_2 ? match.team_2.score : 0,
               date: match.date || "",
               location: match.venue || "",
+              fileURL: match.fileURL || "",
             });
           }
         } else {
@@ -218,6 +221,20 @@ export default function EditMatch() {
                 value={matchData.location}
                 onChange={handleInputChange}
               />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Link do PDF</p>
+              <a
+                href={matchData.fileURL}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ maxWidth: "5rem", marginTop: "2rem" }}
+              >
+                {matchData.fileURL.length > 50
+                  ? `${matchData.fileURL.substring(0, 50)}...`
+                  : matchData.fileURL}
+              </a>
             </div>
 
             <button type="submit" className={styles.save}>
