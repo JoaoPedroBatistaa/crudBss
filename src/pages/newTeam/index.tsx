@@ -233,7 +233,7 @@ export default function NewTeam({
                   <p className={styles.dataInfo}>{team.whatsapp}</p>
                 </div>
 
-                <div className={styles.line}>
+                {/* <div className={styles.line}>
                   <p className={styles.dataInfo}>Elenco</p>
                   <div className={styles.elencoList}>
                     {team.squad.map((player: Player) =>
@@ -244,7 +244,7 @@ export default function NewTeam({
                       ) : null
                     )}
                   </div>
-                </div>
+                </div> */}
               </div>
             </>
           ))}

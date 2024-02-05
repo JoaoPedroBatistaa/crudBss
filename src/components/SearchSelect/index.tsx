@@ -1,8 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
-import styles from './SearchSelect.module.css';
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  collection,
+  getDocs,
+  getFirestore,
+  query,
+  where,
+} from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
+import styles from "./SearchSelect.module.css";
 
 interface Item {
   id: string;
@@ -15,23 +21,26 @@ interface SearchSelectProps {
 }
 
 const SearchSelect = ({ onSelectItems }: SearchSelectProps) => {
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const [searchResults, setSearchResults] = useState<Item[]>([]);
-  const [placeholder, setPlaceholder] = useState('Pesquisar');
+  const [placeholder, setPlaceholder] = useState("Pesquisar");
 
   const searchSelectRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, []);
 
   const handleClickOutside = (event: MouseEvent) => {
-    if (searchSelectRef.current && !searchSelectRef.current.contains(event.target as Node)) {
-      setSearchText('');
+    if (
+      searchSelectRef.current &&
+      !searchSelectRef.current.contains(event.target as Node)
+    ) {
+      setSearchText("");
     }
   };
 
@@ -40,8 +49,12 @@ const SearchSelect = ({ onSelectItems }: SearchSelectProps) => {
     setSearchText(value);
 
     const db = getFirestore();
-    const playersCollection = collection(db, 'players');
-    const q = query(playersCollection, where('name', '>=', value), where('name', '<=', value + '\uf8ff'));
+    const playersCollection = collection(db, "players");
+    const q = query(
+      playersCollection,
+      where("name", ">=", value),
+      where("name", "<=", value + "\uf8ff")
+    );
 
     const querySnapshot = await getDocs(q);
     const results: Item[] = [];
@@ -50,7 +63,7 @@ const SearchSelect = ({ onSelectItems }: SearchSelectProps) => {
       const item = {
         id: doc.id,
         name: doc.data().name,
-        photo: doc.data().photo
+        photo: doc.data().photo,
       };
       results.push(item);
     });
@@ -59,11 +72,15 @@ const SearchSelect = ({ onSelectItems }: SearchSelectProps) => {
   };
 
   const handleToggleItem = (item: Item) => {
-    const isSelected = selectedItems.some((selected) => selected.id === item.id);
+    const isSelected = selectedItems.some(
+      (selected) => selected.id === item.id
+    );
     let updatedItems: Item[];
 
     if (isSelected) {
-      updatedItems = selectedItems.filter((selected) => selected.id !== item.id);
+      updatedItems = selectedItems.filter(
+        (selected) => selected.id !== item.id
+      );
     } else {
       updatedItems = [...selectedItems, item];
     }
@@ -77,12 +94,12 @@ const SearchSelect = ({ onSelectItems }: SearchSelectProps) => {
   };
 
   const getSelectedItemsText = () => {
-    return selectedItems.map((item) => item.name).join(', ');
+    return selectedItems.map((item) => item.name).join(", ");
   };
 
   const handleReset = () => {
-    setSearchText('');
-    setPlaceholder('Pesquisar');
+    setSearchText("");
+    setPlaceholder("Pesquisar");
   };
 
   return (
@@ -90,7 +107,9 @@ const SearchSelect = ({ onSelectItems }: SearchSelectProps) => {
       <input
         className={styles.field}
         type="text"
-        placeholder={selectedItems.length > 0 ? getSelectedItemsText() : 'Pesquisar'}
+        placeholder={
+          selectedItems.length > 0 ? getSelectedItemsText() : "Pesquisar"
+        }
         value={searchText}
         onChange={handleSearch}
       />
@@ -100,32 +119,38 @@ const SearchSelect = ({ onSelectItems }: SearchSelectProps) => {
             <li
               key={item.id}
               className={`${styles.resultItem} ${
-                isItemSelected(item) ? styles.resultItemSelected : ''
+                isItemSelected(item) ? styles.resultItemSelected : ""
               }`}
-              onClick={() => handleToggleItem(item)}>
+              onClick={() => handleToggleItem(item)}
+            >
               <span className={styles.resultItemText}>
-            <img src={item.photo} alt="" className={styles.avatarListResult} />
-            {item.name}
-          </span>
-          {isItemSelected(item) ? (
-            <FontAwesomeIcon icon={faCheck} className={styles.checkIcon} />
-          ) : (
-            <FontAwesomeIcon icon={faCheck} className={`${styles.checkIcon} ${styles.emptyCheckIcon}`} />
-          )}
+                <img
+                  src={item.photo}
+                  alt=""
+                  className={styles.avatarListResult}
+                />
+                {item.name}
+              </span>
+              {isItemSelected(item) ? (
+                <FontAwesomeIcon icon={faCheck} className={styles.checkIcon} />
+              ) : (
+                <FontAwesomeIcon
+                  icon={faCheck}
+                  className={`${styles.checkIcon} ${styles.emptyCheckIcon}`}
+                />
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
 
-        </li>
-      ))}
-    </ul>
-  )}
-
-  {/* {selectedItems.length > 0 && (
+      {/* {selectedItems.length > 0 && (
     <button className={styles.resetButton} onClick={handleReset}>
       Limpar
     </button>
   )} */}
-</div>
-);
+    </div>
+  );
 };
 
 export default SearchSelect;
-

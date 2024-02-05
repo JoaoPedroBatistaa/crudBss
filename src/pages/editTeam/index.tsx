@@ -15,18 +15,6 @@ import styles from "./styles.module.css";
 
 import HomeButton from "../../components/HomeButton";
 
-interface TeamData {
-  name: string;
-  logo: null | File | string;
-  instagram: string;
-  informations: string;
-  whatsapp: string;
-  cnpj: string;
-  responsibleCpf: string;
-  responsibleName: string;
-  players: Player[];
-}
-
 interface Player {
   id: string;
   name: string;
@@ -36,6 +24,50 @@ interface Player {
 interface Params {
   id: string;
 }
+
+interface Category {
+  categoryName: string;
+  players: Player[];
+}
+
+interface TeamData {
+  logo: string | File | null;
+  modality: string;
+  name: string;
+  whatsapp: string;
+  cnpj: string;
+  instagram: string;
+  responsibleCpf: string;
+  responsibleName: string;
+  informations: string;
+  categories: Category[];
+}
+
+const initialState: TeamData = {
+  logo: null, // Ajuste conforme necessário, por exemplo, se você espera uma string, ajuste para uma URL padrão ou mantenha como null e trate na lógica de upload
+  modality: "", // Inicialize como uma string vazia ou com um valor padrão, se aplicável
+  name: "",
+  whatsapp: "",
+  cnpj: "",
+  instagram: "",
+  responsibleCpf: "",
+  responsibleName: "",
+  informations: "",
+  categories: [
+    // Inicialize com uma categoria vazia que pode ser preenchida pelo usuário
+    {
+      categoryName: "",
+      players: [
+        {
+          // Inicialize com um jogador vazio se a intenção é permitir ao usuário adicionar jogadores diretamente
+          id: "", // O ID pode ser preenchido quando um novo jogador é adicionado
+          name: "",
+          photo: "",
+        },
+      ],
+    },
+  ],
+};
 
 export async function getServerSideProps() {
   try {
@@ -59,18 +91,57 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
   const router = useRouter();
   const { id } = router.query as unknown as Params;
   const [selectedItems, setSelectedItems] = useState<Player[]>([]);
+  const [teamData, setTeamData] = useState<TeamData>(initialState);
 
-  const [teamData, setTeamData] = useState<TeamData>({
-    name: "",
-    logo: null,
-    instagram: "",
-    informations: "",
-    whatsapp: "",
-    cnpj: "",
-    responsibleCpf: "",
-    responsibleName: "",
-    players: [],
-  });
+  const handleCategoryNameChange = (
+    event: ChangeEvent<HTMLInputElement>,
+    categoryIndex: number
+  ) => {
+    const updatedCategories = [...teamData.categories]; // Faz uma cópia do estado atual das categorias
+    updatedCategories[categoryIndex].categoryName = event.target.value; // Atualiza o nome da categoria com o valor do input
+
+    setTeamData({ ...teamData, categories: updatedCategories }); // Atualiza o estado com as novas categorias
+  };
+
+  const addCategory = () => {
+    const newCategory = {
+      categoryName: "",
+      players: [{ id: "", name: "", photo: "" }], // Adiciona um jogador por padrão à nova categoria, se necessário
+    };
+    setTeamData((prevState) => ({
+      ...prevState,
+      categories: [...prevState.categories, newCategory],
+    }));
+  };
+
+  const addPlayer = (categoryIndex: any) => {
+    const newPlayer = { id: "", name: "", photo: "" };
+    const updatedCategories = [...teamData.categories];
+    updatedCategories[categoryIndex].players.push(newPlayer);
+
+    setTeamData({ ...teamData, categories: updatedCategories });
+  };
+
+  const handleSelectItems = (
+    selectedItem: Player,
+    categoryIndex: string | number,
+    playerIndex: string | number
+  ) => {
+    // Converte os índices para o tipo number
+    const catIndex = Number(categoryIndex);
+    const playIndex = Number(playerIndex);
+
+    // Lógica para atualizar o jogador selecionado dentro de uma categoria específica
+    // Isso irá substituir o placeholder de novo jogador pelo jogador real selecionado
+    const updatedCategories = [...teamData.categories];
+    if (
+      updatedCategories[catIndex] &&
+      updatedCategories[catIndex].players[playIndex]
+    ) {
+      updatedCategories[catIndex].players[playIndex] = selectedItem;
+      setTeamData({ ...teamData, categories: updatedCategories });
+    }
+  };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -109,10 +180,6 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
       fetchTeamData();
     }
   }, [router.isReady, id]);
-
-  const handleSelectItems = (items: Player[]) => {
-    setSelectedItems(items);
-  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -247,10 +314,43 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
               />
             </div>
 
-            <div className={styles.form}>
-              <p className={styles.label}>Elenco</p>
-              <SearchSelect onSelectItems={handleSelectItems} />
-            </div>
+            {teamData.categories.map((category, categoryIndex) => (
+              <div key={categoryIndex} className={styles.form}>
+                <div className={styles.form}>
+                  <p className={styles.label}>Nome da categoria</p>
+                  <input
+                    type="text"
+                    className={styles.field}
+                    value={category.categoryName}
+                    onChange={(e) => handleCategoryNameChange(e, categoryIndex)}
+                    placeholder="Nome da Categoria"
+                  />
+                </div>
+
+                {category.players.map((player, playerIndex) => (
+                  <div key={playerIndex} className={styles.tableItem}>
+                    <p className={styles.tableLabel}>Nome do jogador</p>
+                    <SearchSelect
+                      onSelectItems={(items) =>
+                        handleSelectItems(items[0], categoryIndex, playerIndex)
+                      }
+                    />
+                  </div>
+                ))}
+
+                <button
+                  onClick={() => addPlayer(categoryIndex)}
+                  className={styles.save}
+                  type="button" // Adiciona isso para evitar que o botão submeta o formulário
+                >
+                  Adicionar Novo Jogador
+                </button>
+              </div>
+            ))}
+
+            <button onClick={addCategory} className={styles.save} type="button">
+              Adicionar Nova Categoria
+            </button>
 
             <button type="submit" className={styles.save}>
               SALVAR
