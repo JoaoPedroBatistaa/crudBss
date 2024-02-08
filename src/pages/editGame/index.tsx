@@ -14,21 +14,31 @@ import styles from "./styles.module.css";
 
 import HomeButton from "../../components/HomeButton";
 
+import SearchSelect from "@/components/SearchSelect";
+
+interface PlayerDetail {
+  id: string;
+  name: string;
+  photo: string; // Ou 'logo', dependendo da propriedade real no seu objeto Item
+}
+
 interface Matche {
-  championship: string;
+  championship: string; // Mantém como string, ajuste conforme necessário
   date: Date;
-  modality: string;
-  fileURL: string;
+  modality: string; // Mantém como string, ajuste conforme necessário
   team_1: {
     score: number;
-    team_id: string;
+    team_id: string; // Considere mudar para um objeto ou ID se necessário
   };
   team_2: {
     score: number;
-    team_id: string;
+    team_id: string; // Considere mudar para um objeto ou ID se necessário
   };
   venue: string;
   time: string;
+  king: PlayerDetail | null;
+  topScorer: PlayerDetail | null;
+  mvp: PlayerDetail | null;
 }
 
 interface Item {
@@ -51,6 +61,9 @@ export default function EditMatch() {
     date: "",
     location: "",
     fileURL: "",
+    king: null,
+    topScorer: null,
+    mvp: null,
   });
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -86,6 +99,9 @@ export default function EditMatch() {
               date: match.date || "",
               location: match.venue || "",
               fileURL: match.fileURL || "",
+              king: match.king || null,
+              topScorer: match.topScorer || null,
+              mvp: match.mvp || null,
             });
           }
         } else {
@@ -133,7 +149,13 @@ export default function EditMatch() {
         matchData.team2Logo = downloadURL as string;
       }
 
-      await setDoc(doc(db, "matches", id as string), matchData);
+      await setDoc(doc(db, "matches", id as string), {
+        ...matchData,
+        king: matchData.king,
+        topScorer: matchData.topScorer,
+        mvp: matchData.mvp,
+        // Certifique-se de que `team1Logo` e `team2Logo` estão sendo manuseados corretamente
+      });
 
       toast.success("Match updated successfully!");
     } catch (error) {
@@ -176,6 +198,33 @@ export default function EditMatch() {
                 name="team2Name"
                 value={matchData.team2Name}
                 onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Cestinha</p>
+              <SearchSelect
+                // @ts-ignore
+
+                onSelectItems={(items) => handleSelectTopScorer(items[0])}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Rei dos Três</p>
+              <SearchSelect
+                // @ts-ignore
+
+                onSelectItems={(items) => handleSelectThreePointKing(items[0])}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>MVP</p>
+              <SearchSelect
+                // @ts-ignore
+
+                onSelectItems={(items) => handleSelectMVP(items[0])}
               />
             </div>
 

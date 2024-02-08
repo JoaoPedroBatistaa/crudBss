@@ -1,3 +1,4 @@
+import SearchSelect from "@/components/SearchSelect";
 import SearchSelectChampionship from "@/components/SearchSelectChampionship";
 import SearchSelectTeam from "@/components/SearchSelectTeam";
 import Spinner from "@/components/Spinner";
@@ -22,26 +23,41 @@ interface Modality {
   id: string;
 }
 
+interface PlayerDetail {
+  id: string;
+  name: string;
+  photo: string; // Ou 'logo', dependendo da propriedade real no seu objeto Item
+}
+
 interface Matche {
-  championship: string;
+  championship: string; // Mantém como string, ajuste conforme necessário
   date: Date;
-  modality: string;
+  modality: string; // Mantém como string, ajuste conforme necessário
   team_1: {
     score: number;
-    team_id: string;
+    team_id: string; // Considere mudar para um objeto ou ID se necessário
   };
   team_2: {
     score: number;
-    team_id: string;
+    team_id: string; // Considere mudar para um objeto ou ID se necessário
   };
   venue: string;
   time: string;
+  king: PlayerDetail | null;
+  topScorer: PlayerDetail | null;
+  mvp: PlayerDetail | null;
 }
 
 interface Item {
   id: string;
   name: string;
   logo: string;
+}
+
+interface Player {
+  id: string;
+  name: string;
+  photo: string;
 }
 
 export default function FormNewMatche({ data }: { data: Modality }) {
@@ -59,6 +75,29 @@ export default function FormNewMatche({ data }: { data: Modality }) {
   const [selectedFileName, setSelectedFileName] = useState<string>(""); // Novo estado para armazenar o nome do arquivo
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  const [selectedTopScorer, setSelectedTopScorer] = useState<Player | null>(
+    null
+  );
+  const [selectedThreePointKing, setSelectedThreePointKing] =
+    useState<Player | null>(null);
+  const [selectedMVP, setSelectedMVP] = useState<Player | null>(null);
+
+  const handleSelectTopScorer = (items: Player[]) => {
+    // Assumindo que você só está interessado no primeiro item para esses casos
+    const item = items[0];
+    setSelectedTopScorer(item);
+  };
+
+  const handleSelectThreePointKing = (items: Player[]) => {
+    const item = items[0];
+    setSelectedThreePointKing(item);
+  };
+
+  const handleSelectMVP = (items: Player[]) => {
+    const item = items[0];
+    setSelectedMVP(item);
+  };
 
   async function handleSubmit() {
     if (selectedTeam1Score && selectedTeam2Score) {
@@ -89,6 +128,28 @@ export default function FormNewMatche({ data }: { data: Modality }) {
           },
           venue: selectedVenue,
           time: selectedTime,
+          // Salva id, name, e logo/photo para cada seleção
+          king: selectedThreePointKing
+            ? {
+                id: selectedThreePointKing.id,
+                name: selectedThreePointKing.name,
+                photo: selectedThreePointKing.photo, // Substitua 'logo' por 'photo' se necessário
+              }
+            : null,
+          topScorer: selectedTopScorer
+            ? {
+                id: selectedTopScorer.id,
+                name: selectedTopScorer.name,
+                photo: selectedTopScorer.photo,
+              }
+            : null,
+          mvp: selectedMVP
+            ? {
+                id: selectedMVP.id,
+                name: selectedMVP.name,
+                photo: selectedMVP.photo,
+              }
+            : null,
         };
 
         const docRef = await addDoc(matcheRef, {
@@ -180,6 +241,33 @@ export default function FormNewMatche({ data }: { data: Modality }) {
           <div className={styles.form}>
             <p className={styles.label}>Time 2:</p>
             <SearchSelectTeam onSelectItem={handleSelectTeamTwo} />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Cestinha</p>
+            <SearchSelect
+              // @ts-ignore
+
+              onSelectItems={(items) => handleSelectTopScorer(items[0])}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Rei dos Três</p>
+            <SearchSelect
+              // @ts-ignore
+
+              onSelectItems={(items) => handleSelectThreePointKing(items[0])}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>MVP</p>
+            <SearchSelect
+              // @ts-ignore
+
+              onSelectItems={(items) => handleSelectMVP(items[0])}
+            />
           </div>
 
           <div className={styles.form}>
