@@ -445,15 +445,14 @@ export default function FormPlayer({ data }: { data: Modality }) {
               }}
             />
           </div>
+          <button
+            className={styles.save}
+            onClick={handleSubmit}
+            disabled={isLoading}
+          >
+            SALVAR
+          </button>
         </div>
-
-        <button
-          className={styles.save}
-          onClick={handleSubmit}
-          disabled={isLoading}
-        >
-          SALVAR
-        </button>
 
         <button className={styles.back} onClick={HandleBackButtonClick}>
           Voltar

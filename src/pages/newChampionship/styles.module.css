@@ -3,9 +3,11 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background-color: #fff;
+  background-color: #0B0B0B;
   height: 100%;
   width: 100%;
+
+  min-height: 100vh;
 }
 
 .Card {
@@ -13,10 +15,10 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #fff;
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  background-color: #0B0B0B;
+  border: 1px solid #FF9F00;
   padding: 90px;
-  border-radius: 25px;
+  border-radius: 50px;
   margin-top: 90px;
 
 }
@@ -26,7 +28,7 @@
   justify-content: space-between;
   align-items: space-between;
   flex-direction: row;
-  gap: 60px;
+  gap: 40px;
 }
 
 .NameGroup {
@@ -53,9 +55,9 @@
 
 .newTitle {
   font-family: 'Montserrat', sans-serif;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
-  color: black;
+  color: rgb(255, 255, 255);
 
 }
 
@@ -68,30 +70,29 @@
   padding-right: 20px;
   height: 5rem;
   width: 35.3rem;
-  background-color: #fff;
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  background-color: #0B0B0B;
+  border: 1px solid #FF9F00;
   border-radius: 20px;
   margin-top: 25px;
 }
 
 .newTeam:hover {
-  background-color: rgb(240, 240, 240);
   cursor: pointer;
 }
 
 .title {
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 700;
   font-family: 'Montserrat', sans-serif;
-  color: black;
+  color: rgb(255, 255, 255);
 }
 
 .newTeamName {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   font-family: 'Montserrat', sans-serif;
   text-align: left;
-  color: black;
+  color: rgb(255, 255, 255);
 }
 
 .crudIcon:hover {
@@ -100,6 +101,12 @@
 }
 
 .categorieIcon {
+  width: 36px;
+  height: 36px;
+
+}
+
+.modalityIcon {
   width: 42px;
   height: 42px;
 
@@ -116,32 +123,12 @@
   font-family: 'Montserrat', sans-serif;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
   border-radius: 15px;
-  margin-bottom: 30px;
+  margin-bottom: 210px;
   margin-top: 30px;
+
 }
 
 .back:hover {
-  background-color: #ca7d00;
-  cursor: pointer;
-}
-
-.generatePDF {
-  width: 9.5rem;
-  height: 2.5rem;
-  border: none;
-  background-color: #FF9F00;
-  color: #fff;
-  font-size: 20px;
-  font-weight: 600;
-  font-family: 'Montserrat', sans-serif;
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-  border-radius: 15px;
-  margin-bottom: 30px;
-  margin-top: 30px;
-}
-
-.generatePDF:hover {
-  background-color: #ca7d00;
   cursor: pointer;
 }
 
@@ -162,25 +149,15 @@
   align-items: center;
   padding-left: 25px;
   padding-right: 25px;
-  border-bottom: solid 2px rgb(206, 206, 206);
+  border-bottom: solid 2px rgb(77, 77, 77);
   padding-top: 20px;
   padding-bottom: 20px;
   width: 33.3rem;
 }
 
-.description{
-  margin-left: 20px;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  color: #000000;
-  font-size: 20px;
-  font-weight: 600;
-  font-family: 'Montserrat', sans-serif;
-}
-
 .dataInfo {
-  color: #000000;
-  font-size: 20px;
+  color: #ffffff;
+  font-size: 14px;
   font-weight: 600;
   font-family: 'Montserrat', sans-serif;
 }
@@ -194,4 +171,22 @@
   width: 60px;
   height: 60px;
   border-radius: 30px;
+}
+
+
+.Game {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.Scoreboard{
+  color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
 }

@@ -6,8 +6,8 @@
 .searchInput {
   width: 100%;
   padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  background-color: #0B0B0B;
+  border: 1px solid #FF9F00;  border-radius: 4px;
 }
 
 .resultsList {
@@ -21,10 +21,10 @@
   list-style-type: none;
   padding: 10px;
   margin: 0;
-  border: 1px solid #ccc;
+  border: 1px solid #FF9F00;
   border-top: none;
   border-radius: 0 0 4px 4px;
-  background-color: #fff;
+  background-color: #0B0B0B;
 }
 
 .resultItem {
@@ -32,9 +32,9 @@
   /* Adicionado */
   cursor: pointer;
   padding: 8px;
-  background-color: #fff;
+  background-color: #0B0B0B;
     font-family: 'Montserrat', sans-serif;
-      color: black;
+      color: rgb(255, 255, 255);
 }
 
 .resultItemText {
@@ -58,13 +58,12 @@
   width: 32rem;
   height: 3.75rem;
   border-radius: 20px;
-  background-color: #F1F1F1;
-  border: none;
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  background-color: #0B0B0B;
+  border: 1px solid #FF9F00;
   margin-top: 8px;
   margin-bottom: 25px;
   font-size: 16px;
-  color: #6b6b6b;
+  color: #ffffff;
   padding-left: 25px;
   font-family: 'Montserrat', sans-serif;
 
@@ -109,3 +108,4 @@
   border-radius: 10px;
   margin-right: 8px;
 }
+

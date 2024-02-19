@@ -208,11 +208,10 @@ export default function EditPlayer() {
               SALVAR
             </button>
           </form>
-
-          <button className={styles.back} onClick={HandleBackButtonClick}>
-            Voltar
-          </button>
         </div>
+        <button className={styles.back} onClick={HandleBackButtonClick}>
+          Voltar
+        </button>
       </div>
     </>
   );

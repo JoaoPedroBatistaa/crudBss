@@ -336,7 +336,7 @@ export default function NewFormChampionship({
               </div>
             )}
             <p className={styles.label}>Logo do campeonato</p>
-            <div className={styles.uploadContainer}>
+            <div className={styles.fieldFile}>
               <PhotoUpload onChange={handleFileChange} />
             </div>
           </div>
@@ -409,10 +409,10 @@ export default function NewFormChampionship({
               {Array.from({ length: count }).map((_, index) => (
                 <div key={index} className={styles.table}>
                   <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Posição</p>
+                    <p className={styles.tableLabel}>P</p>
                     <input
                       type="number"
-                      className={styles.position}
+                      className={styles.positionL}
                       pattern="\d*"
                       value={dataMatrix[index]?.position || ""}
                       onChange={(e) =>
@@ -447,7 +447,7 @@ export default function NewFormChampionship({
                   </div>
 
                   <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Pontos</p>
+                    <p className={styles.tableLabel}>Pts</p>
                     <input
                       type="number"
                       className={styles.position}
@@ -460,7 +460,7 @@ export default function NewFormChampionship({
                   </div>
 
                   <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Vitórias</p>
+                    <p className={styles.tableLabel}>V</p>
                     <input
                       type="number"
                       className={styles.position}
@@ -473,7 +473,7 @@ export default function NewFormChampionship({
                   </div>
 
                   <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Derrotas</p>
+                    <p className={styles.tableLabel}>D</p>
                     <input
                       type="number"
                       className={styles.position}
@@ -486,7 +486,7 @@ export default function NewFormChampionship({
                   </div>
 
                   <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Saldo</p>
+                    <p className={styles.tableLabel}>S</p>
                     <input
                       type="number"
                       className={styles.position}
@@ -499,10 +499,10 @@ export default function NewFormChampionship({
                   </div>
 
                   <div className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Jogos</p>
+                    <p className={styles.tableLabel}>J</p>
                     <input
                       type="number"
-                      className={styles.position}
+                      className={styles.positionD}
                       pattern="\d*"
                       value={dataMatrix[index]?.jogos || ""}
                       onChange={(e) =>
@@ -555,10 +555,10 @@ export default function NewFormChampionship({
                   {Array.from({ length: group.count }).map((_, rowIndex) => (
                     <div key={rowIndex} className={styles.table}>
                       <div className={styles.tableItem}>
-                        <p className={styles.tableLabel}>Posição</p>
+                        <p className={styles.tableLabel}>P</p>
                         <input
                           type="number"
-                          className={styles.position}
+                          className={styles.positionL}
                           pattern="\d*"
                           value={group.dataMatrix[rowIndex]?.position || ""}
                           onChange={(e) =>
@@ -597,7 +597,7 @@ export default function NewFormChampionship({
                         />
                       </div>
                       <div className={styles.tableItem}>
-                        <p className={styles.tableLabel}>Pontos</p>
+                        <p className={styles.tableLabel}>Pts</p>
                         <input
                           type="number"
                           className={styles.position}
@@ -614,7 +614,7 @@ export default function NewFormChampionship({
                         />
                       </div>
                       <div className={styles.tableItem}>
-                        <p className={styles.tableLabel}>Vitórias</p>
+                        <p className={styles.tableLabel}>V</p>
                         <input
                           type="number"
                           className={styles.position}
@@ -631,7 +631,7 @@ export default function NewFormChampionship({
                         />
                       </div>
                       <div className={styles.tableItem}>
-                        <p className={styles.tableLabel}>Derrotas</p>
+                        <p className={styles.tableLabel}>D</p>
                         <input
                           type="number"
                           className={styles.position}
@@ -648,7 +648,7 @@ export default function NewFormChampionship({
                         />
                       </div>
                       <div className={styles.tableItem}>
-                        <p className={styles.tableLabel}>Saldo</p>
+                        <p className={styles.tableLabel}>S</p>
                         <input
                           type="number"
                           className={styles.position}
@@ -666,10 +666,10 @@ export default function NewFormChampionship({
                       </div>
 
                       <div className={styles.tableItem}>
-                        <p className={styles.tableLabel}>Jogos</p>
+                        <p className={styles.tableLabel}>J</p>
                         <input
                           type="number"
-                          className={styles.position}
+                          className={styles.positionD}
                           pattern="\d*"
                           value={group.dataMatrix[rowIndex]?.jogos || ""}
                           onChange={(e) =>
@@ -687,7 +687,7 @@ export default function NewFormChampionship({
                 </div>
               ))}
 
-              <button onClick={addNewGroup} className={styles.save}>
+              <button onClick={addNewGroup} className={styles.newPlayer}>
                 Adicionar Novo Grupo
               </button>
             </>
@@ -756,14 +756,14 @@ export default function NewFormChampionship({
 
                   <button
                     onClick={() => addPartida(faseIndex)}
-                    className={styles.save}
+                    className={styles.newPlayer}
                   >
                     Adicionar Partida
                   </button>
                 </div>
               ))}
 
-              <button onClick={addFase} className={styles.save}>
+              <button onClick={addFase} className={styles.newPlayer}>
                 Adicionar Fase
               </button>
             </>

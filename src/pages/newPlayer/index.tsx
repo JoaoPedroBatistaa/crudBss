@@ -135,6 +135,7 @@ const Player: React.FC<PlayerProps> = ({ player }) => {
 
   return (
     <>
+      {/* <Header></Header> */}
       <HomeButton></HomeButton>
 
       <div className={styles.newTeam}>

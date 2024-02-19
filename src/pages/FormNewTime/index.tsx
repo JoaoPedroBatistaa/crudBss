@@ -11,6 +11,7 @@ import InputMask from "react-input-mask";
 import { toast } from "react-toastify";
 import styles from "./styles.module.css";
 
+import Header from "@/components/Header";
 import HomeButton from "../../components/HomeButton";
 
 interface Modality {
@@ -225,6 +226,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
     <Spinner />
   ) : (
     <>
+      <Header></Header>
       <HomeButton></HomeButton>
 
       <div className={styles.Container}>
@@ -275,7 +277,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
               <p className={styles.label}>Informações</p>
               <textarea
                 className={styles.field}
-                value={teamInstagram}
+                value={informations}
                 onChange={(event) => setInformations(event.target.value)}
               />
             </div>
@@ -327,10 +329,12 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 </div>
               )}
               <p className={styles.label}>Logo</p>
-              <div className={styles.uploadContainer}>
+              <div className={styles.fieldFile}>
                 <PhotoUpload onChange={handleFileChange} />
               </div>
             </div>
+
+            <p className={styles.group}>Elenco</p>
 
             {teamData.categories.map((category, categoryIndex) => (
               <div key={categoryIndex} className={styles.form}>
@@ -347,7 +351,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
 
                 {category.players.map((player, playerIndex) => (
                   <div key={playerIndex} className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Nome do jogador</p>
+                    <p className={styles.label}>Nome do jogador</p>
                     <SearchSelect
                       onSelectItems={(items) =>
                         handleSelectItems(items[0], categoryIndex, playerIndex)
@@ -358,7 +362,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
 
                 <button
                   onClick={() => addPlayer(categoryIndex)}
-                  className={styles.save}
+                  className={styles.newPlayer}
                   type="button" // Adiciona isso para evitar que o botão submeta o formulário
                 >
                   Adicionar Novo Jogador
@@ -366,24 +370,28 @@ export default function FormNewTime({ data }: { data: Modality }) {
               </div>
             ))}
 
-            <button onClick={addCategory} className={styles.save} type="button">
-              Adicionar Nova Categoria
-            </button>
+            <div className={styles.buttons}>
+              <button
+                onClick={addCategory}
+                className={styles.newPlayer}
+                type="button"
+              >
+                Adicionar Nova Categoria
+              </button>
 
-            {/* <div className={styles.form}>
-              <p className={styles.label}>Elenco</p>
-              <SearchSelect onSelectItems={handleSelectItems} />
-            </div> */}
-
-            <button className={styles.save} type="submit" disabled={isLoading}>
-              SALVAR
-            </button>
+              <button
+                className={styles.save}
+                type="submit"
+                disabled={isLoading}
+              >
+                SALVAR
+              </button>
+            </div>
           </form>
-
-          <button className={styles.back} onClick={HandleBackButtonClick}>
-            Voltar
-          </button>
         </div>
+        <button className={styles.back} onClick={HandleBackButtonClick}>
+          Voltar
+        </button>
       </div>
     </>
   );

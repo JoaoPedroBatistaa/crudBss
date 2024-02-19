@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import styles from "./styles.module.css";
 
+import Header from "@/components/Header";
 import HomeButton from "../../components/HomeButton";
 
 interface Modality {
@@ -127,6 +128,7 @@ export default function NewTeam({
 
   return (
     <>
+      <Header></Header>
       <HomeButton></HomeButton>
 
       <div className={styles.Container}>

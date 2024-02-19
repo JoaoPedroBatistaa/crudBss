@@ -2,7 +2,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #fff;
+  background-color: #0B0B0B;
   height: 100%;
   width: 100%;
 }
@@ -12,10 +12,10 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #fff;
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  background-color: #0B0B0B;
+  border: 1px solid #FF9F00;
   padding: 90px;
-  border-radius: 25px;
+  border-radius: 50px;
   margin-top: 120px;
   margin-bottom: 210px;
   max-height: 37 rem;
@@ -26,7 +26,7 @@
   font-weight: 700;
   margin-bottom: 60px;
   font-family: 'Montserrat', sans-serif;
-  color: black;
+  color: rgb(255, 255, 255);
 }
 
 .label {
@@ -34,23 +34,22 @@
   font-weight: 500;
   text-align: left;
   font-family: 'Montserrat', sans-serif;
-  color: black;
+  color: rgb(255, 255, 255);
 }
 
 .field {
   width: 26.25rem;
   height: 3.75rem;
   border-radius: 20px;
-  background-color: #F1F1F1;
-  border: none;
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  background-color: #0B0B0B;
+  border: 1px solid #FF9F00;
   margin-top: 8px;
   margin-bottom: 25px;
   font-size: 16px;
-  color: #6b6b6b;
+  color: #ffffff;
   padding-left: 25px;
   font-family: 'Montserrat', sans-serif;
-
+  outline: none;
 }
 
 .login {
@@ -69,8 +68,7 @@
 }
 
 .login:hover {
-  background-color: #bd7400;
+  background-color: #ffae00;
   cursor: pointer;
-  height: 4rem;
-  width: 25.5rem;
+
 }

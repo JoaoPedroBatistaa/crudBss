@@ -389,10 +389,10 @@ export default function EditChampionship() {
                 {Array.from({ length: count }).map((_, index) => (
                   <div key={index} className={styles.table}>
                     <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>Posição</p>
+                      <p className={styles.tableLabel}>P</p>
                       <input
                         type="number"
-                        className={styles.position}
+                        className={styles.positionL}
                         pattern="\d*"
                         value={
                           championshipData.dataMatrix[index]?.position || ""
@@ -433,7 +433,7 @@ export default function EditChampionship() {
                     </div>
 
                     <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>Pontos</p>
+                      <p className={styles.tableLabel}>Pts</p>
                       <input
                         type="number"
                         className={styles.position}
@@ -446,7 +446,7 @@ export default function EditChampionship() {
                     </div>
 
                     <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>Vitórias</p>
+                      <p className={styles.tableLabel}>V</p>
                       <input
                         type="number"
                         className={styles.position}
@@ -461,7 +461,7 @@ export default function EditChampionship() {
                     </div>
 
                     <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>Derrotas</p>
+                      <p className={styles.tableLabel}>D</p>
                       <input
                         type="number"
                         className={styles.position}
@@ -476,7 +476,7 @@ export default function EditChampionship() {
                     </div>
 
                     <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>Saldo</p>
+                      <p className={styles.tableLabel}>S</p>
                       <input
                         type="number"
                         className={styles.position}
@@ -489,10 +489,10 @@ export default function EditChampionship() {
                     </div>
 
                     <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>Jogos</p>
+                      <p className={styles.tableLabel}>J</p>
                       <input
                         type="number"
-                        className={styles.position}
+                        className={styles.positionD}
                         pattern="\d*"
                         value={championshipData.dataMatrix[index]?.jogos || ""}
                         onChange={(e) =>
@@ -505,244 +505,243 @@ export default function EditChampionship() {
               </div>
             )}
 
-            {championshipData.groups &&
-              championshipData.championshipType === "grupo" && (
-                <>
-                  {(championshipData.groups || []).map((group, groupIndex) => (
-                    <div key={groupIndex}>
-                      <div className={styles.form}>
-                        <p className={styles.label}>Nome do Grupo</p>
-                        <input
-                          type="text"
-                          className={styles.field}
-                          value={group.groupName}
-                          onChange={(e) => {
+            {championshipData.championshipType === "grupo" && (
+              <>
+                {(championshipData.groups || []).map((group, groupIndex) => (
+                  <div key={groupIndex}>
+                    <div className={styles.form}>
+                      <p className={styles.label}>Nome do Grupo</p>
+                      <input
+                        type="text"
+                        className={styles.field}
+                        value={group.groupName}
+                        onChange={(e) => {
+                          const updatedGroups = [
+                            ...(championshipData.groups || []),
+                          ];
+                          updatedGroups[groupIndex].groupName = e.target.value;
+                          setChampionshipData((prevState) => ({
+                            ...prevState,
+                            groups: updatedGroups,
+                          }));
+                        }}
+                      />
+                    </div>
+
+                    <div className={styles.headTable}>
+                      <p className={styles.label}>
+                        Tabela do Grupo - insira o Nº posições
+                      </p>
+                      <input
+                        type="text"
+                        className={styles.pos}
+                        pattern="\d*"
+                        onInput={(e) => {
+                          const value = parseInt(e.currentTarget.value);
+                          if (!isNaN(value)) {
                             const updatedGroups = [
                               ...(championshipData.groups || []),
                             ];
-                            updatedGroups[groupIndex].groupName =
-                              e.target.value;
+                            updatedGroups[groupIndex].count = value;
                             setChampionshipData((prevState) => ({
                               ...prevState,
                               groups: updatedGroups,
                             }));
-                          }}
-                        />
-                      </div>
+                          }
+                        }}
+                      />
+                    </div>
 
-                      <div className={styles.headTable}>
-                        <p className={styles.label}>
-                          Tabela do Grupo - insira o Nº posições
-                        </p>
-                        <input
-                          type="text"
-                          className={styles.pos}
-                          pattern="\d*"
-                          onInput={(e) => {
-                            const value = parseInt(e.currentTarget.value);
-                            if (!isNaN(value)) {
+                    {Array.from({ length: group.count }).map((_, rowIndex) => (
+                      <div key={rowIndex} className={styles.table}>
+                        <div className={styles.tableItem}>
+                          <p className={styles.tableLabel}>P</p>
+                          <input
+                            type="number"
+                            className={styles.positionL}
+                            pattern="\d*"
+                            value={
+                              (championshipData.groups &&
+                                championshipData.groups[groupIndex]?.dataMatrix[
+                                  rowIndex
+                                ]?.position) ||
+                              ""
+                            }
+                            onChange={(e) =>
+                              handleGroupInputChange(
+                                groupIndex,
+                                rowIndex,
+                                "position",
+                                e
+                              )
+                            }
+                          />
+                        </div>
+
+                        <div className={styles.tableItem}>
+                          <p className={styles.tableLabel}>Time</p>
+                          <SearchSelectTeam
+                            onSelectItem={(team: Item) => {
                               const updatedGroups = [
                                 ...(championshipData.groups || []),
                               ];
-                              updatedGroups[groupIndex].count = value;
+                              if (
+                                !updatedGroups[groupIndex].dataMatrix[rowIndex]
+                              ) {
+                                updatedGroups[groupIndex].dataMatrix[rowIndex] =
+                                  {
+                                    time: "",
+                                    position: "",
+                                    victories: "",
+                                    logo: "",
+                                    saldo: "",
+                                    derrotas: "",
+                                    pontos: "",
+                                    jogos: "",
+                                  };
+                              }
+                              updatedGroups[groupIndex].dataMatrix[
+                                rowIndex
+                              ].time = team.name;
+                              updatedGroups[groupIndex].dataMatrix[
+                                rowIndex
+                              ].logo = team.logo;
                               setChampionshipData((prevState) => ({
                                 ...prevState,
                                 groups: updatedGroups,
                               }));
+                            }}
+                          />
+                        </div>
+                        <div className={styles.tableItem}>
+                          <p className={styles.tableLabel}>Pts</p>
+                          <input
+                            type="number"
+                            className={styles.position}
+                            pattern="\d*"
+                            value={
+                              (championshipData.groups &&
+                                championshipData.groups[groupIndex]?.dataMatrix[
+                                  rowIndex
+                                ]?.pontos) ||
+                              ""
                             }
-                          }}
-                        />
+                            onChange={(e) =>
+                              handleGroupInputChange(
+                                groupIndex,
+                                rowIndex,
+                                "pontos",
+                                e
+                              )
+                            }
+                          />
+                        </div>
+
+                        <div className={styles.tableItem}>
+                          <p className={styles.tableLabel}>V</p>
+                          <input
+                            type="number"
+                            className={styles.position}
+                            pattern="\d*"
+                            value={
+                              (championshipData.groups &&
+                                championshipData.groups[groupIndex]?.dataMatrix[
+                                  rowIndex
+                                ]?.victories) ||
+                              ""
+                            }
+                            onChange={(e) =>
+                              handleGroupInputChange(
+                                groupIndex,
+                                rowIndex,
+                                "victories",
+                                e
+                              )
+                            }
+                          />
+                        </div>
+
+                        <div className={styles.tableItem}>
+                          <p className={styles.tableLabel}>D</p>
+                          <input
+                            type="number"
+                            className={styles.position}
+                            pattern="\d*"
+                            value={
+                              (championshipData.groups &&
+                                championshipData.groups[groupIndex]?.dataMatrix[
+                                  rowIndex
+                                ]?.derrotas) ||
+                              ""
+                            }
+                            onChange={(e) =>
+                              handleGroupInputChange(
+                                groupIndex,
+                                rowIndex,
+                                "derrotas",
+                                e
+                              )
+                            }
+                          />
+                        </div>
+
+                        <div className={styles.tableItem}>
+                          <p className={styles.tableLabel}>S</p>
+                          <input
+                            type="number"
+                            className={styles.position}
+                            pattern="\d*"
+                            value={
+                              (championshipData.groups &&
+                                championshipData.groups[groupIndex]?.dataMatrix[
+                                  rowIndex
+                                ]?.saldo) ||
+                              ""
+                            }
+                            onChange={(e) =>
+                              handleGroupInputChange(
+                                groupIndex,
+                                rowIndex,
+                                "saldo",
+                                e
+                              )
+                            }
+                          />
+                        </div>
+
+                        <div className={styles.tableItem}>
+                          <p className={styles.tableLabel}>J</p>
+                          <input
+                            type="number"
+                            className={styles.positionD}
+                            pattern="\d*"
+                            value={
+                              (championshipData.groups &&
+                                championshipData.groups[groupIndex]?.dataMatrix[
+                                  rowIndex
+                                ]?.jogos) ||
+                              ""
+                            }
+                            onChange={(e) =>
+                              handleGroupInputChange(
+                                groupIndex,
+                                rowIndex,
+                                "jogos",
+                                e
+                              )
+                            }
+                          />
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                ))}
 
-                      {Array.from({ length: group.count }).map(
-                        (_, rowIndex) => (
-                          <div key={rowIndex} className={styles.table}>
-                            <div className={styles.tableItem}>
-                              <p className={styles.tableLabel}>Posição</p>
-                              <input
-                                type="number"
-                                className={styles.position}
-                                pattern="\d*"
-                                value={
-                                  (championshipData.groups &&
-                                    championshipData.groups[groupIndex]
-                                      ?.dataMatrix[rowIndex]?.position) ||
-                                  ""
-                                }
-                                onChange={(e) =>
-                                  handleGroupInputChange(
-                                    groupIndex,
-                                    rowIndex,
-                                    "position",
-                                    e
-                                  )
-                                }
-                              />
-                            </div>
-
-                            <div className={styles.tableItem}>
-                              <p className={styles.tableLabel}>Time</p>
-                              <SearchSelectTeam
-                                onSelectItem={(team: Item) => {
-                                  const updatedGroups = [
-                                    ...(championshipData.groups || []),
-                                  ];
-                                  if (
-                                    !updatedGroups[groupIndex].dataMatrix[
-                                      rowIndex
-                                    ]
-                                  ) {
-                                    updatedGroups[groupIndex].dataMatrix[
-                                      rowIndex
-                                    ] = {
-                                      time: "",
-                                      position: "",
-                                      victories: "",
-                                      logo: "",
-                                      saldo: "",
-                                      derrotas: "",
-                                      pontos: "",
-                                      jogos: "",
-                                    };
-                                  }
-                                  updatedGroups[groupIndex].dataMatrix[
-                                    rowIndex
-                                  ].time = team.name;
-                                  updatedGroups[groupIndex].dataMatrix[
-                                    rowIndex
-                                  ].logo = team.logo;
-                                  setChampionshipData((prevState) => ({
-                                    ...prevState,
-                                    groups: updatedGroups,
-                                  }));
-                                }}
-                              />
-                            </div>
-                            <div className={styles.tableItem}>
-                              <p className={styles.tableLabel}>Pontos</p>
-                              <input
-                                type="number"
-                                className={styles.position}
-                                pattern="\d*"
-                                value={
-                                  (championshipData.groups &&
-                                    championshipData.groups[groupIndex]
-                                      ?.dataMatrix[rowIndex]?.pontos) ||
-                                  ""
-                                }
-                                onChange={(e) =>
-                                  handleGroupInputChange(
-                                    groupIndex,
-                                    rowIndex,
-                                    "pontos",
-                                    e
-                                  )
-                                }
-                              />
-                            </div>
-
-                            <div className={styles.tableItem}>
-                              <p className={styles.tableLabel}>Vitórias</p>
-                              <input
-                                type="number"
-                                className={styles.position}
-                                pattern="\d*"
-                                value={
-                                  (championshipData.groups &&
-                                    championshipData.groups[groupIndex]
-                                      ?.dataMatrix[rowIndex]?.victories) ||
-                                  ""
-                                }
-                                onChange={(e) =>
-                                  handleGroupInputChange(
-                                    groupIndex,
-                                    rowIndex,
-                                    "victories",
-                                    e
-                                  )
-                                }
-                              />
-                            </div>
-
-                            <div className={styles.tableItem}>
-                              <p className={styles.tableLabel}>Derrotas</p>
-                              <input
-                                type="number"
-                                className={styles.position}
-                                pattern="\d*"
-                                value={
-                                  (championshipData.groups &&
-                                    championshipData.groups[groupIndex]
-                                      ?.dataMatrix[rowIndex]?.derrotas) ||
-                                  ""
-                                }
-                                onChange={(e) =>
-                                  handleGroupInputChange(
-                                    groupIndex,
-                                    rowIndex,
-                                    "derrotas",
-                                    e
-                                  )
-                                }
-                              />
-                            </div>
-
-                            <div className={styles.tableItem}>
-                              <p className={styles.tableLabel}>Saldo</p>
-                              <input
-                                type="number"
-                                className={styles.position}
-                                pattern="\d*"
-                                value={
-                                  (championshipData.groups &&
-                                    championshipData.groups[groupIndex]
-                                      ?.dataMatrix[rowIndex]?.saldo) ||
-                                  ""
-                                }
-                                onChange={(e) =>
-                                  handleGroupInputChange(
-                                    groupIndex,
-                                    rowIndex,
-                                    "saldo",
-                                    e
-                                  )
-                                }
-                              />
-                            </div>
-
-                            <div className={styles.tableItem}>
-                              <p className={styles.tableLabel}>Jogos</p>
-                              <input
-                                type="number"
-                                className={styles.position}
-                                pattern="\d*"
-                                value={
-                                  (championshipData.groups &&
-                                    championshipData.groups[groupIndex]
-                                      ?.dataMatrix[rowIndex]?.jogos) ||
-                                  ""
-                                }
-                                onChange={(e) =>
-                                  handleGroupInputChange(
-                                    groupIndex,
-                                    rowIndex,
-                                    "jogos",
-                                    e
-                                  )
-                                }
-                              />
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  ))}
-
-                  <button onClick={addNewGroup} className={styles.save}>
-                    Adicionar Novo Grupo
-                  </button>
-                </>
-              )}
+                <button onClick={addNewGroup} className={styles.newPlayer}>
+                  Adicionar Novo Grupo
+                </button>
+              </>
+            )}
 
             {championshipData.championshipType === "mataMata" && (
               <>
@@ -839,7 +838,7 @@ export default function EditChampionship() {
 
                       <button
                         onClick={() => addPartida(faseIndex)}
-                        className={styles.save}
+                        className={styles.newPlayer}
                       >
                         Adicionar Partida
                       </button>
@@ -847,21 +846,19 @@ export default function EditChampionship() {
                   )
                 )}
 
-                <button onClick={addFase} className={styles.save}>
+                <button onClick={addFase} className={styles.newPlayer}>
                   Adicionar Fase
                 </button>
               </>
             )}
-
-            <button type="submit" className={styles.save}>
-              SALVAR
-            </button>
           </form>
-
-          <button className={styles.back} onClick={HandleBackButtonClick}>
-            Voltar
+          <button type="submit" className={styles.save}>
+            SALVAR
           </button>
         </div>
+        <button className={styles.back} onClick={HandleBackButtonClick}>
+          Voltar
+        </button>
       </div>
     </>
   );

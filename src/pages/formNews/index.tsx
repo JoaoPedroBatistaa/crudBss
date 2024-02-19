@@ -182,7 +182,7 @@ export default function NewFormNews({
               </div>
             )}
             <p className={styles.label}>Imagem</p>
-            <div className={styles.uploadContainer}>
+            <div className={styles.fieldFile}>
               <PhotoUpload onChange={handleFileChange} />
             </div>
           </div>
@@ -196,14 +196,14 @@ export default function NewFormNews({
               onChange={(e) => handleInputChange(e, "date")}
             />
           </div>
+          <button
+            className={styles.save}
+            onClick={handleSubmit}
+            disabled={isLoading}
+          >
+            SALVAR
+          </button>
         </div>
-        <button
-          className={styles.save}
-          onClick={handleSubmit}
-          disabled={isLoading}
-        >
-          SALVAR
-        </button>
         <button className={styles.back} onClick={handleBackButtonClick}>
           Voltar
         </button>

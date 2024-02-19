@@ -329,7 +329,7 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
 
                 {category.players.map((player, playerIndex) => (
                   <div key={playerIndex} className={styles.tableItem}>
-                    <p className={styles.tableLabel}>Nome do jogador</p>
+                    <p className={styles.label}>Nome do jogador</p>
                     <SearchSelect
                       onSelectItems={(items) =>
                         handleSelectItems(items[0], categoryIndex, playerIndex)
@@ -340,7 +340,7 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
 
                 <button
                   onClick={() => addPlayer(categoryIndex)}
-                  className={styles.save}
+                  className={styles.newPlayer}
                   type="button" // Adiciona isso para evitar que o botão submeta o formulário
                 >
                   Adicionar Novo Jogador
@@ -348,13 +348,19 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
               </div>
             ))}
 
-            <button onClick={addCategory} className={styles.save} type="button">
-              Adicionar Nova Categoria
-            </button>
+            <div className={styles.buttons}>
+              <button
+                onClick={addCategory}
+                className={styles.newPlayer}
+                type="button"
+              >
+                Adicionar Nova Categoria
+              </button>
 
-            <button type="submit" className={styles.save}>
-              SALVAR
-            </button>
+              <button type="submit" className={styles.save}>
+                SALVAR
+              </button>
+            </div>
           </form>
         </div>
 
