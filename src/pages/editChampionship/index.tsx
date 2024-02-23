@@ -8,7 +8,7 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { useRouter } from "next/router";
-import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import styles from "./styles.module.css";
 
@@ -119,9 +119,7 @@ export default function EditChampionship() {
     }
   }, [router.isReady, id]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleClick = async () => {
     if (!id) {
       console.error("Error: Championship ID is not defined");
       toast.error("Erro ao atualizar o campeonato.");
@@ -154,6 +152,7 @@ export default function EditChampionship() {
       );
 
       toast.success("Campeonato atualizado com sucesso!");
+      router.push("/newChampionship");
     } catch (error) {
       console.error("Erro ao atualizar o campeonato: ", error);
       toast.error("Erro ao atualizar o campeonato.");
@@ -298,7 +297,7 @@ export default function EditChampionship() {
             <h1 className={styles.title}>Editar Campeonato</h1>
           </div>
 
-          <form onSubmit={handleSubmit}>
+          <form>
             <div className={styles.form}>
               <p className={styles.label}>Logo do Campeonato</p>
               <input
@@ -852,7 +851,7 @@ export default function EditChampionship() {
               </>
             )}
           </form>
-          <button type="submit" className={styles.save}>
+          <button onClick={handleClick} className={styles.save}>
             SALVAR
           </button>
         </div>
