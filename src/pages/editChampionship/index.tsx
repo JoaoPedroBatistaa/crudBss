@@ -152,7 +152,7 @@ export default function EditChampionship() {
       );
 
       toast.success("Campeonato atualizado com sucesso!");
-      router.push("/newChampionship");
+      // router.push("/newChampionship");
     } catch (error) {
       console.error("Erro ao atualizar o campeonato: ", error);
       toast.error("Erro ao atualizar o campeonato.");
@@ -403,7 +403,9 @@ export default function EditChampionship() {
                     </div>
 
                     <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>Time</p>
+                      <p className={styles.tableLabel}>
+                        Time ({championshipData.dataMatrix[index]?.time || ""})
+                      </p>
                       <SearchSelectTeam
                         onSelectItem={(team: Item) => {
                           const updatedMatrix = [
@@ -578,7 +580,15 @@ export default function EditChampionship() {
                         </div>
 
                         <div className={styles.tableItem}>
-                          <p className={styles.tableLabel}>Time</p>
+                          <p className={styles.tableLabel}>
+                            Time (
+                            {(championshipData.groups &&
+                              championshipData.groups[groupIndex]?.dataMatrix[
+                                rowIndex
+                              ]?.time) ||
+                              ""}
+                            )
+                          </p>
                           <SearchSelectTeam
                             onSelectItem={(team: Item) => {
                               const updatedGroups = [
