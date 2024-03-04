@@ -1,12 +1,6 @@
 import { db } from "@/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import "firebase/storage";
-import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
 import { useRouter } from "next/router";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -126,35 +120,33 @@ export default function EditMatch() {
       return;
     }
 
+    const matchDataToSave = {
+      ...matchData,
+      team_1: {
+        score: matchData.team1Score.toString(),
+      },
+      team_2: {
+        score: matchData.team2Score.toString(),
+      },
+    };
+
+    // @ts-ignore
+    delete matchDataToSave.team1Name;
+    // @ts-ignore
+    delete matchDataToSave.team1Logo;
+    // @ts-ignore
+    delete matchDataToSave.team1Score;
+    // @ts-ignore
+    delete matchDataToSave.team2Name;
+    // @ts-ignore
+    delete matchDataToSave.team2Logo;
+    // @ts-ignore
+    delete matchDataToSave.team2Score;
+
     try {
-      if (matchData.team1Logo instanceof File) {
-        const storage = getStorage();
-        const fileRef = ref(storage, `matches/${matchData.team1Logo.name}`);
-
-        const uploadTask = uploadBytesResumable(fileRef, matchData.team1Logo);
-        await uploadTask;
-
-        const downloadURL = await getDownloadURL(fileRef);
-        matchData.team1Logo = downloadURL as string;
-      }
-
-      if (matchData.team2Logo instanceof File) {
-        const storage = getStorage();
-        const fileRef = ref(storage, `matches/${matchData.team2Logo.name}`);
-
-        const uploadTask = uploadBytesResumable(fileRef, matchData.team2Logo);
-        await uploadTask;
-
-        const downloadURL = await getDownloadURL(fileRef);
-        matchData.team2Logo = downloadURL as string;
-      }
-
-      await setDoc(doc(db, "matches", id as string), {
-        ...matchData,
-        king: matchData.king,
-        topScorer: matchData.topScorer,
-        mvp: matchData.mvp,
-        // Certifique-se de que `team1Logo` e `team2Logo` estão sendo manuseados corretamente
+      // Atualiza o documento no Firestore
+      await setDoc(doc(db, "matches", id as string), matchDataToSave, {
+        merge: true,
       });
 
       toast.success("Match updated successfully!");
