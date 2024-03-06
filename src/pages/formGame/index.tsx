@@ -66,6 +66,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
   const [selectedTeam2Score, setSelectedTeam2Score] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedVenue, setSelectedVenue] = useState("");
+  const [selectedFase, setSelectedFase] = useState("");
   const [selectedTeamOne, setSelectedTeamOne] = useState<Item | null>(null);
   const [selectedTeamTwo, setSelectedTeamTwo] = useState<Item | null>(null);
   const [selectedChampionship, setSelectedChampionship] = useState<Item | null>(
@@ -150,6 +151,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
                 photo: selectedMVP.photo,
               }
             : null,
+          fase: selectedFase,
         };
 
         const docRef = await addDoc(matcheRef, {
@@ -172,6 +174,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
         setSelectedTime("");
         setSelectedDate("");
         setSelectedVenue("");
+        setSelectedFase("");
         setSelectedTeamOne(null);
         setSelectedTeamTwo(null);
         setSelectedChampionship(null);
@@ -297,6 +300,16 @@ export default function FormNewMatche({ data }: { data: Modality }) {
               type="text"
               value={selectedVenue}
               onChange={(e) => setSelectedVenue(e.target.value)}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Fase do Jogo</p>
+            <input
+              className={styles.field}
+              type="text"
+              value={selectedFase}
+              onChange={(e) => setSelectedFase(e.target.value)}
             />
           </div>
 

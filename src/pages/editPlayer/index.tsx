@@ -27,6 +27,7 @@ interface Player {
   cpf: string;
   kingplayer: Number;
   birthDate: string;
+  about: string;
 }
 
 export default function EditPlayer() {
@@ -42,6 +43,7 @@ export default function EditPlayer() {
     instagram: "",
     birthDate: "",
     cpf: "",
+    about: "",
   });
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -155,6 +157,17 @@ export default function EditPlayer() {
                 type="text"
                 value={playerData.position}
                 name="position"
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Sobre o jogador</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={playerData.about}
+                name="about"
                 onChange={handleInputChange}
               />
             </div>

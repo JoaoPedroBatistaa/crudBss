@@ -29,6 +29,7 @@ interface Matche {
     team_id: string; // Considere mudar para um objeto ou ID se necessário
   };
   venue: string;
+  fase: string;
   time: string;
   king: PlayerDetail | null;
   topScorer: PlayerDetail | null;
@@ -54,6 +55,7 @@ export default function EditMatch() {
     team2Score: 0,
     date: "",
     location: "",
+    fase: "",
     fileURL: "",
     king: null,
     topScorer: null,
@@ -92,6 +94,7 @@ export default function EditMatch() {
               team2Score: match.team_2 ? match.team_2.score : 0,
               date: match.date || "",
               location: match.venue || "",
+              fase: match.fase || "",
               fileURL: match.fileURL || "",
               king: match.king || null,
               topScorer: match.topScorer || null,
@@ -260,6 +263,17 @@ export default function EditMatch() {
                 type="text"
                 name="location"
                 value={matchData.location}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Fase do Jogo</p>
+              <input
+                className={styles.field}
+                type="text"
+                name="fase"
+                value={matchData.fase}
                 onChange={handleInputChange}
               />
             </div>

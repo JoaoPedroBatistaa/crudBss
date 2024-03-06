@@ -45,6 +45,7 @@ interface Player {
   birthDate: string;
   team?: string;
   teamLogo?: string;
+  about: string;
 }
 
 // Modal.setAppElement('#root');
@@ -72,6 +73,7 @@ export default function FormPlayer({ data }: { data: Modality }) {
     instagram: "",
     cpf: "",
     birthDate: "",
+    about: "",
   });
 
   const handleImageClick = () => {
@@ -155,6 +157,7 @@ export default function FormPlayer({ data }: { data: Modality }) {
       instagram: "",
       cpf: "",
       birthDate: "",
+      about: "",
     });
     setCroppedImage("");
     setImage("");
@@ -328,6 +331,16 @@ export default function FormPlayer({ data }: { data: Modality }) {
               type="text"
               value={playerData.position}
               onChange={(e) => handleInputChange(e, "position")}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Sobre o jogador</p>
+            <input
+              className={styles.field}
+              type="text"
+              value={playerData.about}
+              onChange={(e) => handleInputChange(e, "about")}
             />
           </div>
 
