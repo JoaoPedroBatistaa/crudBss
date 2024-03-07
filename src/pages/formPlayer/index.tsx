@@ -164,7 +164,7 @@ export default function FormPlayer({ data }: { data: Modality }) {
   }
 
   function handleInputChange(
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     field: keyof Player
   ) {
     setPlayerData({
@@ -336,9 +336,8 @@ export default function FormPlayer({ data }: { data: Modality }) {
 
           <div className={styles.form}>
             <p className={styles.label}>Sobre o jogador</p>
-            <input
+            <textarea
               className={styles.field}
-              type="text"
               value={playerData.about}
               onChange={(e) => handleInputChange(e, "about")}
             />

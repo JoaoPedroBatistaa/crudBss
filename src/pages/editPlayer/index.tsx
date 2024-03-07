@@ -46,8 +46,12 @@ export default function EditPlayer() {
     about: "",
   });
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
+  const handleInputChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target as
+      | HTMLInputElement
+      | HTMLTextAreaElement;
     setPlayerData((prevState) => ({ ...prevState, [name]: value }));
   };
 
@@ -163,9 +167,8 @@ export default function EditPlayer() {
 
             <div className={styles.form}>
               <p className={styles.label}>Sobre o jogador</p>
-              <input
+              <textarea
                 className={styles.field}
-                type="text"
                 value={playerData.about}
                 name="about"
                 onChange={handleInputChange}
