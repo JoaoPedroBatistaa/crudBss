@@ -25,12 +25,10 @@ interface News {
   id: string;
   image: string;
   title: string;
-  description: string;
-  date: string;
 }
 
 async function getCollectionData() {
-  const q = query(collection(db, "news"));
+  const q = query(collection(db, "sponsors"));
 
   const querySnapshot = await getDocs(q);
   const documents = querySnapshot.docs.map((doc) => {
@@ -80,8 +78,8 @@ export default function NewNews({
   async function popup(newsId: string) {
     if (window.confirm("Deseja mesmo excluir?")) {
       try {
-        await deleteDoc(doc(db, "news", newsId));
-        toast.success("Notícia excluída com sucesso!");
+        await deleteDoc(doc(db, "sponsors", newsId));
+        toast.success("Patrocinador excluída com sucesso!");
 
         const updatedNews = newsData.filter((newItem) => newItem.id !== newsId); // Update the newsData state
         setNewsData(updatedNews);
@@ -102,10 +100,10 @@ export default function NewNews({
       <div className={styles.Container}>
         <div className={styles.Card}>
           <div className={styles.titleGroup}>
-            <h1 className={styles.title}>Notícias</h1>
+            <h1 className={styles.title}>Patrocinadores</h1>
             <div className={styles.new}>
-              <p className={styles.newTitle}>NOVA NOTÍCIA</p>
-              <Link href={{ pathname: "/formNews" }}>
+              <p className={styles.newTitle}>NOVO PATROCINADOR</p>
+              <Link href={{ pathname: "/formSponsor" }}>
                 <img
                   className={styles.crudIcon}
                   src="./assets/novo.png"
@@ -157,16 +155,6 @@ export default function NewNews({
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Manchete:</p>
                   <p className={styles.dataInfo}>{news.title}</p>
-                </div>
-
-                <div className={styles.line}>
-                  <p className={styles.dataInfo}>Descrição:</p>
-                  <p className={styles.dataInfo}>{news.description}</p>
-                </div>
-
-                <div className={styles.line}>
-                  <p className={styles.dataInfo}>Data:</p>
-                  <p className={styles.dataInfo}>{news.date}</p>
                 </div>
 
                 <div className={styles.line}>

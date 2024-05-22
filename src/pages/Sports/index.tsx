@@ -46,6 +46,30 @@ function Sports() {
         <div className={styles.Card}>
           <h1 className={styles.title}>Esportes</h1>
 
+          <Link href={{ pathname: "/newNews" }}>
+            <div className={styles.categorie}>
+              <img
+                className={styles.categorieIcon}
+                src="./assets/noticias.png"
+                alt=""
+              />
+
+              <h1 className={styles.categorieName}>Notícias</h1>
+            </div>
+          </Link>
+
+          <Link href={{ pathname: "/newSponsor" }}>
+            <div className={styles.categorie}>
+              <img
+                className={styles.categorieIcon}
+                src="./assets/noticias.png"
+                alt=""
+              />
+
+              <h1 className={styles.categorieName}>Patrocinadores</h1>
+            </div>
+          </Link>
+
           <Link
             href={{
               pathname: "/Modality",

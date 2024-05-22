@@ -7,6 +7,46 @@
   width: 100%;
 }
 
+.categorie {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 2rem;
+  height: 5rem;
+  width: 28.75rem;
+  background-color: #0B0B0B;
+  border: 1px solid #FF9F00;
+  border-radius: 20px;
+  margin-top: 25px;
+
+  padding-left: 2rem;
+}
+
+.categorie:hover {
+  cursor: pointer;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  font-family: 'Montserrat', sans-serif;
+  color: rgb(255, 255, 255);
+}
+
+.categorieName {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  text-align: left;
+  color: rgb(255, 255, 255);
+}
+
+.categorieIcon {
+  width: 36px;
+  height: 36px;
+}
+
 .Card {
   display: flex;
   flex-direction: column;

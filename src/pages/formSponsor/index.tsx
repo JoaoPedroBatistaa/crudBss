@@ -17,9 +17,6 @@ interface Modality {
 interface New {
   title: string;
   image: string;
-  description: string;
-  link: string;
-  date: string; // Adicione o campo "date" na interface
 }
 
 export default function NewFormNews({
@@ -30,9 +27,6 @@ export default function NewFormNews({
   const [newData, setNewData] = useState<New>({
     title: "",
     image: "",
-    description: "",
-    link: "",
-    date: "", // Inicialize com uma string vazia
   });
 
   const router = useRouter();
@@ -57,8 +51,7 @@ export default function NewFormNews({
     event: React.ChangeEvent<HTMLInputElement>,
     field: keyof New
   ) {
-    const value =
-      field === "date" ? event.target.value.split("T")[0] : event.target.value;
+    const value = event.target.value;
 
     setNewData({
       ...newData,
@@ -71,14 +64,14 @@ export default function NewFormNews({
 
     let imageUrl = "";
     if (selectedFile) {
-      const storageRef = ref(storage, `news/${selectedFile.name}`);
+      const storageRef = ref(storage, `sponsors/${selectedFile.name}`);
       const fileSnapshot = await uploadBytes(storageRef, selectedFile);
       imageUrl = await getDownloadURL(fileSnapshot.ref);
     }
 
     const newWithPhoto = { ...newData, image: imageUrl };
 
-    await addNewDocumentWithReference(db, "news", newWithPhoto);
+    await addNewDocumentWithReference(db, "sponsors", newWithPhoto);
 
     resetForm();
     setIsLoading(false);
@@ -88,9 +81,6 @@ export default function NewFormNews({
     setNewData({
       title: "",
       image: "",
-      description: "",
-      link: "",
-      date: "",
     });
 
     setPreviewImage(null);
@@ -107,7 +97,7 @@ export default function NewFormNews({
       const docRef = await addDoc(collection(db, collectionName), newData);
       console.log("Documento criado com sucesso. ID:", docRef.id);
       toast.success("Notícia criada com sucesso!");
-      router.push("/newNews");
+      router.push("/newSponsor");
     } catch (e) {
       console.error("Erro ao criar o documento:", e);
       toast.error("Erro ao cadastrar a notícia!");
@@ -127,39 +117,19 @@ export default function NewFormNews({
       <div className={styles.Container}>
         <div className={styles.Card}>
           <div className={styles.titleGroup}>
-            <h1 className={styles.title}>Notícias</h1>
+            <h1 className={styles.title}>Patrocinadores</h1>
             <div className={styles.new}>
-              <p className={styles.newTitle}>NOVA NOTÍCIA</p>
+              <p className={styles.newTitle}>NOVO PATROCINADOR</p>
               <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
             </div>
           </div>
           <div className={styles.form}>
-            <p className={styles.label}>Manchete</p>
+            <p className={styles.label}>Nome</p>
             <input
               className={styles.field}
               type="text"
               value={newData.title}
               onChange={(e) => handleInputChange(e, "title")}
-            />
-          </div>
-
-          <div className={styles.form}>
-            <p className={styles.label}>Descrição</p>
-            <input
-              className={styles.field}
-              type="text"
-              value={newData.description}
-              onChange={(e) => handleInputChange(e, "description")}
-            />
-          </div>
-
-          <div className={styles.form}>
-            <p className={styles.label}>Link</p>
-            <input
-              className={styles.field}
-              type="text"
-              value={newData.link}
-              onChange={(e) => handleInputChange(e, "link")}
             />
           </div>
 
@@ -179,15 +149,6 @@ export default function NewFormNews({
             </div>
           </div>
 
-          <div className={styles.form}>
-            <p className={styles.label}>Data</p>
-            <input
-              className={styles.field}
-              type="date"
-              value={newData.date}
-              onChange={(e) => handleInputChange(e, "date")}
-            />
-          </div>
           <button
             className={styles.save}
             onClick={handleSubmit}
