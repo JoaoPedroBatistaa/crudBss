@@ -84,6 +84,9 @@ export default function FormNewMatche({ data }: { data: Modality }) {
     useState<Player | null>(null);
   const [selectedMVP, setSelectedMVP] = useState<Player | null>(null);
 
+  const [isVolleyball, setIsVolleyball] = useState(false);
+  const [setScores, setSetScores] = useState("");
+
   const handleSelectTopScorer = (items: Player[]) => {
     // Assumindo que você só está interessado no primeiro item para esses casos
     const item = items[0];
@@ -152,6 +155,8 @@ export default function FormNewMatche({ data }: { data: Modality }) {
               }
             : null,
           fase: selectedFase,
+          isVolleyball,
+          setScores: isVolleyball ? setScores : null,
         };
 
         const docRef = await addDoc(matcheRef, {
@@ -180,6 +185,8 @@ export default function FormNewMatche({ data }: { data: Modality }) {
         setSelectedChampionship(null);
         setSelectedFile(null);
         setSelectedFileName(""); // Limpar o nome do arquivo selecionado
+        setIsVolleyball(false);
+        setSetScores("");
         toast.success("Jogo cadastrado com sucesso!");
         router.push("newGame?mdl=" + data.id);
         console.log("Novo jogo salvo com sucesso no Firestore!");
@@ -332,6 +339,30 @@ export default function FormNewMatche({ data }: { data: Modality }) {
               onChange={(e) => setSelectedTeam2Score(e.target.value)}
             />
           </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Sets de Vôlei?</p>
+            <select
+              className={styles.field}
+              value={isVolleyball ? "sim" : "não"}
+              onChange={(e) => setIsVolleyball(e.target.value === "sim")}
+            >
+              <option value="não">Não</option>
+              <option value="sim">Sim</option>
+            </select>
+          </div>
+
+          {isVolleyball && (
+            <div className={styles.form}>
+              <p className={styles.label}>Placar Sets</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={setScores}
+                onChange={(e) => setSetScores(e.target.value)}
+              />
+            </div>
+          )}
 
           <div className={styles.form}>
             <p className={styles.label}>PDF do Jogo</p>
