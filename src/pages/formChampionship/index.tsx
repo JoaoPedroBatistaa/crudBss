@@ -30,7 +30,7 @@ interface ChampionShip {
   groups?: { groupName: string; count: number; dataMatrix: TableData[] }[]; // Opcional, usado para "grupo"
   mataMataData?: {
     faseName: string;
-    partidas: { timeA: string; timeB: string }[];
+    partidas: { timeA: string; logoA: string; timeB: string; logoB: string }[];
   }[]; // Opcional, usado para "mataMata"
   count: number;
   championshipType?: string; // Inclua também o tipo de campeonato
@@ -84,20 +84,31 @@ export default function NewFormChampionship({
   };
 
   const [mataMataData, setMataMataData] = useState([
-    { faseName: "", partidas: [{ timeA: "", timeB: "" }] },
+    {
+      faseName: "",
+      partidas: [{ timeA: "", logoA: "", timeB: "", logoB: "" }],
+    },
     // ...outras fases conforme necessário
   ]);
 
   const addPartida = (faseIndex: any) => {
     const newMataMataData = [...mataMataData];
-    newMataMataData[faseIndex].partidas.push({ timeA: "", timeB: "" });
+    newMataMataData[faseIndex].partidas.push({
+      timeA: "",
+      logoA: "",
+      timeB: "",
+      logoB: "",
+    });
     setMataMataData(newMataMataData);
   };
 
   const addFase = () => {
     setMataMataData([
       ...mataMataData,
-      { faseName: "", partidas: [{ timeA: "", timeB: "" }] },
+      {
+        faseName: "",
+        partidas: [{ timeA: "", logoA: "", timeB: "", logoB: "" }],
+      },
     ]);
   };
 
@@ -723,11 +734,19 @@ export default function NewFormChampionship({
                             ) {
                               newMataMataData[faseIndex].partidas[
                                 partidaIndex
-                              ] = { timeA: "", timeB: "" };
+                              ] = {
+                                timeA: "",
+                                logoA: "",
+                                timeB: "",
+                                logoB: "",
+                              };
                             }
                             newMataMataData[faseIndex].partidas[
                               partidaIndex
                             ].timeA = team.name;
+                            newMataMataData[faseIndex].partidas[
+                              partidaIndex
+                            ].logoA = team.logo;
                             setMataMataData(newMataMataData);
                           }}
                         />
@@ -742,11 +761,19 @@ export default function NewFormChampionship({
                             ) {
                               newMataMataData[faseIndex].partidas[
                                 partidaIndex
-                              ] = { timeA: "", timeB: "" };
+                              ] = {
+                                timeA: "",
+                                logoA: "",
+                                timeB: "",
+                                logoB: "",
+                              };
                             }
                             newMataMataData[faseIndex].partidas[
                               partidaIndex
                             ].timeB = team.name;
+                            newMataMataData[faseIndex].partidas[
+                              partidaIndex
+                            ].logoB = team.logo;
                             setMataMataData(newMataMataData);
                           }}
                         />
