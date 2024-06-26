@@ -26,26 +26,7 @@ interface Modality {
 interface PlayerDetail {
   id: string;
   name: string;
-  photo: string; // Ou 'logo', dependendo da propriedade real no seu objeto Item
-}
-
-interface Matche {
-  championship: string; // Mantém como string, ajuste conforme necessário
-  date: Date;
-  modality: string; // Mantém como string, ajuste conforme necessário
-  team_1: {
-    score: number;
-    team_id: string; // Considere mudar para um objeto ou ID se necessário
-  };
-  team_2: {
-    score: number;
-    team_id: string; // Considere mudar para um objeto ou ID se necessário
-  };
-  venue: string;
-  time: string;
-  king: PlayerDetail | null;
-  topScorer: PlayerDetail | null;
-  mvp: PlayerDetail | null;
+  photo: string;
 }
 
 interface Item {
@@ -73,7 +54,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
     null
   );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedFileName, setSelectedFileName] = useState<string>(""); // Novo estado para armazenar o nome do arquivo
+  const [selectedFileName, setSelectedFileName] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -85,10 +66,9 @@ export default function FormNewMatche({ data }: { data: Modality }) {
   const [selectedMVP, setSelectedMVP] = useState<Player | null>(null);
 
   const [isVolleyball, setIsVolleyball] = useState(false);
-  const [setScores, setSetScores] = useState("");
+  const [setScores, setSetScores] = useState({ set1: "", set2: "", set3: "" });
 
   const handleSelectTopScorer = (items: Player[]) => {
-    // Assumindo que você só está interessado no primeiro item para esses casos
     const item = items[0];
     setSelectedTopScorer(item);
   };
@@ -132,12 +112,11 @@ export default function FormNewMatche({ data }: { data: Modality }) {
           },
           venue: selectedVenue,
           time: selectedTime,
-          // Salva id, name, e logo/photo para cada seleção
           king: selectedThreePointKing
             ? {
                 id: selectedThreePointKing.id,
                 name: selectedThreePointKing.name,
-                photo: selectedThreePointKing.photo, // Substitua 'logo' por 'photo' se necessário
+                photo: selectedThreePointKing.photo,
               }
             : null,
           topScorer: selectedTopScorer
@@ -184,9 +163,9 @@ export default function FormNewMatche({ data }: { data: Modality }) {
         setSelectedTeamTwo(null);
         setSelectedChampionship(null);
         setSelectedFile(null);
-        setSelectedFileName(""); // Limpar o nome do arquivo selecionado
+        setSelectedFileName("");
         setIsVolleyball(false);
-        setSetScores("");
+        setSetScores({ set1: "", set2: "", set3: "" });
         toast.success("Jogo cadastrado com sucesso!");
         router.push("newGame?mdl=" + data.id);
         console.log("Novo jogo salvo com sucesso no Firestore!");
@@ -195,19 +174,23 @@ export default function FormNewMatche({ data }: { data: Modality }) {
         toast.error("Erro ao cadastrar jogo!");
         console.error("Erro ao salvar o novo jogo:", error);
       }
-    } else if (!selectedTeam1Score) {
-      toast.error("Preencha o placar do time 01");
-    } else if (!selectedTeam2Score) {
-      toast.error("Preencha o placar do time 02");
+    } else {
+      if (!selectedTeam1Score) {
+        toast.error("Preencha o placar do time 01");
+      } else {
+        toast.error("Preencha o placar do time 02");
+      }
     }
   }
 
   const handleSelectTeamOne = (item: Item) => {
     setSelectedTeamOne(item);
   };
+
   const handleSelectTeamTwo = (item: Item) => {
     setSelectedTeamTwo(item);
   };
+
   const handleSelectChampionship = (item: Item) => {
     setSelectedChampionship(item);
   };
@@ -215,7 +198,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     setSelectedFile(file || null);
-    setSelectedFileName(file?.name || ""); // Atualizar o nome do arquivo selecionado
+    setSelectedFileName(file?.name || "");
   }
 
   function HandleBackButtonClick() {
@@ -228,7 +211,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
     <Spinner />
   ) : (
     <>
-      <HomeButton></HomeButton>
+      <HomeButton />
 
       <div className={styles.Container}>
         <div className={styles.Card}>
@@ -257,7 +240,6 @@ export default function FormNewMatche({ data }: { data: Modality }) {
             <p className={styles.label}>Cestinha</p>
             <SearchSelect
               // @ts-ignore
-
               onSelectItems={(items) => handleSelectTopScorer(items[0])}
             />
           </div>
@@ -266,7 +248,6 @@ export default function FormNewMatche({ data }: { data: Modality }) {
             <p className={styles.label}>Rei dos Três</p>
             <SearchSelect
               // @ts-ignore
-
               onSelectItems={(items) => handleSelectThreePointKing(items[0])}
             />
           </div>
@@ -275,7 +256,6 @@ export default function FormNewMatche({ data }: { data: Modality }) {
             <p className={styles.label}>MVP</p>
             <SearchSelect
               // @ts-ignore
-
               onSelectItems={(items) => handleSelectMVP(items[0])}
             />
           </div>
@@ -353,15 +333,41 @@ export default function FormNewMatche({ data }: { data: Modality }) {
           </div>
 
           {isVolleyball && (
-            <div className={styles.form}>
-              <p className={styles.label}>Placar Sets</p>
-              <input
-                className={styles.field}
-                type="text"
-                value={setScores}
-                onChange={(e) => setSetScores(e.target.value)}
-              />
-            </div>
+            <>
+              <div className={styles.form}>
+                <p className={styles.label}>Placar Set 1</p>
+                <input
+                  className={styles.field}
+                  type="text"
+                  value={setScores.set1}
+                  onChange={(e) =>
+                    setSetScores({ ...setScores, set1: e.target.value })
+                  }
+                />
+              </div>
+              <div className={styles.form}>
+                <p className={styles.label}>Placar Set 2</p>
+                <input
+                  className={styles.field}
+                  type="text"
+                  value={setScores.set2}
+                  onChange={(e) =>
+                    setSetScores({ ...setScores, set2: e.target.value })
+                  }
+                />
+              </div>
+              <div className={styles.form}>
+                <p className={styles.label}>Placar Set 3</p>
+                <input
+                  className={styles.field}
+                  type="text"
+                  value={setScores.set3}
+                  onChange={(e) =>
+                    setSetScores({ ...setScores, set3: e.target.value })
+                  }
+                />
+              </div>
+            </>
           )}
 
           <div className={styles.form}>

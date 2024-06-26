@@ -19,16 +19,20 @@ interface ChampionShip {
   id: string;
   name: string;
   logo: string | File | null;
-  criterion: string;
   description: string;
-  dataMatrix: TableData[]; // Usado para "todosContraTodos"
-  groups?: { groupName: string; count: number; dataMatrix: TableData[] }[]; // Opcional, usado para "grupo"
+  phases: Phase[];
+}
+
+interface Phase {
+  id: number;
+  type: string;
+  count: number;
+  dataMatrix: TableData[];
+  groups?: { groupName: string; count: number; dataMatrix: TableData[] }[];
   mataMataData?: {
     faseName: string;
-    partidas: { timeA: string; timeB: string }[];
-  }[]; // Opcional, usado para "mataMata"
-  count: number;
-  championshipType?: string; // Inclua também o tipo de campeonato
+    partidas: { timeA: string; logoA: string; timeB: string; logoB: string }[];
+  }[];
 }
 
 interface Item {
@@ -37,15 +41,13 @@ interface Item {
   logo: string;
 }
 
+interface Criterion {
+  name: string;
+  type: string;
+}
+
 type TableData = {
-  time: string;
-  position: string;
-  victories: string;
-  logo: string;
-  jogos: string;
-  derrotas: string;
-  saldo: string;
-  pontos: string; // Adicione esta linha
+  [key: string]: string | number;
 };
 
 export default function EditChampionship() {
@@ -53,17 +55,11 @@ export default function EditChampionship() {
     id: "",
     name: "",
     logo: null,
-    criterion: "",
     description: "",
-    dataMatrix: [],
-    groups: [], // Inicialize grupos
-    mataMataData: [], // Inicialize mataMataData
-    count: 0,
-    championshipType: "todosContraTodos", // Inicialize o tipo de campeonato
+    phases: [],
   });
 
-  const [selectedTeamOne, setSelectedTeamOne] = useState<Item | null>(null);
-
+  const [criteria, setCriteria] = useState<Criterion[]>([]);
   const router = useRouter();
   const { id } = router.query;
 
@@ -104,8 +100,23 @@ export default function EditChampionship() {
         if (championshipDoc.exists()) {
           const championship = championshipDoc.data() as ChampionShip;
           setChampionshipData(championship);
-          setDataMatrix(championship.dataMatrix || []);
-          setCount(championship.count || 0);
+
+          // Extract criteria from dataMatrix
+          if (championship.phases.length > 0) {
+            const todosContraTodosPhase = championship.phases.find(
+              (phase) => phase.type === "todosContraTodos"
+            );
+            if (
+              todosContraTodosPhase &&
+              todosContraTodosPhase.dataMatrix.length > 0
+            ) {
+              const sampleData = todosContraTodosPhase.dataMatrix[0];
+              const extractedCriteria = Object.keys(sampleData)
+                .filter((key) => key !== "time" && key !== "logo")
+                .map((key) => ({ name: key, type: typeof sampleData[key] }));
+              setCriteria(extractedCriteria);
+            }
+          }
         } else {
           console.log("No championship exists with this ID.");
         }
@@ -127,7 +138,7 @@ export default function EditChampionship() {
     }
 
     try {
-      let updatedChampionshipData = { ...championshipData, dataMatrix, count };
+      let updatedChampionshipData = { ...championshipData };
 
       if (updatedChampionshipData.logo instanceof File) {
         const storage = getStorage();
@@ -152,7 +163,6 @@ export default function EditChampionship() {
       );
 
       toast.success("Campeonato atualizado com sucesso!");
-      // router.push("/newChampionship");
     } catch (error) {
       console.error("Erro ao atualizar o campeonato: ", error);
       toast.error("Erro ao atualizar o campeonato.");
@@ -163,129 +173,143 @@ export default function EditChampionship() {
     window.history.back();
   }
 
-  const handleSelectTeamOne = (item: Item) => {
-    setSelectedTeamOne(item);
-  };
-
-  const [count, setCount] = useState(0);
-  const [dataMatrix, setDataMatrix] = useState<TableData[]>([]);
-
-  const handleInputTableChange = (e: { target: HTMLInputElement }) => {
-    const input = e.target as HTMLInputElement;
-    const value = parseInt(input.value);
-    if (!isNaN(value)) {
-      setCount(value);
-    }
-  };
-
-  const addNewGroup = () => {
-    const updatedChampionshipData: ChampionShip = { ...championshipData };
-
-    if (!updatedChampionshipData.groups) {
-      updatedChampionshipData.groups = [];
-    }
-
-    updatedChampionshipData.groups.push({
-      groupName: "",
-      count: 0,
-      dataMatrix: [],
-    });
-
-    setChampionshipData(updatedChampionshipData);
-  };
-
-  const handleGroupInputChange = (
-    groupIndex: number,
+  const handleTableInputChange = (
+    phaseIndex: number,
     rowIndex: number,
-    field: keyof TableData,
+    type: string,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const updatedChampionshipData: ChampionShip = { ...championshipData };
+    const updatedPhases = [...championshipData.phases];
+    const value =
+      e.target.type === "number" ? parseInt(e.target.value) : e.target.value;
 
-    if (
-      updatedChampionshipData.groups &&
-      updatedChampionshipData.groups[groupIndex]
-    ) {
-      if (!updatedChampionshipData.groups[groupIndex].dataMatrix) {
-        updatedChampionshipData.groups[groupIndex].dataMatrix = [];
-      }
-
-      if (!updatedChampionshipData.groups[groupIndex].dataMatrix[rowIndex]) {
-        updatedChampionshipData.groups[groupIndex].dataMatrix[rowIndex] = {
-          time: "",
-          position: "",
-          victories: "",
-          logo: "",
-          saldo: "",
-          derrotas: "",
-          pontos: "",
-          jogos: "",
-        };
-      }
-
-      updatedChampionshipData.groups[groupIndex].dataMatrix[rowIndex][field] =
-        e.target.value;
-
-      setChampionshipData(updatedChampionshipData);
+    if (!updatedPhases[phaseIndex].dataMatrix[rowIndex]) {
+      updatedPhases[phaseIndex].dataMatrix[rowIndex] = {
+        time: "",
+        logo: "",
+      };
+      criteria.forEach((criterion) => {
+        updatedPhases[phaseIndex].dataMatrix[rowIndex][criterion.name] = "";
+      });
     }
-  };
-
-  const addFase = () => {
-    const newFase = {
-      faseName: "",
-      partidas: [],
-    };
-
+    updatedPhases[phaseIndex].dataMatrix[rowIndex][type] = value;
     setChampionshipData((prevState) => ({
       ...prevState,
-      mataMataData: [...(prevState.mataMataData || []), newFase],
+      phases: updatedPhases,
     }));
   };
 
-  const addPartida = (faseIndex: any) => {
-    const newPartida = {
-      timeA: "",
-      timeB: "",
-    };
-
-    setChampionshipData((prevState) => {
-      const updatedMataMataData = [...(prevState.mataMataData || [])];
-      if (updatedMataMataData[faseIndex]) {
-        updatedMataMataData[faseIndex].partidas = [
-          ...(updatedMataMataData[faseIndex].partidas || []),
-          newPartida,
-        ];
-      }
-      return {
-        ...prevState,
-        mataMataData: updatedMataMataData,
-      };
-    });
-  };
-
-  const handleTableInputChange = (
-    index: number,
-    type: keyof TableData,
+  const handleGroupInputChange = (
+    phaseIndex: number,
+    groupIndex: number,
+    rowIndex: number,
+    field: string,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const updatedMatrix = [...dataMatrix];
-    if (!updatedMatrix[index]) {
-      updatedMatrix[index] = {
+    const updatedPhases = [...championshipData.phases];
+    const updatedGroups = updatedPhases[phaseIndex].groups || [];
+
+    if (!updatedGroups[groupIndex].dataMatrix[rowIndex]) {
+      updatedGroups[groupIndex].dataMatrix[rowIndex] = {
         time: "",
-        position: "",
-        victories: "",
         logo: "",
-        saldo: "",
-        derrotas: "",
-        pontos: "",
-        jogos: "",
       };
+      criteria.forEach((criterion) => {
+        updatedGroups[groupIndex].dataMatrix[rowIndex][criterion.name] = "";
+      });
     }
-    updatedMatrix[index][type] = e.target.value;
-    setDataMatrix(updatedMatrix);
+
+    updatedGroups[groupIndex].dataMatrix[rowIndex][field] =
+      e.target.type === "number" ? parseInt(e.target.value) : e.target.value;
+
+    updatedPhases[phaseIndex].groups = updatedGroups;
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      phases: updatedPhases,
+    }));
   };
 
-  console.log(dataMatrix);
+  const handleCriterionChange = (name: string, value: string) => {
+    const updatedCriteria = criteria.map((criterion) =>
+      criterion.name === name ? { ...criterion, name: value } : criterion
+    );
+    setCriteria(updatedCriteria);
+  };
+
+  const addNewCriterion = () => {
+    setCriteria([...criteria, { name: "", type: "number" }]);
+  };
+
+  const removeCriterion = (name: string) => {
+    const updatedCriteria = criteria.filter(
+      (criterion) => criterion.name !== name
+    );
+    const updatedPhases = championshipData.phases.map((phase) => {
+      if (phase.type === "todosContraTodos") {
+        const updatedDataMatrix = phase.dataMatrix.map((row) => {
+          const newRow = { ...row };
+          delete newRow[name];
+          return newRow;
+        });
+        return { ...phase, dataMatrix: updatedDataMatrix };
+      }
+      return phase;
+    });
+    setCriteria(updatedCriteria);
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      phases: updatedPhases,
+    }));
+  };
+
+  const addNewGroup = (phaseIndex: number) => {
+    const updatedPhases = [...championshipData.phases];
+    const updatedGroups = updatedPhases[phaseIndex].groups || [];
+    updatedGroups.push({ groupName: "", count: 0, dataMatrix: [] });
+    updatedPhases[phaseIndex].groups = updatedGroups;
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      phases: updatedPhases,
+    }));
+  };
+
+  const addFase = (phaseIndex: number) => {
+    const updatedPhases = [...championshipData.phases];
+    const newFase = { faseName: "", partidas: [] };
+    updatedPhases[phaseIndex].mataMataData = [
+      ...(updatedPhases[phaseIndex].mataMataData || []),
+      newFase,
+    ];
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      phases: updatedPhases,
+    }));
+  };
+
+  const addPartida = (phaseIndex: number, faseIndex: number) => {
+    const updatedPhases = [...championshipData.phases];
+    const newPartida = { timeA: "", timeB: "", logoA: "", logoB: "" };
+    updatedPhases[phaseIndex].mataMataData![faseIndex].partidas.push(
+      newPartida
+    );
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      phases: updatedPhases,
+    }));
+  };
+
+  const addNewPhase = () => {
+    const newPhase = {
+      id: championshipData.phases.length + 1,
+      type: "todosContraTodos",
+      count: 0,
+      dataMatrix: [],
+    };
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      phases: [...prevState.phases, newPhase],
+    }));
+  };
 
   return (
     <>
@@ -320,18 +344,28 @@ export default function EditChampionship() {
             </div>
 
             <div className={styles.form}>
-              <p className={styles.label}>Critério do Campeonato</p>
-              <select
-                className={styles.field}
-                name="criterion"
-                value={championshipData.criterion}
-                onChange={handleSelectChange}
-              >
-                <option value="">Selecione um critério</option>
-                <option value="critério1">Critério 1</option>
-                <option value="critério2">Critério 2</option>
-                <option value="critério3">Critério 3</option>
-              </select>
+              <p className={styles.label}>Critérios do Campeonato</p>
+              {criteria.map((criterion, index) => (
+                <div key={index} className={styles.criterion}>
+                  <input
+                    type="text"
+                    value={criterion.name}
+                    onChange={(e) =>
+                      handleCriterionChange(criterion.name, e.target.value)
+                    }
+                    placeholder="Nome do Critério"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeCriterion(criterion.name)}
+                  >
+                    Remover
+                  </button>
+                </div>
+              ))}
+              <button type="button" onClick={addNewCriterion}>
+                Adicionar Critério
+              </button>
             </div>
 
             <div className={styles.form}>
@@ -344,523 +378,350 @@ export default function EditChampionship() {
               />
             </div>
 
-            <div className={styles.form}>
-              <p className={styles.label}>Tipo de Classificação</p>
-              <select
-                id="championshipType"
-                className={styles.field}
-                value={championshipData.championshipType}
-                onChange={(e) =>
-                  setChampionshipData((prevState) => ({
-                    ...prevState,
-                    championshipType: e.target.value,
-                  }))
-                }
-              >
-                <option value="todosContraTodos">Todos contra todos</option>
-                <option value="grupo">Grupo</option>
-                <option value="mataMata">Mata Mata</option>
-              </select>
-            </div>
+            {championshipData.phases.map((phase, phaseIndex) => (
+              <div key={phase.id} className={styles.form}>
+                <p className={styles.label}>Tipo de Classificação</p>
+                <select
+                  className={styles.field}
+                  value={phase.type}
+                  onChange={(e) => {
+                    const updatedPhases = [...championshipData.phases];
+                    updatedPhases[phaseIndex].type = e.target.value;
+                    setChampionshipData((prevState) => ({
+                      ...prevState,
+                      phases: updatedPhases,
+                    }));
+                  }}
+                >
+                  <option value="todosContraTodos">Todos contra todos</option>
+                  <option value="grupo">Grupo</option>
+                  <option value="mataMata">Mata Mata</option>
+                </select>
 
-            {championshipData.championshipType === "todosContraTodos" && (
-              <div className={styles.form}>
-                <div className={styles.headTable}>
-                  <p className={styles.label}>
-                    Tabela do Campeonato - insira o Nº posições
-                  </p>
-                  <input
-                    type="text"
-                    id="positions"
-                    className={styles.pos}
-                    pattern="\d*"
-                    onInput={(e) => {
-                      const input = e.currentTarget as HTMLInputElement;
-                      const value = parseInt(input.value);
-                      if (!isNaN(value)) {
-                        setCount(value);
-                      }
-                    }}
-                  />
-                </div>
-
-                {/* Renderização condicional para edição */}
-                {Array.from({ length: count }).map((_, index) => (
-                  <div key={index} className={styles.table}>
-                    <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>P</p>
-                      <input
-                        type="number"
-                        className={styles.positionL}
-                        pattern="\d*"
-                        value={
-                          championshipData.dataMatrix[index]?.position || ""
-                        }
-                        onChange={(e) =>
-                          handleTableInputChange(index, "position", e)
-                        }
-                      />
-                    </div>
-
-                    <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>
-                        Time ({championshipData.dataMatrix[index]?.time || ""})
-                      </p>
-                      <SearchSelectTeam
-                        onSelectItem={(team: Item) => {
-                          const updatedMatrix = [
-                            ...championshipData.dataMatrix,
-                          ];
-                          if (!updatedMatrix[index]) {
-                            updatedMatrix[index] = {
-                              time: "",
-                              position: "",
-                              victories: "",
-                              logo: "",
-                              saldo: "",
-                              derrotas: "",
-                              pontos: "",
-                              jogos: "",
-                            };
-                          }
-                          updatedMatrix[index].time = team.name;
-                          updatedMatrix[index].logo = team.logo; // Salva o logo
-                          setChampionshipData((prevState) => ({
-                            ...prevState,
-                            dataMatrix: updatedMatrix,
-                          }));
-                        }}
-                      />
-                    </div>
-
-                    <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>Pts</p>
-                      <input
-                        type="number"
-                        className={styles.position}
-                        pattern="\d*"
-                        value={championshipData.dataMatrix[index]?.pontos || ""}
-                        onChange={(e) =>
-                          handleTableInputChange(index, "pontos", e)
-                        }
-                      />
-                    </div>
-
-                    <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>V</p>
-                      <input
-                        type="number"
-                        className={styles.position}
-                        pattern="\d*"
-                        value={
-                          championshipData.dataMatrix[index]?.victories || ""
-                        }
-                        onChange={(e) =>
-                          handleTableInputChange(index, "victories", e)
-                        }
-                      />
-                    </div>
-
-                    <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>D</p>
-                      <input
-                        type="number"
-                        className={styles.position}
-                        pattern="\d*"
-                        value={
-                          championshipData.dataMatrix[index]?.derrotas || ""
-                        }
-                        onChange={(e) =>
-                          handleTableInputChange(index, "derrotas", e)
-                        }
-                      />
-                    </div>
-
-                    <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>S</p>
-                      <input
-                        type="number"
-                        className={styles.position}
-                        pattern="\d*"
-                        value={championshipData.dataMatrix[index]?.saldo || ""}
-                        onChange={(e) =>
-                          handleTableInputChange(index, "saldo", e)
-                        }
-                      />
-                    </div>
-
-                    <div className={styles.tableItem}>
-                      <p className={styles.tableLabel}>J</p>
-                      <input
-                        type="number"
-                        className={styles.positionD}
-                        pattern="\d*"
-                        value={championshipData.dataMatrix[index]?.jogos || ""}
-                        onChange={(e) =>
-                          handleTableInputChange(index, "jogos", e)
-                        }
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {championshipData.championshipType === "grupo" && (
-              <>
-                {(championshipData.groups || []).map((group, groupIndex) => (
-                  <div key={groupIndex}>
-                    <div className={styles.form}>
-                      <p className={styles.label}>Nome do Grupo</p>
-                      <input
-                        type="text"
-                        className={styles.field}
-                        value={group.groupName}
-                        onChange={(e) => {
-                          const updatedGroups = [
-                            ...(championshipData.groups || []),
-                          ];
-                          updatedGroups[groupIndex].groupName = e.target.value;
-                          setChampionshipData((prevState) => ({
-                            ...prevState,
-                            groups: updatedGroups,
-                          }));
-                        }}
-                      />
-                    </div>
-
+                {phase.type === "todosContraTodos" && (
+                  <>
                     <div className={styles.headTable}>
                       <p className={styles.label}>
-                        Tabela do Grupo - insira o Nº posições
+                        Tabela do Campeonato - Nº de posições
                       </p>
                       <input
                         type="text"
                         className={styles.pos}
                         pattern="\d*"
-                        onInput={(e) => {
-                          const value = parseInt(e.currentTarget.value);
-                          if (!isNaN(value)) {
-                            const updatedGroups = [
-                              ...(championshipData.groups || []),
-                            ];
-                            updatedGroups[groupIndex].count = value;
-                            setChampionshipData((prevState) => ({
-                              ...prevState,
-                              groups: updatedGroups,
-                            }));
-                          }
-                        }}
+                        value={phase.count}
+                        readOnly
                       />
                     </div>
 
-                    {Array.from({ length: group.count }).map((_, rowIndex) => (
+                    {Array.from({ length: phase.count }).map((_, rowIndex) => (
                       <div key={rowIndex} className={styles.table}>
                         <div className={styles.tableItem}>
-                          <p className={styles.tableLabel}>P</p>
-                          <input
-                            type="number"
-                            className={styles.positionL}
-                            pattern="\d*"
-                            value={
-                              (championshipData.groups &&
-                                championshipData.groups[groupIndex]?.dataMatrix[
-                                  rowIndex
-                                ]?.position) ||
-                              ""
-                            }
-                            onChange={(e) =>
-                              handleGroupInputChange(
-                                groupIndex,
-                                rowIndex,
-                                "position",
-                                e
-                              )
-                            }
-                          />
-                        </div>
-
-                        <div className={styles.tableItem}>
-                          <p className={styles.tableLabel}>
-                            Time (
-                            {(championshipData.groups &&
-                              championshipData.groups[groupIndex]?.dataMatrix[
-                                rowIndex
-                              ]?.time) ||
-                              ""}
-                            )
-                          </p>
+                          <p className={styles.tableLabel}>Time</p>
                           <SearchSelectTeam
                             onSelectItem={(team: Item) => {
-                              const updatedGroups = [
-                                ...(championshipData.groups || []),
+                              const updatedPhases = [
+                                ...championshipData.phases,
                               ];
                               if (
-                                !updatedGroups[groupIndex].dataMatrix[rowIndex]
+                                !updatedPhases[phaseIndex].dataMatrix[rowIndex]
                               ) {
-                                updatedGroups[groupIndex].dataMatrix[rowIndex] =
+                                updatedPhases[phaseIndex].dataMatrix[rowIndex] =
                                   {
                                     time: "",
-                                    position: "",
-                                    victories: "",
                                     logo: "",
-                                    saldo: "",
-                                    derrotas: "",
-                                    pontos: "",
-                                    jogos: "",
                                   };
                               }
-                              updatedGroups[groupIndex].dataMatrix[
+                              updatedPhases[phaseIndex].dataMatrix[
                                 rowIndex
                               ].time = team.name;
-                              updatedGroups[groupIndex].dataMatrix[
+                              updatedPhases[phaseIndex].dataMatrix[
                                 rowIndex
                               ].logo = team.logo;
                               setChampionshipData((prevState) => ({
                                 ...prevState,
-                                groups: updatedGroups,
+                                phases: updatedPhases,
                               }));
                             }}
                           />
                         </div>
-                        <div className={styles.tableItem}>
-                          <p className={styles.tableLabel}>Pts</p>
-                          <input
-                            type="number"
-                            className={styles.position}
-                            pattern="\d*"
-                            value={
-                              (championshipData.groups &&
-                                championshipData.groups[groupIndex]?.dataMatrix[
-                                  rowIndex
-                                ]?.pontos) ||
-                              ""
-                            }
-                            onChange={(e) =>
-                              handleGroupInputChange(
-                                groupIndex,
-                                rowIndex,
-                                "pontos",
-                                e
-                              )
-                            }
-                          />
-                        </div>
-
-                        <div className={styles.tableItem}>
-                          <p className={styles.tableLabel}>V</p>
-                          <input
-                            type="number"
-                            className={styles.position}
-                            pattern="\d*"
-                            value={
-                              (championshipData.groups &&
-                                championshipData.groups[groupIndex]?.dataMatrix[
-                                  rowIndex
-                                ]?.victories) ||
-                              ""
-                            }
-                            onChange={(e) =>
-                              handleGroupInputChange(
-                                groupIndex,
-                                rowIndex,
-                                "victories",
-                                e
-                              )
-                            }
-                          />
-                        </div>
-
-                        <div className={styles.tableItem}>
-                          <p className={styles.tableLabel}>D</p>
-                          <input
-                            type="number"
-                            className={styles.position}
-                            pattern="\d*"
-                            value={
-                              (championshipData.groups &&
-                                championshipData.groups[groupIndex]?.dataMatrix[
-                                  rowIndex
-                                ]?.derrotas) ||
-                              ""
-                            }
-                            onChange={(e) =>
-                              handleGroupInputChange(
-                                groupIndex,
-                                rowIndex,
-                                "derrotas",
-                                e
-                              )
-                            }
-                          />
-                        </div>
-
-                        <div className={styles.tableItem}>
-                          <p className={styles.tableLabel}>S</p>
-                          <input
-                            type="number"
-                            className={styles.position}
-                            pattern="\d*"
-                            value={
-                              (championshipData.groups &&
-                                championshipData.groups[groupIndex]?.dataMatrix[
-                                  rowIndex
-                                ]?.saldo) ||
-                              ""
-                            }
-                            onChange={(e) =>
-                              handleGroupInputChange(
-                                groupIndex,
-                                rowIndex,
-                                "saldo",
-                                e
-                              )
-                            }
-                          />
-                        </div>
-
-                        <div className={styles.tableItem}>
-                          <p className={styles.tableLabel}>J</p>
-                          <input
-                            type="number"
-                            className={styles.positionD}
-                            pattern="\d*"
-                            value={
-                              (championshipData.groups &&
-                                championshipData.groups[groupIndex]?.dataMatrix[
-                                  rowIndex
-                                ]?.jogos) ||
-                              ""
-                            }
-                            onChange={(e) =>
-                              handleGroupInputChange(
-                                groupIndex,
-                                rowIndex,
-                                "jogos",
-                                e
-                              )
-                            }
-                          />
-                        </div>
+                        {criteria.map((criterion, i) => (
+                          <div key={i} className={styles.tableItem}>
+                            <p className={styles.tableLabel}>
+                              {criterion.name.slice(0, 2)}
+                            </p>
+                            <input
+                              type={criterion.type}
+                              className={styles.position}
+                              value={
+                                (phase.dataMatrix[rowIndex] &&
+                                  phase.dataMatrix[rowIndex][criterion.name]) ||
+                                ""
+                              }
+                              onChange={(e) =>
+                                handleTableInputChange(
+                                  phaseIndex,
+                                  rowIndex,
+                                  criterion.name,
+                                  e
+                                )
+                              }
+                            />
+                          </div>
+                        ))}
                       </div>
                     ))}
-                  </div>
-                ))}
-
-                <button onClick={addNewGroup} className={styles.newPlayer}>
-                  Adicionar Novo Grupo
-                </button>
-              </>
-            )}
-
-            {championshipData.championshipType === "mataMata" && (
-              <>
-                {(championshipData.mataMataData || []).map(
-                  (fase, faseIndex) => (
-                    <div key={faseIndex}>
-                      <div className={styles.form}>
-                        <p className={styles.label}>Nome da fase</p>
-                        <input
-                          type="text"
-                          className={styles.field}
-                          value={fase.faseName}
-                          onChange={(e) => {
-                            const updatedMataMataData = [
-                              ...(championshipData.mataMataData || []),
-                            ];
-                            updatedMataMataData[faseIndex].faseName =
-                              e.target.value;
-                            setChampionshipData((prevState) => ({
-                              ...prevState,
-                              mataMataData: updatedMataMataData,
-                            }));
-                          }}
-                          placeholder="Nome da Fase"
-                        />
-                      </div>
-
-                      {fase.partidas.map((partida, partidaIndex) => (
-                        <div key={partidaIndex}>
-                          <div className={styles.tableItem}>
-                            <p className={styles.tableLabel}>
-                              Time A ({partida.timeA})
-                            </p>
-                            <SearchSelectTeam
-                              onSelectItem={(team: Item) => {
-                                const updatedMataMataData = [
-                                  ...(championshipData.mataMataData || []),
-                                ];
-                                if (
-                                  !updatedMataMataData[faseIndex].partidas[
-                                    partidaIndex
-                                  ]
-                                ) {
-                                  updatedMataMataData[faseIndex].partidas[
-                                    partidaIndex
-                                  ] = {
-                                    timeA: "",
-                                    timeB: "",
-                                  };
-                                }
-                                updatedMataMataData[faseIndex].partidas[
-                                  partidaIndex
-                                ].timeA = team.name;
-                                setChampionshipData((prevState) => ({
-                                  ...prevState,
-                                  mataMataData: updatedMataMataData,
-                                }));
-                              }}
-                            />
-                          </div>
-                          <div className={styles.tableItem}>
-                            <p className={styles.tableLabel}>
-                              Time B ({partida.timeB})
-                            </p>
-                            <SearchSelectTeam
-                              onSelectItem={(team: Item) => {
-                                const updatedMataMataData = [
-                                  ...(championshipData.mataMataData || []),
-                                ];
-                                if (
-                                  !updatedMataMataData[faseIndex].partidas[
-                                    partidaIndex
-                                  ]
-                                ) {
-                                  updatedMataMataData[faseIndex].partidas[
-                                    partidaIndex
-                                  ] = {
-                                    timeA: "",
-                                    timeB: "",
-                                  };
-                                }
-                                updatedMataMataData[faseIndex].partidas[
-                                  partidaIndex
-                                ].timeB = team.name;
-                                setChampionshipData((prevState) => ({
-                                  ...prevState,
-                                  mataMataData: updatedMataMataData,
-                                }));
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-
-                      <button
-                        onClick={() => addPartida(faseIndex)}
-                        className={styles.newPlayer}
-                      >
-                        Adicionar Partida
-                      </button>
-                    </div>
-                  )
+                  </>
                 )}
 
-                <button onClick={addFase} className={styles.newPlayer}>
-                  Adicionar Fase
-                </button>
-              </>
-            )}
+                {phase.type === "grupo" && (
+                  <>
+                    {phase.groups?.map((group, groupIndex) => (
+                      <div key={groupIndex}>
+                        <div className={styles.form}>
+                          <p className={styles.label}>Nome do Grupo</p>
+                          <input
+                            type="text"
+                            className={styles.field}
+                            value={group.groupName}
+                            onChange={(e) => {
+                              const updatedPhases = [
+                                ...championshipData.phases,
+                              ];
+                              updatedPhases[phaseIndex].groups![
+                                groupIndex
+                              ].groupName = e.target.value;
+                              setChampionshipData((prevState) => ({
+                                ...prevState,
+                                phases: updatedPhases,
+                              }));
+                            }}
+                          />
+                        </div>
+
+                        <div className={styles.headTable}>
+                          <p className={styles.label}>
+                            Tabela do Grupo - Nº de posições
+                          </p>
+                          <input
+                            type="text"
+                            className={styles.pos}
+                            pattern="\d*"
+                            value={group.count}
+                            readOnly
+                          />
+                        </div>
+
+                        {Array.from({ length: group.count }).map(
+                          (_, rowIndex) => (
+                            <div key={rowIndex} className={styles.table}>
+                              <div className={styles.tableItem}>
+                                <p className={styles.tableLabel}>Time</p>
+                                <SearchSelectTeam
+                                  onSelectItem={(team: Item) => {
+                                    const updatedPhases = [
+                                      ...championshipData.phases,
+                                    ];
+                                    if (
+                                      !updatedPhases[phaseIndex].groups![
+                                        groupIndex
+                                      ].dataMatrix[rowIndex]
+                                    ) {
+                                      updatedPhases[phaseIndex].groups![
+                                        groupIndex
+                                      ].dataMatrix[rowIndex] = {
+                                        time: "",
+                                        logo: "",
+                                      };
+                                    }
+                                    updatedPhases[phaseIndex].groups![
+                                      groupIndex
+                                    ].dataMatrix[rowIndex].time = team.name;
+                                    updatedPhases[phaseIndex].groups![
+                                      groupIndex
+                                    ].dataMatrix[rowIndex].logo = team.logo;
+                                    setChampionshipData((prevState) => ({
+                                      ...prevState,
+                                      phases: updatedPhases,
+                                    }));
+                                  }}
+                                />
+                              </div>
+                              {criteria.map((criterion, i) => (
+                                <div key={i} className={styles.tableItem}>
+                                  <p className={styles.tableLabel}>
+                                    {criterion.name.slice(0, 2)}
+                                  </p>
+                                  <input
+                                    type={criterion.type}
+                                    className={styles.position}
+                                    value={
+                                      (group.dataMatrix[rowIndex] &&
+                                        group.dataMatrix[rowIndex][
+                                          criterion.name
+                                        ]) ||
+                                      ""
+                                    }
+                                    onChange={(e) =>
+                                      handleGroupInputChange(
+                                        phaseIndex,
+                                        groupIndex,
+                                        rowIndex,
+                                        criterion.name,
+                                        e
+                                      )
+                                    }
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          )
+                        )}
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() => addNewGroup(phaseIndex)}
+                      className={styles.newPlayer}
+                    >
+                      Adicionar Novo Grupo
+                    </button>
+                  </>
+                )}
+
+                {phase.type === "mataMata" && (
+                  <>
+                    {phase.mataMataData?.map((fase, faseIndex) => (
+                      <div key={faseIndex}>
+                        <div className={styles.form}>
+                          <p className={styles.label}>Nome da fase</p>
+                          <input
+                            type="text"
+                            className={styles.field}
+                            value={fase.faseName}
+                            onChange={(e) => {
+                              const updatedPhases = [
+                                ...championshipData.phases,
+                              ];
+                              updatedPhases[phaseIndex].mataMataData![
+                                faseIndex
+                              ].faseName = e.target.value;
+                              setChampionshipData((prevState) => ({
+                                ...prevState,
+                                phases: updatedPhases,
+                              }));
+                            }}
+                            placeholder="Nome da Fase"
+                          />
+                        </div>
+
+                        {fase.partidas.map((partida, partidaIndex) => (
+                          <div key={partidaIndex}>
+                            <div className={styles.tableItem}>
+                              <p className={styles.tableLabel}>
+                                Time A ({partida.timeA})
+                              </p>
+                              <SearchSelectTeam
+                                onSelectItem={(team: Item) => {
+                                  const updatedPhases = [
+                                    ...championshipData.phases,
+                                  ];
+                                  if (
+                                    !updatedPhases[phaseIndex].mataMataData![
+                                      faseIndex
+                                    ].partidas[partidaIndex]
+                                  ) {
+                                    updatedPhases[phaseIndex].mataMataData![
+                                      faseIndex
+                                    ].partidas[partidaIndex] = {
+                                      timeA: "",
+                                      logoA: "",
+                                      timeB: "",
+                                      logoB: "",
+                                    };
+                                  }
+                                  updatedPhases[phaseIndex].mataMataData![
+                                    faseIndex
+                                  ].partidas[partidaIndex].timeA = team.name;
+                                  updatedPhases[phaseIndex].mataMataData![
+                                    faseIndex
+                                  ].partidas[partidaIndex].logoA = team.logo;
+                                  setChampionshipData((prevState) => ({
+                                    ...prevState,
+                                    phases: updatedPhases,
+                                  }));
+                                }}
+                              />
+                            </div>
+                            <div className={styles.tableItem}>
+                              <p className={styles.tableLabel}>
+                                Time B ({partida.timeB})
+                              </p>
+                              <SearchSelectTeam
+                                onSelectItem={(team: Item) => {
+                                  const updatedPhases = [
+                                    ...championshipData.phases,
+                                  ];
+                                  if (
+                                    !updatedPhases[phaseIndex].mataMataData![
+                                      faseIndex
+                                    ].partidas[partidaIndex]
+                                  ) {
+                                    updatedPhases[phaseIndex].mataMataData![
+                                      faseIndex
+                                    ].partidas[partidaIndex] = {
+                                      timeA: "",
+                                      logoA: "",
+                                      timeB: "",
+                                      logoB: "",
+                                    };
+                                  }
+                                  updatedPhases[phaseIndex].mataMataData![
+                                    faseIndex
+                                  ].partidas[partidaIndex].timeB = team.name;
+                                  updatedPhases[phaseIndex].mataMataData![
+                                    faseIndex
+                                  ].partidas[partidaIndex].logoB = team.logo;
+                                  setChampionshipData((prevState) => ({
+                                    ...prevState,
+                                    phases: updatedPhases,
+                                  }));
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+
+                        <button
+                          type="button"
+                          onClick={() => addPartida(phaseIndex, faseIndex)}
+                          className={styles.newPlayer}
+                        >
+                          Adicionar Partida
+                        </button>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() => addFase(phaseIndex)}
+                      className={styles.newPlayer}
+                    >
+                      Adicionar Fase
+                    </button>
+                  </>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addNewPhase}
+              className={styles.newPlayer}
+            >
+              Adicionar Nova Fase
+            </button>
           </form>
+
           <button onClick={handleClick} className={styles.save}>
             SALVAR
           </button>

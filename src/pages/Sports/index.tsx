@@ -70,6 +70,18 @@ function Sports() {
             </div>
           </Link>
 
+          <Link href={{ pathname: "/newHistoric" }}>
+            <div className={styles.categorie}>
+              <img
+                className={styles.categorieIcon}
+                src="./assets/noticias.png"
+                alt=""
+              />
+
+              <h1 className={styles.categorieName}>Histórico de campeões</h1>
+            </div>
+          </Link>
+
           <Link
             href={{
               pathname: "/Modality",
