@@ -53,6 +53,7 @@ export default function AddHistoricChampion() {
     value: string | Item | null
   ) => {
     const updatedChampions = [...champions];
+    // @ts-ignore
     updatedChampions[index][field] = value;
     setChampions(updatedChampions);
   };
