@@ -44,6 +44,9 @@ interface Team {
   instagram: string;
   whatsapp: string;
   informations: string;
+  teamCategory: string; // Adicionando campo de Categoria do time
+  categories: any;
+  createdAt: any;
 }
 
 const initialState = {
@@ -63,6 +66,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
   const [teamWhatsAppResponsible, setTeamWhatsAppResponsible] = useState("");
   const [teamInstagram, setTeamInstagram] = useState("");
   const [informations, setInformations] = useState("");
+  const [teamCategory, setTeamCategory] = useState(""); // Adicionando estado para Categoria do time
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
@@ -172,8 +176,8 @@ export default function FormNewTime({ data }: { data: Modality }) {
         })),
       }));
 
-      // Criando o objeto do time com as referências, incluindo as categorias
-      const newTeam = {
+      // @ts-ignore
+      const newTeam: Team = {
         logo: imageUrl,
         modality: modalityRef.path, // Usa a referência da modalidade
         name: teamName,
@@ -184,6 +188,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
         responsibleName: teamNameResponsible,
         informations: informations,
         categories: categoriesWithPlayers, // Inclui as categorias com jogadores
+        teamCategory: teamCategory, // Inclui a Categoria do time
         createdAt: serverTimestamp(),
       };
 
@@ -216,6 +221,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
     setTeamWhatsAppResponsible("");
     setTeamInstagram("");
     setInformations("");
+    setTeamCategory(""); // Resetando o campo Categoria do time
     setSelectedFile(null);
     setPreviewImage(null);
     setSelectedItems([]);
@@ -270,6 +276,16 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 type="text"
                 value={teamInstagram}
                 onChange={(event) => setTeamInstagram(event.target.value)}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Categoria do Time:</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={teamCategory}
+                onChange={(event) => setTeamCategory(event.target.value)}
               />
             </div>
 

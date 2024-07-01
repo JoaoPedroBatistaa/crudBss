@@ -104,6 +104,28 @@ export default function NewFormChampionship({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTeamOne, setSelectedTeamOne] = useState<Item | null>(null);
 
+  const [rankings, setRankings] = useState<
+    { name: string; value: string; athlete: string }[]
+  >([]);
+
+  const addRanking = () => {
+    setRankings([...rankings, { name: "", value: "", athlete: "" }]);
+  };
+
+  const removeRanking = (index: number) => {
+    setRankings(rankings.filter((_, i) => i !== index));
+  };
+
+  const handleRankingChange = (
+    index: number,
+    field: "name" | "value" | "athlete",
+    value: string | number
+  ) => {
+    const updatedRankings = [...rankings];
+    updatedRankings[index] = { ...updatedRankings[index], [field]: value };
+    setRankings(updatedRankings);
+  };
+
   const handleFileChange = (file: File | null) => {
     setSelectedFile(file);
     if (file) {
@@ -249,13 +271,7 @@ export default function NewFormChampionship({
         if (!newDataMatrix[index]) {
           newDataMatrix[index] = {
             time: "",
-            position: "",
-            victories: "",
             logo: "",
-            saldo: "",
-            derrotas: "",
-            pontos: "",
-            jogos: "",
           };
         }
         newDataMatrix[index][type] = value;
@@ -287,13 +303,8 @@ export default function NewFormChampionship({
         if (!updatedMatrix[rowIndex]) {
           updatedMatrix[rowIndex] = {
             time: "",
-            position: "",
-            victories: "",
+
             logo: "",
-            saldo: "",
-            derrotas: "",
-            pontos: "",
-            jogos: "",
           };
         }
 
@@ -379,6 +390,7 @@ export default function NewFormChampionship({
       ...championShipData,
       logo: imageUrl,
       phases,
+      rankings, // Incluindo rankings
     };
 
     await addNewDocumentWithReference(
@@ -406,6 +418,7 @@ export default function NewFormChampionship({
 
     setPreviewImage(null);
     setSelectedFile(null);
+    setRankings([]); // Resetando os rankings
   }
 
   async function addNewDocumentWithReference(
@@ -831,6 +844,46 @@ export default function NewFormChampionship({
           <button onClick={addNewPhase} className={styles.newPlayer}>
             Adicionar Nova Fase
           </button>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Rankings Individuais</p>
+            {rankings.map((ranking, index) => (
+              <div key={index} className={styles.ranking}>
+                <input
+                  type="text"
+                  value={ranking.name}
+                  onChange={(e) =>
+                    handleRankingChange(index, "name", e.target.value)
+                  }
+                  placeholder="Nome do Ranking"
+                />
+                <input
+                  type="number"
+                  value={ranking.value}
+                  onChange={(e) =>
+                    handleRankingChange(
+                      index,
+                      "value",
+                      parseFloat(e.target.value)
+                    )
+                  }
+                  placeholder="Valor"
+                />
+                <input
+                  type="text"
+                  value={ranking.athlete}
+                  onChange={(e) =>
+                    handleRankingChange(index, "athlete", e.target.value)
+                  }
+                  placeholder="Nome do Atleta"
+                />
+                <button onClick={() => removeRanking(index)}>Remover</button>
+              </div>
+            ))}
+            <button onClick={addRanking} className={styles.newPlayer}>
+              Adicionar Ranking
+            </button>
+          </div>
         </div>
 
         <button

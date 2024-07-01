@@ -41,6 +41,7 @@ interface TeamData {
   responsibleName: string;
   informations: string;
   categories: Category[];
+  teamCategory: string; // Adicionando o novo campo Categoria do time
 }
 
 const initialState: TeamData = {
@@ -53,6 +54,7 @@ const initialState: TeamData = {
   responsibleCpf: "",
   responsibleName: "",
   informations: "",
+  teamCategory: "", // Inicializando a nova categoria do time
   categories: [
     // Inicialize com uma categoria vazia que pode ser preenchida pelo usuário
     {
@@ -255,6 +257,17 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
                 type="text"
                 name="instagram"
                 value={teamData.instagram}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Categoria do Time:</p>
+              <input
+                className={styles.field}
+                type="text"
+                name="teamCategory"
+                value={teamData.teamCategory}
                 onChange={handleInputChange}
               />
             </div>

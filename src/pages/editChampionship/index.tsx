@@ -63,6 +63,28 @@ export default function EditChampionship() {
   const router = useRouter();
   const { id } = router.query;
 
+  const [rankings, setRankings] = useState<
+    { name: string; value: string; athlete: string }[]
+  >([]);
+
+  const addRanking = () => {
+    setRankings([...rankings, { name: "", value: "", athlete: "" }]);
+  };
+
+  const removeRanking = (index: number) => {
+    setRankings(rankings.filter((_, i) => i !== index));
+  };
+
+  const handleRankingChange = (
+    index: number,
+    field: "name" | "value" | "athlete",
+    value: string | number
+  ) => {
+    const updatedRankings = [...rankings];
+    updatedRankings[index] = { ...updatedRankings[index], [field]: value };
+    setRankings(updatedRankings);
+  };
+
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setChampionshipData((prevState) => ({ ...prevState, [name]: value }));
@@ -117,6 +139,12 @@ export default function EditChampionship() {
               setCriteria(extractedCriteria);
             }
           }
+
+          // @ts-ignore
+          if (championship.rankings) {
+            // @ts-ignore
+            setRankings(championship.rankings);
+          }
         } else {
           console.log("No championship exists with this ID.");
         }
@@ -156,6 +184,9 @@ export default function EditChampionship() {
         const downloadURL = await getDownloadURL(fileRef);
         updatedChampionshipData.logo = downloadURL as string;
       }
+
+      // @ts-ignore
+      updatedChampionshipData.rankings = rankings; // Incluindo rankings
 
       await setDoc(
         doc(db, "championships", id as string),
@@ -720,6 +751,46 @@ export default function EditChampionship() {
             >
               Adicionar Nova Fase
             </button>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Rankings Individuais</p>
+              {rankings.map((ranking, index) => (
+                <div key={index} className={styles.ranking}>
+                  <input
+                    type="text"
+                    value={ranking.name}
+                    onChange={(e) =>
+                      handleRankingChange(index, "name", e.target.value)
+                    }
+                    placeholder="Nome do Ranking"
+                  />
+                  <input
+                    type="number"
+                    value={ranking.value}
+                    onChange={(e) =>
+                      handleRankingChange(
+                        index,
+                        "value",
+                        parseFloat(e.target.value)
+                      )
+                    }
+                    placeholder="Valor"
+                  />
+                  <input
+                    type="text"
+                    value={ranking.athlete}
+                    onChange={(e) =>
+                      handleRankingChange(index, "athlete", e.target.value)
+                    }
+                    placeholder="Nome do Atleta"
+                  />
+                  <button onClick={() => removeRanking(index)}>Remover</button>
+                </div>
+              ))}
+              <button onClick={addRanking} className={styles.newPlayer}>
+                Adicionar Ranking
+              </button>
+            </div>
           </form>
 
           <button onClick={handleClick} className={styles.save}>
