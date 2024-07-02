@@ -1,8 +1,15 @@
 import PhotoUpload from "@/components/PhotoUpload";
 import SearchSelectTeam from "@/components/SearchSelectTable";
 import Spinner from "@/components/Spinner";
-import { addDoc, collection, db, storage } from "@/firebase";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import {
+  addDoc,
+  collection,
+  db,
+  getDownloadURL,
+  ref,
+  storage,
+} from "@/firebase";
+import { uploadBytes } from "firebase/storage";
 import { useRouter } from "next/router";
 import { ChangeEvent, useState } from "react";
 import { toast } from "react-toastify";
@@ -15,17 +22,19 @@ interface Item {
   logo: string;
 }
 
-interface Champion {
-  time: Item | null;
+interface YearlyPlacing {
   year: string;
+  firstPlace: Item | null;
+  secondPlace: Item | null;
+  thirdPlace: Item | null;
 }
 
 export default function AddHistoricChampion() {
   const [title, setTitle] = useState("");
   const [logo, setLogo] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [champions, setChampions] = useState<Champion[]>([
-    { time: null, year: "" },
+  const [yearlyPlacings, setYearlyPlacings] = useState<YearlyPlacing[]>([
+    { year: "", firstPlace: null, secondPlace: null, thirdPlace: null },
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -47,19 +56,22 @@ export default function AddHistoricChampion() {
     }
   };
 
-  const handleChampionChange = (
+  const handleYearlyPlacingChange = (
     index: number,
-    field: keyof Champion,
+    field: keyof YearlyPlacing,
     value: string | Item | null
   ) => {
-    const updatedChampions = [...champions];
+    const updatedPlacings = [...yearlyPlacings];
     // @ts-ignore
-    updatedChampions[index][field] = value;
-    setChampions(updatedChampions);
+    updatedPlacings[index][field] = value;
+    setYearlyPlacings(updatedPlacings);
   };
 
-  const addChampionField = () => {
-    setChampions([...champions, { time: null, year: "" }]);
+  const addYearlyPlacingField = () => {
+    setYearlyPlacings([
+      ...yearlyPlacings,
+      { year: "", firstPlace: null, secondPlace: null, thirdPlace: null },
+    ]);
   };
 
   const handleSave = async () => {
@@ -75,9 +87,26 @@ export default function AddHistoricChampion() {
       const dataToSave = {
         title,
         logo: logoDownloadURL,
-        champions: champions.map((champion) => ({
-          time: champion.time?.name,
-          year: champion.year,
+        yearlyPlacings: yearlyPlacings.map((placing) => ({
+          year: placing.year,
+          firstPlace: placing.firstPlace
+            ? {
+                name: placing.firstPlace.name,
+                logo: placing.firstPlace.logo,
+              }
+            : null,
+          secondPlace: placing.secondPlace
+            ? {
+                name: placing.secondPlace.name,
+                logo: placing.secondPlace.logo,
+              }
+            : null,
+          thirdPlace: placing.thirdPlace
+            ? {
+                name: placing.thirdPlace.name,
+                logo: placing.thirdPlace.logo,
+              }
+            : null,
         })),
       };
 
@@ -134,25 +163,43 @@ export default function AddHistoricChampion() {
               <PhotoUpload onChange={handleLogoChange} />
             </div>
 
-            {champions.map((champion, index) => (
-              <div key={index} className={styles.championFields}>
-                <div className={styles.form}>
-                  <p className={styles.label}>Time</p>
-                  <SearchSelectTeam
-                    onSelectItem={(team: Item) =>
-                      handleChampionChange(index, "time", team)
-                    }
-                  />
-                </div>
-
+            {yearlyPlacings.map((placing, index) => (
+              <div key={index} className={styles.yearlyPlacingFields}>
                 <div className={styles.form}>
                   <p className={styles.label}>Ano</p>
                   <input
                     className={styles.field}
                     type="text"
-                    value={champion.year}
+                    value={placing.year}
                     onChange={(e) =>
-                      handleChampionChange(index, "year", e.target.value)
+                      handleYearlyPlacingChange(index, "year", e.target.value)
+                    }
+                  />
+                </div>
+
+                <div className={styles.form}>
+                  <h2 className={styles.label}>Primeiro Colocado</h2>
+                  <SearchSelectTeam
+                    onSelectItem={(team: Item) =>
+                      handleYearlyPlacingChange(index, "firstPlace", team)
+                    }
+                  />
+                </div>
+
+                <div className={styles.form}>
+                  <h2 className={styles.label}>Segundo Colocado</h2>
+                  <SearchSelectTeam
+                    onSelectItem={(team: Item) =>
+                      handleYearlyPlacingChange(index, "secondPlace", team)
+                    }
+                  />
+                </div>
+
+                <div className={styles.form}>
+                  <h2 className={styles.label}>Terceiro Colocado</h2>
+                  <SearchSelectTeam
+                    onSelectItem={(team: Item) =>
+                      handleYearlyPlacingChange(index, "thirdPlace", team)
                     }
                   />
                 </div>
@@ -161,10 +208,10 @@ export default function AddHistoricChampion() {
 
             <button
               type="button"
-              onClick={addChampionField}
+              onClick={addYearlyPlacingField}
               className={styles.newPlayer}
             >
-              Adicionar Campeão
+              Adicionar Ano
             </button>
           </form>
 
