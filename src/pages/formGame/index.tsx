@@ -204,7 +204,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
             <input
               className={styles.field}
               type="text"
-              value={selectedFase}
+              value={selectedTopScorer}
               onChange={(e) => setSelectedTopScorer(e.target.value)}
             />
           </div>
@@ -214,7 +214,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
             <input
               className={styles.field}
               type="text"
-              value={selectedFase}
+              value={selectedThreePointKing}
               onChange={(e) => setSelectedThreePointKing(e.target.value)}
             />
           </div>
@@ -224,7 +224,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
             <input
               className={styles.field}
               type="text"
-              value={selectedFase}
+              value={selectedMVP}
               onChange={(e) => setSelectedMVP(e.target.value)}
             />
           </div>
