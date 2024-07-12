@@ -272,6 +272,7 @@ export default function NewFormChampionship({
           newDataMatrix[index] = {
             time: "",
             logo: "",
+            position: "",
           };
         }
         newDataMatrix[index][type] = value;
@@ -303,8 +304,8 @@ export default function NewFormChampionship({
         if (!updatedMatrix[rowIndex]) {
           updatedMatrix[rowIndex] = {
             time: "",
-
             logo: "",
+            position: "",
           };
         }
 
@@ -571,6 +572,26 @@ export default function NewFormChampionship({
                   {Array.from({ length: phase.count || 0 }).map((_, index) => (
                     <div key={index} className={styles.table}>
                       <div className={styles.tableItem}>
+                        <p className={styles.tableLabel}>Posi</p>
+                        <input
+                          type="number"
+                          className={styles.position}
+                          value={
+                            (phase.dataMatrix[index] &&
+                              phase.dataMatrix[index].position) ||
+                            ""
+                          }
+                          onChange={(e) =>
+                            handleTableInputChange(
+                              phase.id,
+                              index,
+                              "position",
+                              e
+                            )
+                          }
+                        />
+                      </div>
+                      <div className={styles.tableItem}>
                         <p className={styles.tableLabel}>Time</p>
                         <SearchSelectTeam
                           onSelectItem={(team: Item) => {
@@ -659,6 +680,31 @@ export default function NewFormChampionship({
                       {Array.from({ length: group.count }).map(
                         (_, rowIndex) => (
                           <div key={rowIndex} className={styles.table}>
+                            <div className={styles.tableItem}>
+                              <p className={styles.tableLabel}>Posi</p>
+                              <input
+                                type="number"
+                                className={styles.position}
+                                value={
+                                  (phase.groups![groupIndex].dataMatrix[
+                                    rowIndex
+                                  ] &&
+                                    phase.groups![groupIndex].dataMatrix[
+                                      rowIndex
+                                    ].position) ||
+                                  ""
+                                }
+                                onChange={(e) =>
+                                  handleGroupInputChange(
+                                    phase.id,
+                                    groupIndex,
+                                    rowIndex,
+                                    "position",
+                                    e
+                                  )
+                                }
+                              />
+                            </div>
                             <div className={styles.tableItem}>
                               <p className={styles.tableLabel}>Time</p>
                               <SearchSelectTeam

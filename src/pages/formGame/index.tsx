@@ -65,84 +65,75 @@ export default function FormNewMatche({ data }: { data: Modality }) {
   const [setScores, setSetScores] = useState({ set1: "", set2: "", set3: "" });
 
   async function handleSubmit() {
-    if (selectedTeam1Score && selectedTeam2Score) {
-      try {
-        setIsLoading(true);
-        const matcheRef = collection(db, "matches");
+    try {
+      setIsLoading(true);
+      const matcheRef = collection(db, "matches");
 
-        const modalityRef = doc(db, "modalities", data.id);
-        const teamOneRef = doc(db, "teams", selectedTeamOne?.id || "");
-        const teamTwoRef = doc(db, "teams", selectedTeamTwo?.id || "");
-        const championshipRef = doc(
-          db,
-          "championships",
-          selectedChampionship?.id || ""
+      const modalityRef = doc(db, "modalities", data.id);
+      const teamOneRef = doc(db, "teams", selectedTeamOne?.id || "");
+      const teamTwoRef = doc(db, "teams", selectedTeamTwo?.id || "");
+      const championshipRef = doc(
+        db,
+        "championships",
+        selectedChampionship?.id || ""
+      );
+
+      const newMatche = {
+        championship: championshipRef,
+        date: selectedDate,
+        modality: modalityRef,
+        team_1: {
+          score: selectedTeam1Score || "",
+          team_id: teamOneRef,
+        },
+        team_2: {
+          score: selectedTeam2Score || "",
+          team_id: teamTwoRef,
+        },
+        venue: selectedVenue,
+        time: selectedTime,
+        topScorer: selectedTopScorer,
+        mvp: selectedMVP,
+        fase: selectedFase,
+        isVolleyball,
+        setScores: isVolleyball ? setScores : null,
+      };
+
+      const docRef = await addDoc(matcheRef, {
+        ...newMatche,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      if (selectedFile) {
+        const storageRef = ref(
+          storage,
+          `matches/${docRef.id}/${selectedFile.name}`
         );
-
-        const newMatche = {
-          championship: championshipRef,
-          date: selectedDate,
-          modality: modalityRef,
-          team_1: {
-            score: selectedTeam1Score,
-            team_id: teamOneRef,
-          },
-          team_2: {
-            score: selectedTeam2Score,
-            team_id: teamTwoRef,
-          },
-          venue: selectedVenue,
-          time: selectedTime,
-          king: selectedThreePointKing,
-          topScorer: selectedTopScorer,
-          mvp: selectedMVP,
-          fase: selectedFase,
-          isVolleyball,
-          setScores: isVolleyball ? setScores : null,
-        };
-
-        const docRef = await addDoc(matcheRef, {
-          ...newMatche,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-
-        if (selectedFile) {
-          const storageRef = ref(
-            storage,
-            `matches/${docRef.id}/${selectedFile.name}`
-          );
-          await uploadBytes(storageRef, selectedFile);
-          const downloadURL = await getDownloadURL(storageRef);
-          await setDoc(docRef, { fileURL: downloadURL }, { merge: true });
-        }
-
-        setIsLoading(false);
-        setSelectedTime("");
-        setSelectedDate("");
-        setSelectedVenue("");
-        setSelectedFase("");
-        setSelectedTeamOne(null);
-        setSelectedTeamTwo(null);
-        setSelectedChampionship(null);
-        setSelectedFile(null);
-        setSelectedFileName("");
-        setIsVolleyball(false);
-        setSetScores({ set1: "", set2: "", set3: "" });
-        toast.success("Jogo cadastrado com sucesso!");
-        router.push("newGame?mdl=" + data.id);
-        console.log("Novo jogo salvo com sucesso no Firestore!");
-      } catch (error) {
-        setIsLoading(false);
-        toast.error("Erro ao cadastrar jogo!");
-        console.error("Erro ao salvar o novo jogo:", error);
+        await uploadBytes(storageRef, selectedFile);
+        const downloadURL = await getDownloadURL(storageRef);
+        await setDoc(docRef, { fileURL: downloadURL }, { merge: true });
       }
-    } else {
-      if (!selectedTeam1Score) {
-        toast.error("Preencha o placar do time 01");
-      } else {
-        toast.error("Preencha o placar do time 02");
-      }
+
+      setIsLoading(false);
+      setSelectedTime("");
+      setSelectedDate("");
+      setSelectedVenue("");
+      setSelectedFase("");
+      setSelectedTeamOne(null);
+      setSelectedTeamTwo(null);
+      setSelectedChampionship(null);
+      setSelectedFile(null);
+      setSelectedFileName("");
+      setIsVolleyball(false);
+      setSetScores({ set1: "", set2: "", set3: "" });
+      toast.success("Jogo cadastrado com sucesso!");
+      router.push("newGame?mdl=" + data.id);
+      console.log("Novo jogo salvo com sucesso no Firestore!");
+    } catch (error) {
+      setIsLoading(false);
+      toast.error("Erro ao cadastrar jogo!");
+      console.error("Erro ao salvar o novo jogo:", error);
     }
   }
 
@@ -210,17 +201,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>Rei dos Três</p>
-            <input
-              className={styles.field}
-              type="text"
-              value={selectedThreePointKing}
-              onChange={(e) => setSelectedThreePointKing(e.target.value)}
-            />
-          </div>
-
-          <div className={styles.form}>
-            <p className={styles.label}>MVP</p>
+            <p className={styles.label}>Destaque da partida</p>
             <input
               className={styles.field}
               type="text"

@@ -218,6 +218,7 @@ export default function EditChampionship() {
       updatedPhases[phaseIndex].dataMatrix[rowIndex] = {
         time: "",
         logo: "",
+        position: "",
       };
       criteria.forEach((criterion) => {
         updatedPhases[phaseIndex].dataMatrix[rowIndex][criterion.name] = "";
@@ -244,6 +245,7 @@ export default function EditChampionship() {
       updatedGroups[groupIndex].dataMatrix[rowIndex] = {
         time: "",
         logo: "",
+        position: "",
       };
       criteria.forEach((criterion) => {
         updatedGroups[groupIndex].dataMatrix[rowIndex][criterion.name] = "";
@@ -447,7 +449,32 @@ export default function EditChampionship() {
                     {Array.from({ length: phase.count }).map((_, rowIndex) => (
                       <div key={rowIndex} className={styles.table}>
                         <div className={styles.tableItem}>
-                          <p className={styles.tableLabel}>Time</p>
+                          <p className={styles.tableLabel}>Posi</p>
+                          <input
+                            type="number"
+                            className={styles.position}
+                            value={
+                              (phase.dataMatrix[rowIndex] &&
+                                phase.dataMatrix[rowIndex].position) ||
+                              ""
+                            }
+                            onChange={(e) =>
+                              handleTableInputChange(
+                                phaseIndex,
+                                rowIndex,
+                                "position",
+                                e
+                              )
+                            }
+                          />
+                        </div>
+                        <div className={styles.tableItem}>
+                          <p className={styles.tableLabel}>
+                            Time:{" "}
+                            {(phase.dataMatrix[rowIndex] &&
+                              phase.dataMatrix[rowIndex].time) ||
+                              ""}
+                          </p>
                           <SearchSelectTeam
                             onSelectItem={(team: Item) => {
                               const updatedPhases = [
@@ -546,7 +573,33 @@ export default function EditChampionship() {
                           (_, rowIndex) => (
                             <div key={rowIndex} className={styles.table}>
                               <div className={styles.tableItem}>
-                                <p className={styles.tableLabel}>Time</p>
+                                <p className={styles.tableLabel}>Posi</p>
+                                <input
+                                  type="number"
+                                  className={styles.position}
+                                  value={
+                                    (group.dataMatrix[rowIndex] &&
+                                      group.dataMatrix[rowIndex].position) ||
+                                    ""
+                                  }
+                                  onChange={(e) =>
+                                    handleGroupInputChange(
+                                      phaseIndex,
+                                      groupIndex,
+                                      rowIndex,
+                                      "position",
+                                      e
+                                    )
+                                  }
+                                />
+                              </div>
+                              <div className={styles.tableItem}>
+                                <p className={styles.tableLabel}>
+                                  Time:{" "}
+                                  {(group.dataMatrix[rowIndex] &&
+                                    group.dataMatrix[rowIndex].time) ||
+                                    ""}
+                                </p>
                                 <SearchSelectTeam
                                   onSelectItem={(team: Item) => {
                                     const updatedPhases = [
@@ -609,7 +662,6 @@ export default function EditChampionship() {
                         )}
                       </div>
                     ))}
-
                     <button
                       type="button"
                       onClick={() => addNewGroup(phaseIndex)}

@@ -25,11 +25,6 @@ interface Params {
   id: string;
 }
 
-interface Category {
-  categoryName: string;
-  players: Player[];
-}
-
 interface TeamData {
   logo: string | File | null;
   modality: string;
@@ -40,13 +35,18 @@ interface TeamData {
   responsibleCpf: string;
   responsibleName: string;
   informations: string;
-  categories: Category[];
-  teamCategory: string; // Adicionando o novo campo Categoria do time
+  squad: Player[];
+  teamCategory: string;
+  city: string;
+  trainingLocation: string;
+  foundationYear: string;
+  titles: string[];
+  participations: string[];
 }
 
 const initialState: TeamData = {
-  logo: null, // Ajuste conforme necessário, por exemplo, se você espera uma string, ajuste para uma URL padrão ou mantenha como null e trate na lógica de upload
-  modality: "", // Inicialize como uma string vazia ou com um valor padrão, se aplicável
+  logo: null,
+  modality: "",
   name: "",
   whatsapp: "",
   cnpj: "",
@@ -54,21 +54,13 @@ const initialState: TeamData = {
   responsibleCpf: "",
   responsibleName: "",
   informations: "",
-  teamCategory: "", // Inicializando a nova categoria do time
-  categories: [
-    // Inicialize com uma categoria vazia que pode ser preenchida pelo usuário
-    {
-      categoryName: "",
-      players: [
-        {
-          // Inicialize com um jogador vazio se a intenção é permitir ao usuário adicionar jogadores diretamente
-          id: "", // O ID pode ser preenchido quando um novo jogador é adicionado
-          name: "",
-          photo: "",
-        },
-      ],
-    },
-  ],
+  squad: [{ id: "", name: "", photo: "" }],
+  teamCategory: "",
+  city: "",
+  trainingLocation: "",
+  foundationYear: "",
+  titles: [""],
+  participations: [""],
 };
 
 export async function getServerSideProps() {
@@ -82,9 +74,7 @@ export async function getServerSideProps() {
 }
 
 async function fetchTeam() {
-  // Implemente o código para buscar os dados dos times no banco de dados
-  // e retorne os times obtidos
-  const response = await fetch("teams"); // Substitua 'api/teams' pela rota correta em seu projeto
+  const response = await fetch("teams");
   const teams = await response.json();
   return teams;
 }
@@ -92,58 +82,7 @@ async function fetchTeam() {
 export default function EditTeam({ teams }: { teams: TeamData[] }) {
   const router = useRouter();
   const { id } = router.query as unknown as Params;
-  const [selectedItems, setSelectedItems] = useState<Player[]>([]);
   const [teamData, setTeamData] = useState<TeamData>(initialState);
-
-  const handleCategoryNameChange = (
-    event: ChangeEvent<HTMLInputElement>,
-    categoryIndex: number
-  ) => {
-    const updatedCategories = [...teamData.categories]; // Faz uma cópia do estado atual das categorias
-    updatedCategories[categoryIndex].categoryName = event.target.value; // Atualiza o nome da categoria com o valor do input
-
-    setTeamData({ ...teamData, categories: updatedCategories }); // Atualiza o estado com as novas categorias
-  };
-
-  const addCategory = () => {
-    const newCategory = {
-      categoryName: "",
-      players: [{ id: "", name: "", photo: "" }], // Adiciona um jogador por padrão à nova categoria, se necessário
-    };
-    setTeamData((prevState) => ({
-      ...prevState,
-      categories: [...prevState.categories, newCategory],
-    }));
-  };
-
-  const addPlayer = (categoryIndex: any) => {
-    const newPlayer = { id: "", name: "", photo: "" };
-    const updatedCategories = [...teamData.categories];
-    updatedCategories[categoryIndex].players.push(newPlayer);
-
-    setTeamData({ ...teamData, categories: updatedCategories });
-  };
-
-  const handleSelectItems = (
-    selectedItem: Player,
-    categoryIndex: string | number,
-    playerIndex: string | number
-  ) => {
-    // Converte os índices para o tipo number
-    const catIndex = Number(categoryIndex);
-    const playIndex = Number(playerIndex);
-
-    // Lógica para atualizar o jogador selecionado dentro de uma categoria específica
-    // Isso irá substituir o placeholder de novo jogador pelo jogador real selecionado
-    const updatedCategories = [...teamData.categories];
-    if (
-      updatedCategories[catIndex] &&
-      updatedCategories[catIndex].players[playIndex]
-    ) {
-      updatedCategories[catIndex].players[playIndex] = selectedItem;
-      setTeamData({ ...teamData, categories: updatedCategories });
-    }
-  };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -156,6 +95,48 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
         ? event.target.files[0]
         : null;
     setTeamData((prevState) => ({ ...prevState, logo: file }));
+  };
+
+  const handleSelectItems = (selectedItem: Player, playerIndex: number) => {
+    const updatedPlayers = [...teamData.squad];
+    updatedPlayers[playerIndex] = selectedItem;
+    setTeamData({ ...teamData, squad: updatedPlayers });
+  };
+
+  const addPlayer = () => {
+    setTeamData((prevState) => ({
+      ...prevState,
+      squad: [...prevState.squad, { id: "", name: "", photo: "" }],
+    }));
+  };
+
+  const addTitle = () => {
+    setTeamData((prevState) => ({
+      ...prevState,
+      titles: [...prevState.titles, ""],
+    }));
+  };
+
+  const handleTitleChange = (index: number, value: string) => {
+    const updatedTitles = [...teamData.titles];
+    updatedTitles[index] = value;
+    setTeamData((prevState) => ({ ...prevState, titles: updatedTitles }));
+  };
+
+  const addParticipation = () => {
+    setTeamData((prevState) => ({
+      ...prevState,
+      participations: [...prevState.participations, ""],
+    }));
+  };
+
+  const handleParticipationChange = (index: number, value: string) => {
+    const updatedParticipations = [...teamData.participations];
+    updatedParticipations[index] = value;
+    setTeamData((prevState) => ({
+      ...prevState,
+      participations: updatedParticipations,
+    }));
   };
 
   useEffect(() => {
@@ -327,49 +308,103 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
               />
             </div>
 
-            {teamData.categories.map((category, categoryIndex) => (
-              <div key={categoryIndex} className={styles.form}>
-                <div className={styles.form}>
-                  <p className={styles.label}>Nome da categoria</p>
-                  <input
-                    type="text"
-                    className={styles.field}
-                    value={category.categoryName}
-                    onChange={(e) => handleCategoryNameChange(e, categoryIndex)}
-                    placeholder="Nome da Categoria"
-                  />
-                </div>
+            <div className={styles.form}>
+              <p className={styles.label}>Cidade do Time:</p>
+              <input
+                className={styles.field}
+                type="text"
+                name="city"
+                value={teamData.city}
+                onChange={handleInputChange}
+              />
+            </div>
 
-                {category.players.map((player, playerIndex) => (
-                  <div key={playerIndex} className={styles.tableItem}>
-                    <p className={styles.label}>Nome do jogador</p>
-                    <SearchSelect
-                      onSelectItems={(items) =>
-                        handleSelectItems(items[0], categoryIndex, playerIndex)
-                      }
-                    />
-                  </div>
-                ))}
+            <div className={styles.form}>
+              <p className={styles.label}>Onde Treina:</p>
+              <input
+                className={styles.field}
+                type="text"
+                name="trainingLocation"
+                value={teamData.trainingLocation}
+                onChange={handleInputChange}
+              />
+            </div>
 
-                <button
-                  onClick={() => addPlayer(categoryIndex)}
-                  className={styles.newPlayer}
-                  type="button" // Adiciona isso para evitar que o botão submeta o formulário
-                >
-                  Adicionar Novo Jogador
-                </button>
+            <div className={styles.form}>
+              <p className={styles.label}>Ano de Fundação:</p>
+              <input
+                className={styles.field}
+                type="text"
+                name="foundationYear"
+                value={teamData.foundationYear}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Títulos:</p>
+              {teamData.titles.map((title, index) => (
+                <input
+                  key={index}
+                  className={styles.field}
+                  type="text"
+                  value={title}
+                  onChange={(event) =>
+                    handleTitleChange(index, event.target.value)
+                  }
+                />
+              ))}
+              <button
+                type="button"
+                onClick={addTitle}
+                className={styles.newPlayer}
+              >
+                Adicionar Novo Título
+              </button>
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Participações em Campeonatos:</p>
+              {teamData.participations.map((participation, index) => (
+                <input
+                  key={index}
+                  className={styles.field}
+                  type="text"
+                  value={participation}
+                  onChange={(event) =>
+                    handleParticipationChange(index, event.target.value)
+                  }
+                />
+              ))}
+              <button
+                type="button"
+                onClick={addParticipation}
+                className={styles.newPlayer}
+              >
+                Adicionar Nova Participação
+              </button>
+            </div>
+
+            <p className={styles.group}>Elenco</p>
+            {teamData.squad.map((player, playerIndex) => (
+              <div key={playerIndex} className={styles.tableItem}>
+                <p className={styles.label}>Nome do jogador</p>
+                <SearchSelect
+                  onSelectItems={(items) =>
+                    handleSelectItems(items[0], playerIndex)
+                  }
+                />
               </div>
             ))}
+            <button
+              type="button"
+              onClick={addPlayer}
+              className={styles.newPlayer}
+            >
+              Adicionar Novo Jogador
+            </button>
 
             <div className={styles.buttons}>
-              <button
-                onClick={addCategory}
-                className={styles.newPlayer}
-                type="button"
-              >
-                Adicionar Nova Categoria
-              </button>
-
               <button type="submit" className={styles.save}>
                 SALVAR
               </button>

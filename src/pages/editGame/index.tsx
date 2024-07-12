@@ -8,8 +8,6 @@ import styles from "./styles.module.css";
 
 import HomeButton from "../../components/HomeButton";
 
-import SearchSelect from "@/components/SearchSelect";
-
 interface PlayerDetail {
   id: string;
   name: string;
@@ -31,7 +29,6 @@ interface Matche {
   venue: string;
   fase: string;
   time: string;
-  king: PlayerDetail | null;
   topScorer: PlayerDetail | null;
   mvp: PlayerDetail | null;
 }
@@ -57,9 +54,8 @@ export default function EditMatch() {
     location: "",
     fase: "",
     fileURL: "",
-    king: null,
-    topScorer: null,
-    mvp: null,
+    topScorer: "",
+    mvp: "",
   });
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -85,20 +81,30 @@ export default function EditMatch() {
         if (matchDoc.exists()) {
           const match = matchDoc.data();
           if (match) {
+            const team1Ref = match.team_1.team_id;
+            const team2Ref = match.team_2.team_id;
+
+            const team1Doc = await getDoc(team1Ref);
+            const team2Doc = await getDoc(team2Ref);
+
+            // @ts-ignore
+            const team1Name = team1Doc.exists() ? team1Doc.data().name : "";
+            // @ts-ignore
+            const team2Name = team2Doc.exists() ? team2Doc.data().name : "";
+
             setMatchData({
-              team1Name: match.team_1 ? match.team_1.team_id : "",
+              team1Name: team1Name,
               team1Logo: match.team_1 ? match.team_1.logo : null,
               team1Score: match.team_1 ? match.team_1.score : 0,
-              team2Name: match.team_2 ? match.team_2.team_id : "",
+              team2Name: team2Name,
               team2Logo: match.team_2 ? match.team_2.logo : null,
               team2Score: match.team_2 ? match.team_2.score : 0,
               date: match.date || "",
               location: match.venue || "",
               fase: match.fase || "",
               fileURL: match.fileURL || "",
-              king: match.king || null,
-              topScorer: match.topScorer || null,
-              mvp: match.mvp || null,
+              topScorer: match.topScorer || "",
+              mvp: match.mvp || "",
             });
           }
         } else {
@@ -165,7 +171,7 @@ export default function EditMatch() {
 
   return (
     <>
-      <HomeButton></HomeButton>
+      <HomeButton />
 
       <div className={styles.Container}>
         <div className={styles.Card}>
@@ -175,51 +181,52 @@ export default function EditMatch() {
 
           <form onSubmit={handleSubmit}>
             <div className={styles.form}>
-              <p className={styles.label}>Nome do Time 1</p>
+              <p className={styles.label}>
+                Nome do Time 1: {matchData.team1Name}
+              </p>
               <input
                 className={styles.field}
                 type="text"
                 name="team1Name"
                 value={matchData.team1Name}
                 onChange={handleInputChange}
+                disabled
               />
             </div>
 
             <div className={styles.form}>
-              <p className={styles.label}>Nome do Time 2</p>
+              <p className={styles.label}>
+                Nome do Time 2: {matchData.team2Name}
+              </p>
               <input
                 className={styles.field}
                 type="text"
                 name="team2Name"
                 value={matchData.team2Name}
                 onChange={handleInputChange}
+                disabled
               />
             </div>
 
             <div className={styles.form}>
               <p className={styles.label}>Cestinha</p>
-              <SearchSelect
-                // @ts-ignore
-
-                onSelectItems={(items) => handleSelectTopScorer(items[0])}
+              <input
+                className={styles.field}
+                type="text"
+                name="topScorer"
+                value={matchData.topScorer}
+                onChange={handleInputChange}
               />
             </div>
 
             <div className={styles.form}>
-              <p className={styles.label}>Rei dos Três</p>
-              <SearchSelect
-                // @ts-ignore
-
-                onSelectItems={(items) => handleSelectThreePointKing(items[0])}
-              />
-            </div>
-
-            <div className={styles.form}>
-              <p className={styles.label}>MVP</p>
-              <SearchSelect
-                // @ts-ignore
-
-                onSelectItems={(items) => handleSelectMVP(items[0])}
+              <p className={styles.label}>Destaque da partida</p>
+              <input
+                className={styles.field}
+                type="text"
+                name="mvp"
+                value={matchData.mvp}
+                onChange={handleInputChange}
               />
             </div>
 

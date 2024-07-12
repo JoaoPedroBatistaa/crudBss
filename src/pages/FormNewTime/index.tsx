@@ -6,7 +6,7 @@ import { addDoc, collection, doc, serverTimestamp } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import InputMask from "react-input-mask";
 import { toast } from "react-toastify";
 import styles from "./styles.module.css";
@@ -24,15 +24,6 @@ interface Item {
   photo: string;
 }
 
-interface Category {
-  categoryName: string;
-  players: Item[];
-}
-
-interface TeamData {
-  categories: Category[];
-}
-
 interface Team {
   logo: string;
   modality: string;
@@ -44,18 +35,19 @@ interface Team {
   instagram: string;
   whatsapp: string;
   informations: string;
-  teamCategory: string; // Adicionando campo de Categoria do time
-  categories: any;
+  teamCategory: string;
   createdAt: any;
+  city: string;
+  trainingLocation: string;
+  foundationYear: string;
+  titles: string[];
+  participations: string[];
 }
 
 const initialState = {
-  categories: [
-    {
-      categoryName: "",
-      players: [{ id: "", name: "", photo: "" }],
-    },
-  ],
+  players: [{ id: "", name: "", photo: "" }],
+  titles: [""],
+  participations: [""],
 };
 
 export default function FormNewTime({ data }: { data: Modality }) {
@@ -66,7 +58,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
   const [teamWhatsAppResponsible, setTeamWhatsAppResponsible] = useState("");
   const [teamInstagram, setTeamInstagram] = useState("");
   const [informations, setInformations] = useState("");
-  const [teamCategory, setTeamCategory] = useState(""); // Adicionando estado para Categoria do time
+  const [teamCategory, setTeamCategory] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
@@ -74,56 +66,44 @@ export default function FormNewTime({ data }: { data: Modality }) {
   const [limparSelected, setLimparSelected] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [placeholder, setPlaceholder] = useState("Pesquisar");
+  const [city, setCity] = useState("");
+  const [trainingLocation, setTrainingLocation] = useState("");
+  const [foundationYear, setFoundationYear] = useState("");
+  const [titles, setTitles] = useState([""]);
+  const [participations, setParticipations] = useState([""]);
   const [teamData, setTeamData] = useState(initialState);
 
-  const handleCategoryNameChange = (
-    event: ChangeEvent<HTMLInputElement>,
-    categoryIndex: number
-  ) => {
-    const updatedCategories = [...teamData.categories]; // Faz uma cópia do estado atual das categorias
-    updatedCategories[categoryIndex].categoryName = event.target.value; // Atualiza o nome da categoria com o valor do input
-
-    setTeamData({ ...teamData, categories: updatedCategories }); // Atualiza o estado com as novas categorias
-  };
-
-  const addCategory = () => {
-    const newCategory = {
-      categoryName: "",
-      players: [{ id: "", name: "", photo: "" }], // Adiciona um jogador por padrão à nova categoria, se necessário
-    };
+  const addPlayer = () => {
     setTeamData((prevState) => ({
       ...prevState,
-      categories: [...prevState.categories, newCategory],
+      players: [...prevState.players, { id: "", name: "", photo: "" }],
     }));
   };
 
-  const addPlayer = (categoryIndex: any) => {
-    const newPlayer = { id: "", name: "", photo: "" };
-    const updatedCategories = [...teamData.categories];
-    updatedCategories[categoryIndex].players.push(newPlayer);
-
-    setTeamData({ ...teamData, categories: updatedCategories });
+  const handleSelectItems = (selectedItem: Item, playerIndex: number) => {
+    const updatedPlayers = [...teamData.players];
+    updatedPlayers[playerIndex] = selectedItem;
+    setTeamData({ ...teamData, players: updatedPlayers });
   };
 
-  const handleSelectItems = (
-    selectedItem: Item,
-    categoryIndex: string | number,
-    playerIndex: string | number
-  ) => {
-    // Converte os índices para o tipo number
-    const catIndex = Number(categoryIndex);
-    const playIndex = Number(playerIndex);
+  const addTitle = () => {
+    setTitles([...titles, ""]);
+  };
 
-    // Lógica para atualizar o jogador selecionado dentro de uma categoria específica
-    // Isso irá substituir o placeholder de novo jogador pelo jogador real selecionado
-    const updatedCategories = [...teamData.categories];
-    if (
-      updatedCategories[catIndex] &&
-      updatedCategories[catIndex].players[playIndex]
-    ) {
-      updatedCategories[catIndex].players[playIndex] = selectedItem;
-      setTeamData({ ...teamData, categories: updatedCategories });
-    }
+  const handleTitleChange = (index: number, value: string) => {
+    const updatedTitles = [...titles];
+    updatedTitles[index] = value;
+    setTitles(updatedTitles);
+  };
+
+  const addParticipation = () => {
+    setParticipations([...participations, ""]);
+  };
+
+  const handleParticipationChange = (index: number, value: string) => {
+    const updatedParticipations = [...participations];
+    updatedParticipations[index] = value;
+    setParticipations(updatedParticipations);
   };
 
   const router = useRouter();
@@ -154,7 +134,6 @@ export default function FormNewTime({ data }: { data: Modality }) {
     setIsLoading(true);
 
     try {
-      // Upload da imagem para o Firebase Storage (se necessário)
       let imageUrl = "";
       if (selectedFile) {
         const storage = getStorage();
@@ -163,23 +142,11 @@ export default function FormNewTime({ data }: { data: Modality }) {
         imageUrl = await getDownloadURL(fileSnapshot.ref);
       }
 
-      // Obter a referência da modalidade
       const modalityRef = doc(db, "modalities", data.id);
 
-      // Preparando as categorias e seus jogadores para serem incluídos
-      const categoriesWithPlayers = teamData.categories.map((category) => ({
-        categoryName: category.categoryName,
-        players: category.players.map((player) => ({
-          id: player.id,
-          name: player.name,
-          photo: player.photo,
-        })),
-      }));
-
-      // @ts-ignore
       const newTeam: Team = {
         logo: imageUrl,
-        modality: modalityRef.path, // Usa a referência da modalidade
+        modality: modalityRef.path,
         name: teamName,
         whatsapp: teamWhatsAppResponsible,
         cnpj: teamCnpj,
@@ -187,12 +154,16 @@ export default function FormNewTime({ data }: { data: Modality }) {
         responsibleCpf: teamCpfResponsible,
         responsibleName: teamNameResponsible,
         informations: informations,
-        categories: categoriesWithPlayers, // Inclui as categorias com jogadores
-        teamCategory: teamCategory, // Inclui a Categoria do time
+        squad: teamData.players,
+        teamCategory: teamCategory,
         createdAt: serverTimestamp(),
+        city: city,
+        trainingLocation: trainingLocation,
+        foundationYear: foundationYear,
+        titles: titles,
+        participations: participations,
       };
 
-      // Adicionando o novo time à coleção 'teams'
       const docRef = await addDoc(collection(db, "teams"), newTeam);
 
       console.log("Time cadastrado com sucesso! ID:", docRef.id);
@@ -221,10 +192,16 @@ export default function FormNewTime({ data }: { data: Modality }) {
     setTeamWhatsAppResponsible("");
     setTeamInstagram("");
     setInformations("");
-    setTeamCategory(""); // Resetando o campo Categoria do time
+    setTeamCategory("");
     setSelectedFile(null);
     setPreviewImage(null);
     setSelectedItems([]);
+    setCity("");
+    setTrainingLocation("");
+    setFoundationYear("");
+    setTitles([""]);
+    setParticipations([""]);
+    setTeamData(initialState);
     handleResetSearch();
   };
 
@@ -255,7 +232,6 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 onChange={(event) => setTeamName(event.target.value)}
               />
             </div>
-
             <div className={styles.form}>
               <p className={styles.label}>CNPJ do time:</p>
               <InputMask
@@ -268,7 +244,6 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 }
               />
             </div>
-
             <div className={styles.form}>
               <p className={styles.label}>Instagram do Time:</p>
               <input
@@ -278,7 +253,6 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 onChange={(event) => setTeamInstagram(event.target.value)}
               />
             </div>
-
             <div className={styles.form}>
               <p className={styles.label}>Categoria do Time:</p>
               <input
@@ -288,16 +262,14 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 onChange={(event) => setTeamCategory(event.target.value)}
               />
             </div>
-
             <div className={styles.form}>
-              <p className={styles.label}>Informações</p>
+              <p className={styles.label}>Curiosidades</p>
               <textarea
                 className={styles.field}
                 value={informations}
                 onChange={(event) => setInformations(event.target.value)}
               />
             </div>
-
             <div className={styles.form}>
               <p className={styles.label}>Nome Responsável:</p>
               <input
@@ -307,7 +279,6 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 onChange={(event) => setTeamNameResponsible(event.target.value)}
               />
             </div>
-
             <div className={styles.form}>
               <p className={styles.label}>CPF Responsável:</p>
               <InputMask
@@ -320,7 +291,6 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 }
               />
             </div>
-
             <div className={styles.form}>
               <p className={styles.label}>WhatsApp Responsável:</p>
               <InputMask
@@ -333,7 +303,75 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 }
               />
             </div>
-
+            <div className={styles.form}>
+              <p className={styles.label}>Cidade do Time:</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={city}
+                onChange={(event) => setCity(event.target.value)}
+              />
+            </div>
+            <div className={styles.form}>
+              <p className={styles.label}>Onde Treina:</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={trainingLocation}
+                onChange={(event) => setTrainingLocation(event.target.value)}
+              />
+            </div>
+            <div className={styles.form}>
+              <p className={styles.label}>Ano de Fundação:</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={foundationYear}
+                onChange={(event) => setFoundationYear(event.target.value)}
+              />
+            </div>
+            <div className={styles.formT}>
+              <p className={styles.label}>Títulos:</p>
+              {titles.map((title, index) => (
+                <input
+                  key={index}
+                  className={styles.field}
+                  type="text"
+                  value={title}
+                  onChange={(event) =>
+                    handleTitleChange(index, event.target.value)
+                  }
+                />
+              ))}
+              <button
+                type="button"
+                onClick={addTitle}
+                className={styles.newPlayer}
+              >
+                Adicionar Novo Título
+              </button>
+            </div>
+            <div className={styles.formT}>
+              <p className={styles.label}>Participações em Campeonatos:</p>
+              {participations.map((participation, index) => (
+                <input
+                  key={index}
+                  className={styles.field}
+                  type="text"
+                  value={participation}
+                  onChange={(event) =>
+                    handleParticipationChange(index, event.target.value)
+                  }
+                />
+              ))}
+              <button
+                type="button"
+                onClick={addParticipation}
+                className={styles.newPlayer}
+              >
+                Adicionar Nova Participação
+              </button>
+            </div>
             <div className={styles.form}>
               {previewImage && (
                 <div className={styles.previewContainer}>
@@ -349,52 +387,25 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 <PhotoUpload onChange={handleFileChange} />
               </div>
             </div>
-
             <p className={styles.group}>Elenco</p>
-
-            {teamData.categories.map((category, categoryIndex) => (
-              <div key={categoryIndex} className={styles.form}>
-                <div className={styles.form}>
-                  <p className={styles.label}>Nome da categoria</p>
-                  <input
-                    type="text"
-                    className={styles.field}
-                    value={category.categoryName}
-                    onChange={(e) => handleCategoryNameChange(e, categoryIndex)}
-                    placeholder="Nome da Categoria"
-                  />
-                </div>
-
-                {category.players.map((player, playerIndex) => (
-                  <div key={playerIndex} className={styles.tableItem}>
-                    <p className={styles.label}>Nome do jogador</p>
-                    <SearchSelect
-                      onSelectItems={(items) =>
-                        handleSelectItems(items[0], categoryIndex, playerIndex)
-                      }
-                    />
-                  </div>
-                ))}
-
-                <button
-                  onClick={() => addPlayer(categoryIndex)}
-                  className={styles.newPlayer}
-                  type="button" // Adiciona isso para evitar que o botão submeta o formulário
-                >
-                  Adicionar Novo Jogador
-                </button>
+            {teamData.players.map((player, playerIndex) => (
+              <div key={playerIndex} className={styles.tableItem}>
+                <p className={styles.label}>Nome do jogador</p>
+                <SearchSelect
+                  onSelectItems={(items) =>
+                    handleSelectItems(items[0], playerIndex)
+                  }
+                />
               </div>
             ))}
-
+            <button
+              type="button"
+              onClick={addPlayer}
+              className={styles.newPlayer}
+            >
+              Adicionar Novo Jogador
+            </button>
             <div className={styles.buttons}>
-              <button
-                onClick={addCategory}
-                className={styles.newPlayer}
-                type="button"
-              >
-                Adicionar Nova Categoria
-              </button>
-
               <button
                 className={styles.save}
                 type="submit"
@@ -416,7 +427,6 @@ export default function FormNewTime({ data }: { data: Modality }) {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { query } = context;
   const { mdl } = query;
-  console.log(mdl);
 
   return {
     props: {

@@ -129,7 +129,7 @@ export default function NewNews({
                     onClick={() => toggleMoreInfo(news.id)}
                   />
                   <Link
-                    href={{ pathname: `/editNews`, query: { id: news.id } }}
+                    href={{ pathname: `/editHistoric`, query: { id: news.id } }}
                   >
                     <img
                       className={styles.crudIcon}
