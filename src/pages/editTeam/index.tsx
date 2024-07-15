@@ -42,6 +42,7 @@ interface TeamData {
   foundationYear: string;
   titles: string[];
   participations: string[];
+  categories: string[];
 }
 
 const initialState: TeamData = {
@@ -61,6 +62,7 @@ const initialState: TeamData = {
   foundationYear: "",
   titles: [""],
   participations: [""],
+  categories: [""],
 };
 
 export async function getServerSideProps() {
@@ -83,8 +85,9 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
   const router = useRouter();
   const { id } = router.query as unknown as Params;
   const [teamData, setTeamData] = useState<TeamData>(initialState);
+  const [categories, setCategories] = useState([""]);
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (event: any) => {
     const { name, value } = event.target;
     setTeamData((prevState) => ({ ...prevState, [name]: value }));
   };
@@ -139,6 +142,16 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
     }));
   };
 
+  const addCategory = () => {
+    setCategories([...categories, ""]);
+  };
+
+  const handleCategoryChange = (index: number, value: string) => {
+    const updatedCategories = [...categories];
+    updatedCategories[index] = value;
+    setCategories(updatedCategories);
+  };
+
   useEffect(() => {
     const fetchTeamData = async () => {
       if (!id) {
@@ -151,6 +164,7 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
         if (teamDoc.exists()) {
           const team = teamDoc.data() as TeamData;
           setTeamData(team);
+          setCategories(team.categories || [""]);
         } else {
           console.log("No team exists with this ID.");
         }
@@ -185,7 +199,12 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
         teamData.logo = downloadURL;
       }
 
-      await setDoc(doc(db, "teams", id), teamData);
+      const updatedTeamData = {
+        ...teamData,
+        categories: categories,
+      };
+
+      await setDoc(doc(db, "teams", id), updatedTeamData);
 
       toast.success("Team updated successfully!");
     } catch (error) {
@@ -254,10 +273,9 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
             </div>
 
             <div className={styles.form}>
-              <p className={styles.label}>Informações</p>
-              <input
+              <p className={styles.label}>Curiosidades</p>
+              <textarea
                 className={styles.field}
-                type="text"
                 name="informations"
                 value={teamData.informations}
                 onChange={handleInputChange}
@@ -382,6 +400,28 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
                 className={styles.newPlayer}
               >
                 Adicionar Nova Participação
+              </button>
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Categorias:</p>
+              {categories.map((category, index) => (
+                <input
+                  key={index}
+                  className={styles.field}
+                  type="text"
+                  value={category}
+                  onChange={(event) =>
+                    handleCategoryChange(index, event.target.value)
+                  }
+                />
+              ))}
+              <button
+                type="button"
+                onClick={addCategory}
+                className={styles.newPlayer}
+              >
+                Adicionar Nova Categoria
               </button>
             </div>
 

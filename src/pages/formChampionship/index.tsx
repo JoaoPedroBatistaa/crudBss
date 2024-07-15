@@ -14,6 +14,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import styles from "./styles.module.css";
 
+import SearchSelect from "@/components/SearchSelect";
 import SearchSelectTeam from "@/components/SearchSelectTable";
 import HomeButton from "../../components/HomeButton";
 
@@ -40,13 +41,26 @@ interface ChampionShip {
 interface Item {
   id: string;
   name: string;
-  logo: string;
+  logo: string; // Pode ser usado como 'photo' se este campo representa a foto
+}
+
+interface Player {
+  id: string;
+  name: string;
+  photo: string; // Pode ser usado como 'photo' se este campo representa a foto
 }
 
 interface Criterion {
   id: number;
   name: string;
   type: string;
+}
+
+interface Ranking {
+  name: string;
+  value: string;
+  athlete: string;
+  photo: string;
 }
 
 type TableData = {
@@ -104,12 +118,10 @@ export default function NewFormChampionship({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTeamOne, setSelectedTeamOne] = useState<Item | null>(null);
 
-  const [rankings, setRankings] = useState<
-    { name: string; value: string; athlete: string }[]
-  >([]);
+  const [rankings, setRankings] = useState<Ranking[]>([]);
 
   const addRanking = () => {
-    setRankings([...rankings, { name: "", value: "", athlete: "" }]);
+    setRankings([...rankings, { name: "", value: "", athlete: "", photo: "" }]);
   };
 
   const removeRanking = (index: number) => {
@@ -118,11 +130,26 @@ export default function NewFormChampionship({
 
   const handleRankingChange = (
     index: number,
-    field: "name" | "value" | "athlete",
+    field: keyof Ranking,
     value: string | number
   ) => {
+    console.log(
+      `handleRankingChange - index: ${index}, field: ${field}, value: ${value}`
+    );
     const updatedRankings = [...rankings];
     updatedRankings[index] = { ...updatedRankings[index], [field]: value };
+    console.log("Updated Rankings:", updatedRankings);
+    setRankings(updatedRankings);
+  };
+
+  const handleSelectPlayer = (index: number, player: Player) => {
+    const updatedRankings = [...rankings];
+    updatedRankings[index] = {
+      ...updatedRankings[index],
+      athlete: player.name,
+      photo: player.photo,
+    };
+    console.log("Updated Rankings:", updatedRankings);
     setRankings(updatedRankings);
   };
 
@@ -915,14 +942,14 @@ export default function NewFormChampionship({
                   }
                   placeholder="Valor"
                 />
-                <input
-                  type="text"
-                  value={ranking.athlete}
-                  onChange={(e) =>
-                    handleRankingChange(index, "athlete", e.target.value)
-                  }
-                  placeholder="Nome do Atleta"
+                <SearchSelect
+                  onSelectItems={(players: Player[]) => {
+                    const player = players[0];
+                    console.log("Selected Player:", player);
+                    handleSelectPlayer(index, player);
+                  }}
                 />
+
                 <button onClick={() => removeRanking(index)}>Remover</button>
               </div>
             ))}

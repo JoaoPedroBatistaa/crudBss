@@ -42,6 +42,7 @@ interface Team {
   foundationYear: string;
   titles: string[];
   participations: string[];
+  categories: string[];
 }
 
 const initialState = {
@@ -71,6 +72,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
   const [foundationYear, setFoundationYear] = useState("");
   const [titles, setTitles] = useState([""]);
   const [participations, setParticipations] = useState([""]);
+  const [categories, setCategories] = useState([""]);
   const [teamData, setTeamData] = useState(initialState);
 
   const addPlayer = () => {
@@ -104,6 +106,16 @@ export default function FormNewTime({ data }: { data: Modality }) {
     const updatedParticipations = [...participations];
     updatedParticipations[index] = value;
     setParticipations(updatedParticipations);
+  };
+
+  const addCategory = () => {
+    setCategories([...categories, ""]);
+  };
+
+  const handleCategoryChange = (index: number, value: string) => {
+    const updatedCategories = [...categories];
+    updatedCategories[index] = value;
+    setCategories(updatedCategories);
   };
 
   const router = useRouter();
@@ -162,6 +174,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
         foundationYear: foundationYear,
         titles: titles,
         participations: participations,
+        categories: categories,
       };
 
       const docRef = await addDoc(collection(db, "teams"), newTeam);
@@ -201,6 +214,7 @@ export default function FormNewTime({ data }: { data: Modality }) {
     setFoundationYear("");
     setTitles([""]);
     setParticipations([""]);
+    setCategories([""]);
     setTeamData(initialState);
     handleResetSearch();
   };
@@ -370,6 +384,27 @@ export default function FormNewTime({ data }: { data: Modality }) {
                 className={styles.newPlayer}
               >
                 Adicionar Nova Participação
+              </button>
+            </div>
+            <div className={styles.formT}>
+              <p className={styles.label}>Categorias:</p>
+              {categories.map((category, index) => (
+                <input
+                  key={index}
+                  className={styles.field}
+                  type="text"
+                  value={category}
+                  onChange={(event) =>
+                    handleCategoryChange(index, event.target.value)
+                  }
+                />
+              ))}
+              <button
+                type="button"
+                onClick={addCategory}
+                className={styles.newPlayer}
+              >
+                Adicionar Nova Categoria
               </button>
             </div>
             <div className={styles.form}>

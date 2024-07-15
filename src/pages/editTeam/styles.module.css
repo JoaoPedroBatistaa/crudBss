@@ -8,6 +8,24 @@
   width: 100%;
 }
 
+
+.group {
+  font-family: 'Montserrat', sans-serif;
+  color: #fff;
+
+  font-size: 26px;
+  font-weight: 700;
+
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+
 .Card {
   display: flex;
   flex-direction: column;
