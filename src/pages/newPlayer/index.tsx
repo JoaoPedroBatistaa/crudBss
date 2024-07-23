@@ -205,13 +205,15 @@ export default function NewPlayer({
   players,
 }: {
   data: Modality;
-  players: [Player];
+  players: Player[];
 }) {
   const [moreInfoVisible, setMoreInfoVisible] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
 
-  // console.log(data)
-  // console.log(players)
+  const filteredPlayers = players.filter((player) =>
+    player.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   function toggleMoreInfo() {
     setMoreInfoVisible(!moreInfoVisible);
@@ -222,14 +224,6 @@ export default function NewPlayer({
       query: { mdl: data.id },
     });
   }
-
-  // function popup() {
-  //   if (confirm('Deseja mesmo excluir?')) {
-  //     // Ação a ser executada se o usuário clicar em "Sim"
-  //   } else {
-  //     // Ação a ser executada se o usuário clicar em "Não" ou fechar a caixa de diálogo
-  //   }
-  // }
 
   return (
     <>
@@ -249,11 +243,17 @@ export default function NewPlayer({
             </div>
           </div>
 
-          {players.map(
-            (player) => (
-              console.log(player), (<Player key={player.id} player={player} />)
-            )
-          )}
+          <input
+            type="text"
+            placeholder="Pesquise por jogadores"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+
+          {filteredPlayers.map((player) => (
+            <Player key={player.id} player={player} />
+          ))}
         </div>
 
         <button className={styles.back} onClick={HandleBackButtonClick}>

@@ -87,12 +87,17 @@ export default function NewTeam({
   teams,
 }: {
   data: Modality;
-  teams: [Team];
+  teams: Team[];
 }) {
   const [moreInfoVisible, setMoreInfoVisible] = useState<{
     [key: string]: boolean;
   }>({});
+  const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
+
+  const filteredTeams = teams.filter((team) =>
+    team.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   function toggleMoreInfo(teamId: string) {
     setMoreInfoVisible((prevState) => ({
@@ -148,8 +153,15 @@ export default function NewTeam({
               </Link>
             </div>
           </div>
-          {teams.map((team) => (
-            <>
+          <input
+            type="text"
+            placeholder="Pesquise por equipes"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+          {filteredTeams.map((team) => (
+            <div key={team.id}>
               <div className={styles.newTeam}>
                 <div className={styles.NameGroup}>
                   <img
@@ -198,8 +210,7 @@ export default function NewTeam({
                 <div className={styles.line}>
                   <p className={styles.dataInfo}>Logo do time</p>
                   <img
-                    className={`${styles.modalityIcon}
-                  ${styles.newLogoAvatarListItem}`}
+                    className={`${styles.modalityIcon} ${styles.newLogoAvatarListItem}`}
                     src={team.logo}
                     alt=""
                   />
@@ -234,21 +245,8 @@ export default function NewTeam({
                   <p className={styles.dataInfo}>WhatsApp do Responsavel</p>
                   <p className={styles.dataInfo}>{team.whatsapp}</p>
                 </div>
-
-                {/* <div className={styles.line}>
-                  <p className={styles.dataInfo}>Elenco</p>
-                  <div className={styles.elencoList}>
-                    {team.squad.map((player: Player) =>
-                      player && player.name ? (
-                        <p key={player.id} className={styles.dataInfo}>
-                          {player.name}
-                        </p>
-                      ) : null
-                    )}
-                  </div>
-                </div> */}
               </div>
-            </>
+            </div>
           ))}
         </div>
         <button className={styles.back} onClick={HandleBackButtonClick}>

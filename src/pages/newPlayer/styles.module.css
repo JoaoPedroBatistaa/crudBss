@@ -23,6 +23,19 @@
 
 }
 
+.searchInput {
+  width: 100%;
+  font-size: 16px;
+  padding: 1rem 1.5rem;
+
+  margin-top: 2rem;
+  background-color: #0B0B0B;
+  border: 1px solid #FF9F00;
+  color: #fff;
+
+  border-radius: 1rem;
+}
+
 .titleGroup {
   display: flex;
   justify-content: space-between;

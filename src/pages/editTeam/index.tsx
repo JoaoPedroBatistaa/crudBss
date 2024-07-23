@@ -361,17 +361,21 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
 
             <div className={styles.form}>
               <p className={styles.label}>Títulos:</p>
-              {teamData.titles.map((title, index) => (
-                <input
-                  key={index}
-                  className={styles.field}
-                  type="text"
-                  value={title}
-                  onChange={(event) =>
-                    handleTitleChange(index, event.target.value)
-                  }
-                />
-              ))}
+              {teamData.titles && teamData.titles.length > 0 ? (
+                teamData.titles.map((title, index) => (
+                  <input
+                    key={index}
+                    className={styles.field}
+                    type="text"
+                    value={title}
+                    onChange={(event) =>
+                      handleTitleChange(index, event.target.value)
+                    }
+                  />
+                ))
+              ) : (
+                <p>Nenhum título adicionado.</p>
+              )}
               <button
                 type="button"
                 onClick={addTitle}
@@ -383,17 +387,21 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
 
             <div className={styles.form}>
               <p className={styles.label}>Participações em Campeonatos:</p>
-              {teamData.participations.map((participation, index) => (
-                <input
-                  key={index}
-                  className={styles.field}
-                  type="text"
-                  value={participation}
-                  onChange={(event) =>
-                    handleParticipationChange(index, event.target.value)
-                  }
-                />
-              ))}
+              {teamData.participations && teamData.participations.length > 0 ? (
+                teamData.participations.map((participation, index) => (
+                  <input
+                    key={index}
+                    className={styles.field}
+                    type="text"
+                    value={participation}
+                    onChange={(event) =>
+                      handleParticipationChange(index, event.target.value)
+                    }
+                  />
+                ))
+              ) : (
+                <p>Nenhuma participação adicionada.</p>
+              )}
               <button
                 type="button"
                 onClick={addParticipation}
@@ -426,16 +434,20 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
             </div>
 
             <p className={styles.group}>Elenco</p>
-            {teamData.squad.map((player, playerIndex) => (
-              <div key={playerIndex} className={styles.tableItem}>
-                <p className={styles.label}>Nome do jogador</p>
-                <SearchSelect
-                  onSelectItems={(items) =>
-                    handleSelectItems(items[0], playerIndex)
-                  }
-                />
-              </div>
-            ))}
+            {teamData.squad && teamData.squad.length > 0 ? (
+              teamData.squad.map((player, playerIndex) => (
+                <div key={playerIndex} className={styles.tableItem}>
+                  <p className={styles.label}>Nome do jogador</p>
+                  <SearchSelect
+                    onSelectItems={(items) =>
+                      handleSelectItems(items[0], playerIndex)
+                    }
+                  />
+                </div>
+              ))
+            ) : (
+              <p>Nenhum jogador adicionado.</p>
+            )}
             <button
               type="button"
               onClick={addPlayer}
