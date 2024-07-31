@@ -146,21 +146,55 @@ export default function EditChampionship() {
           const championship = championshipDoc.data() as ChampionShip;
           setChampionshipData(championship);
 
-          // Extract criteria from dataMatrix
+          // Extract criteria from dataMatrix or groups
           if (championship.phases.length > 0) {
-            const todosContraTodosPhase = championship.phases.find(
-              (phase) => phase.type === "todosContraTodos"
-            );
-            if (
-              todosContraTodosPhase &&
-              todosContraTodosPhase.dataMatrix.length > 0
-            ) {
-              const sampleData = todosContraTodosPhase.dataMatrix[0];
-              const extractedCriteria = Object.keys(sampleData)
-                .filter((key) => key !== "time" && key !== "logo")
-                .map((key) => ({ name: key, type: typeof sampleData[key] }));
-              setCriteria(extractedCriteria);
-            }
+            let extractedCriteria: Criterion[] = [];
+
+            championship.phases.forEach((phase) => {
+              // Check for 'todosContraTodos' type
+              if (
+                phase.type === "todosContraTodos" &&
+                phase.dataMatrix.length > 0
+              ) {
+                const sampleData = phase.dataMatrix[0];
+                Object.keys(sampleData).forEach((key) => {
+                  if (key !== "time" && key !== "logo" && key !== "position") {
+                    extractedCriteria.push({
+                      name: key,
+                      type: typeof sampleData[key],
+                    });
+                  }
+                });
+              }
+
+              // Check for 'grupo' type
+              if (phase.type === "grupo" && phase.groups) {
+                phase.groups.forEach((group) => {
+                  if (group.dataMatrix.length > 0) {
+                    const sampleData = group.dataMatrix[0];
+                    Object.keys(sampleData).forEach((key) => {
+                      if (
+                        key !== "time" &&
+                        key !== "logo" &&
+                        key !== "position"
+                      ) {
+                        extractedCriteria.push({
+                          name: key,
+                          type: typeof sampleData[key],
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+            });
+
+            // Remove duplicates
+            const uniqueCriteria = Array.from(
+              new Set(extractedCriteria.map((a) => a.name))
+            ).map((name) => extractedCriteria.find((a) => a.name === name)!);
+
+            setCriteria(uniqueCriteria);
           }
 
           // @ts-ignore
