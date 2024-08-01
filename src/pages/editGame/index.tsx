@@ -1,6 +1,6 @@
-import { db } from "@/firebase";
+import { db, storage } from "@/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import "firebase/storage";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/router";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -63,10 +63,13 @@ export default function EditMatch() {
     setMatchData((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, files } = event.target;
-    const file = files && files.length > 0 ? files[0] : null;
-    setMatchData((prevState) => ({ ...prevState, [name]: file }));
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files && event.target.files[0];
+    // @ts-ignore
+    setMatchData((prevState) => ({
+      ...prevState,
+      fileURL: file || prevState.fileURL,
+    }));
   };
 
   useEffect(() => {
@@ -129,30 +132,44 @@ export default function EditMatch() {
       return;
     }
 
-    const matchDataToSave = {
-      ...matchData,
-      team_1: {
-        score: matchData.team1Score.toString(),
-      },
-      team_2: {
-        score: matchData.team2Score.toString(),
-      },
-    };
-
-    // @ts-ignore
-    delete matchDataToSave.team1Name;
-    // @ts-ignore
-    delete matchDataToSave.team1Logo;
-    // @ts-ignore
-    delete matchDataToSave.team1Score;
-    // @ts-ignore
-    delete matchDataToSave.team2Name;
-    // @ts-ignore
-    delete matchDataToSave.team2Logo;
-    // @ts-ignore
-    delete matchDataToSave.team2Score;
-
     try {
+      let fileURL = matchData.fileURL;
+
+      // @ts-ignore
+      if (matchData.fileURL instanceof File) {
+        const storageRef = ref(
+          storage,
+          `matches/${id}/${matchData.fileURL.name}`
+        );
+        await uploadBytes(storageRef, matchData.fileURL);
+        fileURL = await getDownloadURL(storageRef);
+      }
+
+      const matchDataToSave = {
+        ...matchData,
+        team_1: {
+          score: matchData.team1Score.toString(),
+        },
+        team_2: {
+          score: matchData.team2Score.toString(),
+        },
+        fileURL,
+      };
+
+      // @ts-ignore
+      delete matchDataToSave.team1Name;
+      // @ts-ignore
+      delete matchDataToSave.team1Logo;
+      // @ts-ignore
+      delete matchDataToSave.team1Score;
+      // @ts-ignore
+      delete matchDataToSave.team2Name;
+      // @ts-ignore
+      // @ts-ignore
+      delete matchDataToSave.team2Logo;
+      // @ts-ignore
+      delete matchDataToSave.team2Score;
+
       // Atualiza o documento no Firestore
       await setDoc(doc(db, "matches", id as string), matchDataToSave, {
         merge: true,
@@ -286,18 +303,31 @@ export default function EditMatch() {
             </div>
 
             <div className={styles.form}>
-              <p className={styles.label}>Link do PDF</p>
-              <a
-                href={matchData.fileURL}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ maxWidth: "5rem", marginTop: "2rem" }}
-              >
-                {matchData.fileURL.length > 50
-                  ? `${matchData.fileURL.substring(0, 50)}...`
-                  : matchData.fileURL}
-              </a>
+              <p className={styles.label}>Novo PDF do Jogo</p>
+              <input
+                className={styles.fieldFile}
+                type="file"
+                name="fileURL"
+                accept="application/pdf"
+                onChange={handleFileChange}
+              />
             </div>
+
+            {matchData.fileURL && (
+              <div className={styles.form}>
+                <p className={styles.label}>PDF Atual</p>
+                <a
+                  href={matchData.fileURL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.label}
+                >
+                  {matchData.fileURL.length > 50
+                    ? `${matchData.fileURL.substring(0, 50)}...`
+                    : matchData.fileURL}
+                </a>
+              </div>
+            )}
 
             <button type="submit" className={styles.save}>
               SALVAR
