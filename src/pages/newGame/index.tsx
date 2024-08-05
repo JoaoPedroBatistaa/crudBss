@@ -19,12 +19,12 @@ interface Modality {
 interface Matche {
   id: string;
   team_1: {
-    score: number;
+    score: number | null;
     team_id: string;
     team_data: Team; // Added property to store team details
   };
   team_2: {
-    score: number;
+    score: number | null;
     team_id: string;
     team_data: Team; // Added property to store team details
   };
@@ -145,7 +145,7 @@ export default function NewGame({
     });
   }
 
-  const [matchet, setMatches] = useState<Matche[]>([]);
+  const [matchet, setMatches] = useState<Matche[]>(matches);
 
   async function popup(MatcheId: string) {
     if (window.confirm("Deseja mesmo excluir?")) {
@@ -165,6 +165,24 @@ export default function NewGame({
     } else {
     }
   }
+
+  // Função de comparação para ordenação por data e horário
+  function compareDates(a: Matche, b: Matche) {
+    const dateA = new Date(`${a.date}T${a.time}`);
+    const dateB = new Date(`${b.date}T${b.time}`);
+    return dateA.getTime() - dateB.getTime();
+  }
+
+  // Separar e ordenar jogos
+  const matchesWithScore = matches.filter(
+    (match) => match.team_1.score !== null && match.team_2.score !== null
+  );
+  const matchesWithoutScore = matches.filter(
+    (match) => match.team_1.score === null && match.team_2.score === null
+  );
+
+  matchesWithScore.sort(compareDates);
+  matchesWithoutScore.sort(compareDates);
 
   return (
     <>
@@ -186,7 +204,106 @@ export default function NewGame({
             </div>
           </div>
 
-          {matches.map((matche) => (
+          {matchesWithoutScore.map((matche) => (
+            <>
+              <React.Fragment key={matche.id}>
+                <div className={styles.newTeam}>
+                  <div className={styles.NameGroup}>
+                    <div className={styles.Game}>
+                      <div className={styles.TeamLogo}>
+                        <Image
+                          src={
+                            matche.team_1.team_data?.logo || "/assets/team1.png"
+                          }
+                          alt=""
+                          width={60}
+                          height={60}
+                        />
+                      </div>
+                      <div className={styles.Scoreboard}>
+                        <h2>{matche.team_1.score}</h2>
+                        <h1>X</h1>
+                        <h2>{matche.team_2.score}</h2>
+                      </div>
+                      <div className={styles.TeamLogo}>
+                        <Image
+                          src={
+                            matche.team_2.team_data?.logo || "/assets/team1.png"
+                          }
+                          alt=""
+                          width={60}
+                          height={60}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.crudGroup}>
+                    <img
+                      id={`moreInfoButton_${matche.id}`}
+                      className={styles.crudIcon}
+                      src="./assets/detalhes.png"
+                      alt=""
+                      onClick={() => toggleMoreInfo(matche.id)}
+                    />
+                    <Link
+                      href={{ pathname: `/editGame`, query: { id: matche.id } }}
+                    >
+                      <img
+                        className={styles.crudIcon}
+                        src="./assets/editar.png"
+                        alt=""
+                      />
+                    </Link>
+                    <img
+                      className={styles.crudIcon}
+                      src="./assets/excluir.png"
+                      alt=""
+                      onClick={() => popup(matche.id)}
+                    />
+                  </div>
+                </div>
+
+                <div
+                  id={`moreInfo_${matche.id}`}
+                  className={`${styles.moreInfo} ${
+                    moreInfoVisible[matche.id] ? "" : styles.hidden
+                  }`}
+                >
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Horario</p>
+                    <p className={styles.dataInfo}>{matche.time}</p>
+                  </div>
+
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Local</p>
+                    <p className={styles.dataInfo}>{matche.venue}</p>
+                  </div>
+
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Data</p>
+                    <p className={styles.dataInfo}>{matche.date}</p>
+                  </div>
+
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Time 1</p>
+                    <p className={styles.dataInfo}>
+                      {matche.team_1.team_data?.name}
+                    </p>
+                  </div>
+
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Time 2</p>
+                    <p className={styles.dataInfo}>
+                      {matche.team_2.team_data?.name}
+                    </p>
+                  </div>
+                </div>
+              </React.Fragment>
+            </>
+          ))}
+
+          {matchesWithScore.map((matche) => (
             <>
               <React.Fragment key={matche.id}>
                 <div className={styles.newTeam}>

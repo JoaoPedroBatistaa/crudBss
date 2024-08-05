@@ -131,6 +131,26 @@ export default function EditChampionship() {
     setChampionshipData((prevState) => ({ ...prevState, logo: file }));
   };
 
+  const handleCountChange = (
+    phaseIndex: number,
+    groupIndex: number | null,
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = parseInt(e.target.value);
+    const updatedPhases = [...championshipData.phases];
+
+    if (groupIndex === null) {
+      updatedPhases[phaseIndex].count = value;
+    } else {
+      updatedPhases[phaseIndex].groups![groupIndex].count = value;
+    }
+
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      phases: updatedPhases,
+    }));
+  };
+
   useEffect(() => {
     const fetchChampionship = async () => {
       if (!id) {
@@ -495,11 +515,10 @@ export default function EditChampionship() {
                         Tabela do Campeonato - Nº de posições
                       </p>
                       <input
-                        type="text"
+                        type="number"
                         className={styles.pos}
-                        pattern="\d*"
                         value={phase.count}
-                        readOnly
+                        onChange={(e) => handleCountChange(phaseIndex, null, e)}
                       />
                     </div>
 
@@ -618,11 +637,12 @@ export default function EditChampionship() {
                             Tabela do Grupo - Nº de posições
                           </p>
                           <input
-                            type="text"
+                            type="number"
                             className={styles.pos}
-                            pattern="\d*"
                             value={group.count}
-                            readOnly
+                            onChange={(e) =>
+                              handleCountChange(phaseIndex, groupIndex, e)
+                            }
                           />
                         </div>
 
