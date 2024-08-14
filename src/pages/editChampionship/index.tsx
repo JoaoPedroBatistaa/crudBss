@@ -22,6 +22,7 @@ interface ChampionShip {
   logo: string | File | null;
   description: string;
   phases: Phase[];
+  rankings?: Ranking[];
 }
 
 interface Phase {
@@ -50,12 +51,12 @@ interface Criterion {
 interface Player {
   id: string;
   name: string;
-  photo: string; // Pode ser usado como 'photo' se este campo representa a foto
+  photo: string;
 }
 
 interface Ranking {
   name: string;
-  value: string;
+  value: number;
   athlete: string;
   photo: string;
 }
@@ -71,6 +72,7 @@ export default function EditChampionship() {
     logo: null,
     description: "",
     phases: [],
+    rankings: [],
   });
 
   const [criteria, setCriteria] = useState<Criterion[]>([]);
@@ -80,7 +82,7 @@ export default function EditChampionship() {
   const [rankings, setRankings] = useState<Ranking[]>([]);
 
   const addRanking = () => {
-    setRankings([...rankings, { name: "", value: "", athlete: "", photo: "" }]);
+    setRankings([...rankings, { name: "", value: 0, athlete: "", photo: "" }]);
   };
 
   const removeRanking = (index: number) => {
@@ -92,20 +94,23 @@ export default function EditChampionship() {
     field: keyof Ranking,
     value: string | number
   ) => {
-    const updatedRankings = [...rankings];
-    updatedRankings[index] = { ...updatedRankings[index], [field]: value };
-    setRankings(updatedRankings);
+    setRankings((prevRankings) => {
+      const updatedRankings = [...prevRankings];
+      updatedRankings[index] = { ...updatedRankings[index], [field]: value };
+      return updatedRankings;
+    });
   };
 
   const handleSelectPlayer = (index: number, player: Player) => {
-    const updatedRankings = [...rankings];
-    updatedRankings[index] = {
-      ...updatedRankings[index],
-      athlete: player.name,
-      photo: player.photo,
-    };
-    console.log("Updated Rankings:", updatedRankings);
-    setRankings(updatedRankings);
+    setRankings((prevRankings) => {
+      const updatedRankings = [...prevRankings];
+      updatedRankings[index] = {
+        ...updatedRankings[index],
+        athlete: player.name,
+        photo: player.photo,
+      };
+      return updatedRankings;
+    });
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -166,12 +171,10 @@ export default function EditChampionship() {
           const championship = championshipDoc.data() as ChampionShip;
           setChampionshipData(championship);
 
-          // Extract criteria from dataMatrix or groups
           if (championship.phases.length > 0) {
             let extractedCriteria: Criterion[] = [];
 
             championship.phases.forEach((phase) => {
-              // Check for 'todosContraTodos' type
               if (
                 phase.type === "todosContraTodos" &&
                 phase.dataMatrix.length > 0
@@ -187,7 +190,6 @@ export default function EditChampionship() {
                 });
               }
 
-              // Check for 'grupo' type
               if (phase.type === "grupo" && phase.groups) {
                 phase.groups.forEach((group) => {
                   if (group.dataMatrix.length > 0) {
@@ -209,7 +211,6 @@ export default function EditChampionship() {
               }
             });
 
-            // Remove duplicates
             const uniqueCriteria = Array.from(
               new Set(extractedCriteria.map((a) => a.name))
             ).map((name) => extractedCriteria.find((a) => a.name === name)!);
@@ -217,9 +218,7 @@ export default function EditChampionship() {
             setCriteria(uniqueCriteria);
           }
 
-          // @ts-ignore
           if (championship.rankings) {
-            // @ts-ignore
             setRankings(championship.rankings);
           }
         } else {
@@ -262,8 +261,7 @@ export default function EditChampionship() {
         updatedChampionshipData.logo = downloadURL as string;
       }
 
-      // @ts-ignore
-      updatedChampionshipData.rankings = rankings; // Incluindo rankings
+      updatedChampionshipData.rankings = rankings;
 
       await setDoc(
         doc(db, "championships", id as string),
@@ -916,10 +914,16 @@ export default function EditChampionship() {
                     />
                   </div>
 
-                  <button onClick={() => removeRanking(index)}>Remover</button>
+                  <button type="button" onClick={() => removeRanking(index)}>
+                    Remover
+                  </button>
                 </div>
               ))}
-              <button onClick={addRanking} className={styles.newPlayer}>
+              <button
+                type="button"
+                onClick={addRanking}
+                className={styles.newPlayer}
+              >
                 Adicionar Ranking
               </button>
             </div>

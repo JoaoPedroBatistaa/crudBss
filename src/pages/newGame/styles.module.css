@@ -29,6 +29,8 @@
   align-items: space-between;
   flex-direction: row;
   gap: 210px;
+
+  margin-bottom: 1.5rem;
 }
 
 .NameGroup {
@@ -160,6 +162,21 @@
   font-size: 14px;
   font-weight: 600;
   font-family: 'Montserrat', sans-serif;
+}
+
+.dataInfon {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+  margin-top: 1rem;
+
+}
+
+.dataInfon input {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+
 }
 
 .hidden {
