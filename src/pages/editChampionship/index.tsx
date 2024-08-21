@@ -381,6 +381,17 @@ export default function EditChampionship() {
     }));
   };
 
+  const removeGroup = (phaseIndex: number, groupIndex: number) => {
+    const updatedPhases = [...championshipData.phases];
+    updatedPhases[phaseIndex].groups = updatedPhases[phaseIndex].groups?.filter(
+      (_, index) => index !== groupIndex
+    );
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      phases: updatedPhases,
+    }));
+  };
+
   const addFase = (phaseIndex: number) => {
     const updatedPhases = [...championshipData.phases];
     const newFase = { faseName: "", partidas: [] };
@@ -629,6 +640,13 @@ export default function EditChampionship() {
                             }}
                           />
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => removeGroup(phaseIndex, groupIndex)}
+                          className={styles.newPlayer}
+                        >
+                          Remover Grupo
+                        </button>
 
                         <div className={styles.headTable}>
                           <p className={styles.label}>
