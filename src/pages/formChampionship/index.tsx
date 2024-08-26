@@ -287,13 +287,11 @@ export default function NewFormChampionship({
     type: string,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
+    const value = e.target.value; // Capture o valor como string
+
     const updatedMatrix = phases.map((phase) => {
       if (phase.id === phaseId) {
         const newDataMatrix = [...phase.dataMatrix];
-        const value =
-          e.target.type === "number"
-            ? parseInt(e.target.value)
-            : e.target.value;
 
         if (!newDataMatrix[index]) {
           newDataMatrix[index] = {
@@ -302,7 +300,9 @@ export default function NewFormChampionship({
             position: "",
           };
         }
-        newDataMatrix[index][type] = value;
+
+        newDataMatrix[index][type] = value; // Atribua o valor diretamente
+
         return { ...phase, dataMatrix: newDataMatrix };
       }
       return phase;
@@ -579,12 +579,11 @@ export default function NewFormChampionship({
                       Tabela do Campeonato - insira o Nº posições
                     </p>
                     <input
-                      type="text"
+                      type="number" // Mudei para "number" para garantir que o input aceita números corretamente
                       className={styles.pos}
-                      pattern="\d*"
-                      onInput={(e) => {
-                        const input = e.currentTarget as HTMLInputElement;
-                        const value = parseInt(input.value);
+                      value={phase.count || ""} // Mantém o valor do input mesmo que seja 0
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
                         if (!isNaN(value)) {
                           setPhases(
                             phases.map((p) =>
@@ -604,9 +603,7 @@ export default function NewFormChampionship({
                           type="number"
                           className={styles.position}
                           value={
-                            (phase.dataMatrix[index] &&
-                              phase.dataMatrix[index].position) ||
-                            ""
+                            phase.dataMatrix[index]?.position ?? "" // Usa nullish coalescing (??) para garantir que "0" seja exibido corretamente
                           }
                           onChange={(e) =>
                             handleTableInputChange(
@@ -632,12 +629,12 @@ export default function NewFormChampionship({
                             {criterion.name.slice(0, 2)}
                           </p>
                           <input
-                            type={criterion.type}
+                            type={
+                              criterion.type === "number" ? "number" : "text"
+                            } // Garantir que tipos de números são aceitos
                             className={styles.position}
                             value={
-                              (phase.dataMatrix[index] &&
-                                phase.dataMatrix[index][criterion.name]) ||
-                              ""
+                              phase.dataMatrix[index]?.[criterion.name] ?? "" // Usa nullish coalescing para garantir que "0" seja exibido corretamente
                             }
                             onChange={(e) =>
                               handleTableInputChange(

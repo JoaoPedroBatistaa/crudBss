@@ -31,6 +31,7 @@ interface Matche {
   time: string;
   venue: String;
   date: string;
+  championship: string; // Adicionado para guardar a referência do campeonato
 }
 
 interface Team {
@@ -39,14 +40,18 @@ interface Team {
   logo: string;
 }
 
+interface Championship {
+  id: string;
+  name: string;
+}
+
 async function getCollectionData(modalityId: string) {
-  const collectionRef = collection(db, "modalities");
   const modalityRef = doc(db, "modalities", modalityId);
   const modalityDoc = await getDoc(modalityRef);
 
   if (!modalityDoc.exists()) {
     toast.error("Modalidade não encontrada!");
-    return;
+    return [];
   }
 
   const q = query(
@@ -56,63 +61,63 @@ async function getCollectionData(modalityId: string) {
   const querySnapshot = await getDocs(q);
   const documents = querySnapshot.docs.map(async (doc1) => {
     const data = doc1.data();
-    const jsonSerializableData = JSON.parse(JSON.stringify(data));
 
-    const team1Id = jsonSerializableData.team_1.team_id._key.path.segments[6];
+    // Serializar corretamente as referências do campeonato e das equipes
+    const team1Id = data.team_1.team_id.id;
     const team1Doc = await getDoc(doc(db, "teams", team1Id));
     const team1Data = team1Doc.exists() ? team1Doc.data() : null;
 
-    if (team1Data && team1Data.createdAt && team1Data.createdAt.toMillis) {
-      team1Data.createdAt = team1Data.createdAt.toMillis();
-    }
-
-    const team2Id = jsonSerializableData.team_2.team_id._key.path.segments[6];
+    const team2Id = data.team_2.team_id.id;
     const team2Doc = await getDoc(doc(db, "teams", team2Id));
     const team2Data = team2Doc.exists() ? team2Doc.data() : null;
 
-    if (team2Data && team2Data.createdAt && team2Data.createdAt.toMillis) {
-      team2Data.createdAt = team2Data.createdAt.toMillis();
-    }
-
-    jsonSerializableData.team_1.team_data = team1Data;
-    jsonSerializableData.team_2.team_data = team2Data;
+    const championshipId = data.championship.id;
+    const championshipDoc = await getDoc(
+      doc(db, "championships", championshipId)
+    );
+    const championshipData = championshipDoc.exists()
+      ? { id: championshipId, ...championshipDoc.data() }
+      : null;
 
     return {
       id: doc1.id,
-      ...jsonSerializableData,
+      ...data,
+      team_1: {
+        ...data.team_1,
+        team_data: team1Data,
+      },
+      team_2: {
+        ...data.team_2,
+        team_data: team2Data,
+      },
+      championship: championshipData, // Serializar para um objeto plain JSON
     };
   });
 
   const results = await Promise.all(documents);
 
-  if (results.length > 0) {
-    console.log("Documentos encontrados");
-  }
-
   return results;
 }
 
-async function getModalityReference(modalityId: string) {
-  console.log("buscar esportes -" + modalityId);
-  const sportsCollection = "modalities";
-  const sportRef = doc(db, sportsCollection, modalityId);
-  const sportDoc = await getDoc(sportRef);
+async function getChampionships() {
+  const championshipsRef = collection(db, "championships");
+  const championshipsSnapshot = await getDocs(championshipsRef);
+  const championships = championshipsSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Championship[];
 
-  if (sportDoc.exists()) {
-    console.log("Sucesso ao buscar a modalidade -" + modalityId);
-    return sportRef;
-  } else {
-    toast.error("Esporte não encontrado!");
-    return null;
-  }
+  return championships;
 }
 
 export default function NewGame({
   data,
   matches,
+  championships,
 }: {
   data: Modality;
   matches: Matche[];
+  championships: Championship[];
 }) {
   const [moreInfoVisible, setMoreInfoVisible] = useState<{
     [key: string]: boolean;
@@ -123,6 +128,8 @@ export default function NewGame({
   const [endDate, setEndDate] = useState<string>("");
   const [showCompleted, setShowCompleted] = useState<boolean>(false);
   const [matchet, setMatches] = useState<Matche[]>(matches);
+
+  const [selectedChampionship, setSelectedChampionship] = useState<string>("");
 
   function toggleMoreInfo(matchId: string) {
     setMoreInfoVisible((prevState) => ({
@@ -174,6 +181,12 @@ export default function NewGame({
     setShowCompleted(event.target.checked);
   }
 
+  function handleChampionshipChange(
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) {
+    setSelectedChampionship(event.target.value);
+  }
+
   const filteredMatches = matches.filter((match) => {
     const matchDate = new Date(`${match.date}T${match.time}`);
     const isCompleted = match.team_1.score !== "" && match.team_2.score !== "";
@@ -184,7 +197,14 @@ export default function NewGame({
 
     const matchesStatusFilter = !showCompleted || isCompleted;
 
-    return matchesDateFilter && matchesStatusFilter;
+    const matchesChampionshipFilter =
+      selectedChampionship === "" ||
+      // @ts-ignore
+      match.championship?.id === selectedChampionship; // Usar o ID serializado do campeonato
+
+    return (
+      matchesDateFilter && matchesStatusFilter && matchesChampionshipFilter
+    );
   });
 
   const matchesWithScore = filteredMatches.filter(
@@ -215,6 +235,44 @@ export default function NewGame({
                 />
               </Link>
             </div>
+          </div>
+
+          <div className={styles.filterContainer}>
+            <label className={styles.dataInfon}>
+              Campeonato:
+              <select
+                value={selectedChampionship}
+                onChange={handleChampionshipChange}
+              >
+                <option value="">Todos os Campeonatos</option>
+                {championships.map(
+                  (championship: {
+                    id: readonly string[] | React.Key | null | undefined;
+                    name:
+                      | string
+                      | number
+                      | boolean
+                      | React.ReactElement<
+                          any,
+                          string | React.JSXElementConstructor<any>
+                        >
+                      | React.ReactFragment
+                      | React.ReactPortal
+                      | null
+                      | undefined;
+                  }) => (
+                    <option
+                      // @ts-ignore
+                      key={championship.id}
+                      // @ts-ignore
+                      value={championship.id}
+                    >
+                      {championship.name}
+                    </option>
+                  )
+                )}
+              </select>
+            </label>
           </div>
 
           <div className={styles.filterContainer}>
@@ -461,11 +519,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
 
   const matches = await getCollectionData(modalityId);
+  const championships = await getChampionships(); // Obtenção da lista de campeonatos
 
   return {
     props: {
       data: { id: mdl },
-      matches: matches,
+      matches: JSON.parse(JSON.stringify(matches)), // Garantir que os dados são serializáveis
+      championships: JSON.parse(JSON.stringify(championships)), // Serializar os campeonatos
     },
   };
 }

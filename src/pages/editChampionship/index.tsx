@@ -526,93 +526,93 @@ export default function EditChampionship() {
                       <input
                         type="number"
                         className={styles.pos}
-                        value={phase.count}
+                        value={phase.count ?? ""} // Usa nullish coalescing para garantir que "0" seja exibido corretamente
                         onChange={(e) => handleCountChange(phaseIndex, null, e)}
                       />
                     </div>
 
-                    {Array.from({ length: phase.count }).map((_, rowIndex) => (
-                      <div key={rowIndex} className={styles.table}>
-                        <div className={styles.tableItem}>
-                          <p className={styles.tableLabel}>Posi</p>
-                          <input
-                            type="number"
-                            className={styles.position}
-                            value={
-                              (phase.dataMatrix[rowIndex] &&
-                                phase.dataMatrix[rowIndex].position) ||
-                              ""
-                            }
-                            onChange={(e) =>
-                              handleTableInputChange(
-                                phaseIndex,
-                                rowIndex,
-                                "position",
-                                e
-                              )
-                            }
-                          />
-                        </div>
-                        <div className={styles.tableItem}>
-                          <p className={styles.tableLabel}>
-                            Time:{" "}
-                            {(phase.dataMatrix[rowIndex] &&
-                              phase.dataMatrix[rowIndex].time) ||
-                              ""}
-                          </p>
-                          <SearchSelectTeam
-                            onSelectItem={(team: Item) => {
-                              const updatedPhases = [
-                                ...championshipData.phases,
-                              ];
-                              if (
-                                !updatedPhases[phaseIndex].dataMatrix[rowIndex]
-                              ) {
-                                updatedPhases[phaseIndex].dataMatrix[rowIndex] =
-                                  {
-                                    time: "",
-                                    logo: "",
-                                  };
-                              }
-                              updatedPhases[phaseIndex].dataMatrix[
-                                rowIndex
-                              ].time = team.name;
-                              updatedPhases[phaseIndex].dataMatrix[
-                                rowIndex
-                              ].logo = team.logo;
-                              setChampionshipData((prevState) => ({
-                                ...prevState,
-                                phases: updatedPhases,
-                              }));
-                            }}
-                          />
-                        </div>
-                        {criteria.map((criterion, i) => (
-                          <div key={i} className={styles.tableItem}>
-                            <p className={styles.tableLabel}>
-                              {criterion.name.slice(0, 2)}
-                            </p>
+                    {Array.from({ length: phase.count ?? 0 }).map(
+                      (_, rowIndex) => (
+                        <div key={rowIndex} className={styles.table}>
+                          <div className={styles.tableItem}>
+                            <p className={styles.tableLabel}>Posi</p>
                             <input
-                              type={criterion.type}
+                              type="number"
                               className={styles.position}
                               value={
-                                (phase.dataMatrix[rowIndex] &&
-                                  phase.dataMatrix[rowIndex][criterion.name]) ||
-                                ""
+                                phase.dataMatrix[rowIndex]?.position ?? "" // Usa nullish coalescing para garantir que "0" seja exibido corretamente
                               }
                               onChange={(e) =>
                                 handleTableInputChange(
                                   phaseIndex,
                                   rowIndex,
-                                  criterion.name,
+                                  "position",
                                   e
                                 )
                               }
                             />
                           </div>
-                        ))}
-                      </div>
-                    ))}
+                          <div className={styles.tableItem}>
+                            <p className={styles.tableLabel}>
+                              Time: {phase.dataMatrix[rowIndex]?.time ?? ""}
+                            </p>
+                            <SearchSelectTeam
+                              onSelectItem={(team: Item) => {
+                                const updatedPhases = [
+                                  ...championshipData.phases,
+                                ];
+                                if (
+                                  !updatedPhases[phaseIndex].dataMatrix[
+                                    rowIndex
+                                  ]
+                                ) {
+                                  updatedPhases[phaseIndex].dataMatrix[
+                                    rowIndex
+                                  ] = {
+                                    time: "",
+                                    logo: "",
+                                  };
+                                }
+                                updatedPhases[phaseIndex].dataMatrix[
+                                  rowIndex
+                                ].time = team.name;
+                                updatedPhases[phaseIndex].dataMatrix[
+                                  rowIndex
+                                ].logo = team.logo;
+                                setChampionshipData((prevState) => ({
+                                  ...prevState,
+                                  phases: updatedPhases,
+                                }));
+                              }}
+                            />
+                          </div>
+                          {criteria.map((criterion, i) => (
+                            <div key={i} className={styles.tableItem}>
+                              <p className={styles.tableLabel}>
+                                {criterion.name.slice(0, 2)}
+                              </p>
+                              <input
+                                type={criterion.type}
+                                className={styles.position}
+                                value={
+                                  phase.dataMatrix[rowIndex]?.[
+                                    criterion.name
+                                  ] ?? "" // Usa nullish coalescing para garantir que "0" seja exibido corretamente
+                                }
+                                onChange={(e) =>
+                                  handleTableInputChange(
+                                    phaseIndex,
+                                    rowIndex,
+                                    criterion.name,
+                                    e
+                                  )
+                                }
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    )}
                   </>
                 )}
 

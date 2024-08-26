@@ -23,6 +23,14 @@
 
 }
 
+.filterContainer {
+  margin-bottom: 0.5rem;
+}
+
+.filterContainer select {
+  margin-left: 0.5rem;
+}
+
 .titleGroup {
   display: flex;
   justify-content: space-between;
