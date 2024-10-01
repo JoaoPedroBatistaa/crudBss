@@ -8,6 +8,11 @@
   width: 100%;
 }
 
+.ranking {
+  display: flex;
+  flex-direction: column;
+}
+
 .Card {
   display: flex;
   flex-direction: column;

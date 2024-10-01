@@ -162,6 +162,11 @@ export default function EditHistoricChampion() {
     window.history.back();
   }
 
+  const removeYearlyPlacingField = (index: number) => {
+    const updatedPlacings = yearlyPlacings.filter((_, i) => i !== index);
+    setYearlyPlacings(updatedPlacings);
+  };
+
   return isLoading ? (
     <Spinner />
   ) : (
@@ -257,6 +262,15 @@ export default function EditHistoricChampion() {
                     }
                   />
                 </div>
+
+                {/* Botão para remover o ano */}
+                <button
+                  type="button"
+                  onClick={() => removeYearlyPlacingField(index)}
+                  className={styles.newPlayer}
+                >
+                  Remover Ano
+                </button>
               </div>
             ))}
 

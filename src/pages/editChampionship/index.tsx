@@ -417,6 +417,23 @@ export default function EditChampionship() {
     }));
   };
 
+  const removePartida = (
+    phaseIndex: number,
+    faseIndex: number,
+    partidaIndex: number
+  ) => {
+    const updatedPhases = [...championshipData.phases];
+    updatedPhases[phaseIndex].mataMataData![faseIndex].partidas = updatedPhases[
+      phaseIndex
+    ].mataMataData![faseIndex].partidas.filter(
+      (_, index) => index !== partidaIndex
+    );
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      phases: updatedPhases,
+    }));
+  };
+
   const addNewPhase = () => {
     const newPhase = {
       id: championshipData.phases.length + 1,
@@ -427,6 +444,16 @@ export default function EditChampionship() {
     setChampionshipData((prevState) => ({
       ...prevState,
       phases: [...prevState.phases, newPhase],
+    }));
+  };
+
+  const removePhase = (phaseIndex: number) => {
+    const updatedPhases = championshipData.phases.filter(
+      (_, index) => index !== phaseIndex
+    );
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      phases: updatedPhases,
     }));
   };
 
@@ -526,7 +553,7 @@ export default function EditChampionship() {
                       <input
                         type="number"
                         className={styles.pos}
-                        value={phase.count ?? ""} // Usa nullish coalescing para garantir que "0" seja exibido corretamente
+                        value={phase.count ?? ""}
                         onChange={(e) => handleCountChange(phaseIndex, null, e)}
                       />
                     </div>
@@ -539,9 +566,7 @@ export default function EditChampionship() {
                             <input
                               type="number"
                               className={styles.position}
-                              value={
-                                phase.dataMatrix[rowIndex]?.position ?? "" // Usa nullish coalescing para garantir que "0" seja exibido corretamente
-                              }
+                              value={phase.dataMatrix[rowIndex]?.position ?? ""}
                               onChange={(e) =>
                                 handleTableInputChange(
                                   phaseIndex,
@@ -597,7 +622,7 @@ export default function EditChampionship() {
                                 value={
                                   phase.dataMatrix[rowIndex]?.[
                                     criterion.name
-                                  ] ?? "" // Usa nullish coalescing para garantir que "0" seja exibido corretamente
+                                  ] ?? ""
                                 }
                                 onChange={(e) =>
                                   handleTableInputChange(
@@ -802,20 +827,6 @@ export default function EditChampionship() {
                                   const updatedPhases = [
                                     ...championshipData.phases,
                                   ];
-                                  if (
-                                    !updatedPhases[phaseIndex].mataMataData![
-                                      faseIndex
-                                    ].partidas[partidaIndex]
-                                  ) {
-                                    updatedPhases[phaseIndex].mataMataData![
-                                      faseIndex
-                                    ].partidas[partidaIndex] = {
-                                      timeA: "",
-                                      logoA: "",
-                                      timeB: "",
-                                      logoB: "",
-                                    };
-                                  }
                                   updatedPhases[phaseIndex].mataMataData![
                                     faseIndex
                                   ].partidas[partidaIndex].timeA = team.name;
@@ -838,20 +849,6 @@ export default function EditChampionship() {
                                   const updatedPhases = [
                                     ...championshipData.phases,
                                   ];
-                                  if (
-                                    !updatedPhases[phaseIndex].mataMataData![
-                                      faseIndex
-                                    ].partidas[partidaIndex]
-                                  ) {
-                                    updatedPhases[phaseIndex].mataMataData![
-                                      faseIndex
-                                    ].partidas[partidaIndex] = {
-                                      timeA: "",
-                                      logoA: "",
-                                      timeB: "",
-                                      logoB: "",
-                                    };
-                                  }
                                   updatedPhases[phaseIndex].mataMataData![
                                     faseIndex
                                   ].partidas[partidaIndex].timeB = team.name;
@@ -865,6 +862,20 @@ export default function EditChampionship() {
                                 }}
                               />
                             </div>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removePartida(
+                                  phaseIndex,
+                                  faseIndex,
+                                  partidaIndex
+                                )
+                              }
+                              className={styles.newPlayer}
+                            >
+                              Remover Partida
+                            </button>
                           </div>
                         ))}
 
@@ -887,8 +898,17 @@ export default function EditChampionship() {
                     </button>
                   </>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => removePhase(phaseIndex)}
+                  className={styles.newPlayer}
+                >
+                  Remover Fase
+                </button>
               </div>
             ))}
+
             <button
               type="button"
               onClick={addNewPhase}
@@ -908,6 +928,7 @@ export default function EditChampionship() {
                       handleRankingChange(index, "name", e.target.value)
                     }
                     placeholder="Nome do Ranking"
+                    className={styles.field}
                   />
                   <input
                     type="number"
@@ -920,6 +941,7 @@ export default function EditChampionship() {
                       )
                     }
                     placeholder="Valor"
+                    className={styles.field}
                   />
                   <div>
                     <p className={styles.label}>{ranking.athlete}</p>
@@ -932,7 +954,11 @@ export default function EditChampionship() {
                     />
                   </div>
 
-                  <button type="button" onClick={() => removeRanking(index)}>
+                  <button
+                    type="button"
+                    onClick={() => removeRanking(index)}
+                    className={styles.newPlayer}
+                  >
                     Remover
                   </button>
                 </div>
