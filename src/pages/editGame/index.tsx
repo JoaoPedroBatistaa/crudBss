@@ -35,6 +35,8 @@ export default function EditMatch() {
     fileURL: "",
     topScorer: "",
     mvp: "",
+    isVolleyball: false,
+    setScores: { set1: "", set2: "", set3: "" },
   });
 
   const [selectedTeamOne, setSelectedTeamOne] = useState<Item | null>(null);
@@ -62,6 +64,8 @@ export default function EditMatch() {
               fileURL: match.fileURL || "",
               topScorer: match.topScorer || "",
               mvp: match.mvp || "",
+              isVolleyball: match.isVolleyball || false,
+              setScores: match.setScores || { set1: "", set2: "", set3: "" },
             });
             setSelectedTeamOne({
               id: match.team_1.team_id.id,
@@ -282,6 +286,70 @@ export default function EditMatch() {
                 }
               />
             </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Sets de Vôlei?</p>
+              <select
+                className={styles.field}
+                value={matchData.isVolleyball ? "sim" : "não"}
+                onChange={(e) =>
+                  setMatchData((prev) => ({
+                    ...prev,
+                    isVolleyball: e.target.value === "sim",
+                  }))
+                }
+              >
+                <option value="não">Não</option>
+                <option value="sim">Sim</option>
+              </select>
+            </div>
+
+            {matchData.isVolleyball && (
+              <>
+                <div className={styles.form}>
+                  <p className={styles.label}>Placar Set 1</p>
+                  <input
+                    className={styles.field}
+                    type="text"
+                    value={matchData.setScores.set1}
+                    onChange={(e) =>
+                      setMatchData((prev) => ({
+                        ...prev,
+                        setScores: { ...prev.setScores, set1: e.target.value },
+                      }))
+                    }
+                  />
+                </div>
+                <div className={styles.form}>
+                  <p className={styles.label}>Placar Set 2</p>
+                  <input
+                    className={styles.field}
+                    type="text"
+                    value={matchData.setScores.set2}
+                    onChange={(e) =>
+                      setMatchData((prev) => ({
+                        ...prev,
+                        setScores: { ...prev.setScores, set2: e.target.value },
+                      }))
+                    }
+                  />
+                </div>
+                <div className={styles.form}>
+                  <p className={styles.label}>Placar Set 3</p>
+                  <input
+                    className={styles.field}
+                    type="text"
+                    value={matchData.setScores.set3}
+                    onChange={(e) =>
+                      setMatchData((prev) => ({
+                        ...prev,
+                        setScores: { ...prev.setScores, set3: e.target.value },
+                      }))
+                    }
+                  />
+                </div>
+              </>
+            )}
 
             <div className={styles.form}>
               <p className={styles.label}>Novo PDF do Jogo</p>
