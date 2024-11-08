@@ -29,52 +29,42 @@ interface Modality {
   id: string;
 }
 
+interface Team {
+  name: string;
+}
+
 interface Player {
-  totalScore: Number;
   instagram?: string;
-  mpvOfTheGames: Number;
-  mvpOfTheChampionship: Number;
   name: string;
   photo?: string;
-  threePointers: Number;
-  topScorersOfTheChampionship: Number;
-  topScorersOfTheGame: Number;
-  kingplayer: Number;
   position: string;
   cpf: string;
   birthDate: string;
   team?: string;
   teamLogo?: string;
   about: string;
+  teams?: Team[];
 }
 
-// Modal.setAppElement('#root');
 export default function FormPlayer({ data }: { data: Modality }) {
   const [modality, setModality] = useState(data);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [modalOpen, setModalOpen] = useState(false);
-
   const [isLoading, setIsLoading] = useState(false);
   const [isFileInputOpen, setIsFileInputOpen] = useState(false);
   const router = useRouter();
-
   const [playerData, setPlayerData] = useState<Player>({
-    totalScore: 0,
-    mpvOfTheGames: 0,
-    mvpOfTheChampionship: 0,
     name: "",
-    threePointers: 0,
-    topScorersOfTheChampionship: 0,
-    topScorersOfTheGame: 0,
-    kingplayer: 0,
     position: "",
     instagram: "",
     cpf: "",
     birthDate: "",
     about: "",
   });
+  const [teams, setTeams] = useState<Team[]>([]); // Lista de equipes
+  const [image, setImage] = useState<string | null>(null);
+  const [croppedImage, setCroppedImage] = useState("");
+  const editorRef = useRef<AvatarEditor | null>(null);
 
   const handleImageClick = () => {
     if (!isFileInputOpen) {
@@ -82,9 +72,6 @@ export default function FormPlayer({ data }: { data: Modality }) {
       fileInputRef.current?.click();
     }
   };
-  const [image, setImage] = useState<string | null>(null);
-  const [croppedImage, setCroppedImage] = useState("");
-  const editorRef = useRef<AvatarEditor | null>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsFileInputOpen(false);
@@ -118,11 +105,8 @@ export default function FormPlayer({ data }: { data: Modality }) {
         ctx.arc(45, 45, 45, 0, Math.PI * 2, true);
         ctx.closePath();
         ctx.clip();
-
         ctx.drawImage(canvas, 0, 0, 90, 90);
-
         ctx.restore();
-
         const croppedImageDataURL = finalCanvas.toDataURL();
         setCroppedImage(croppedImageDataURL);
         setModalOpen(false);
@@ -130,29 +114,20 @@ export default function FormPlayer({ data }: { data: Modality }) {
     }
   };
 
-  const handleOpen = () => {
-    setModalOpen(true);
+  const handleOpen = () => setModalOpen(true);
+  const handleClose = () => setModalOpen(false);
+
+  const addTeam = (team: Team) => {
+    setTeams((prevTeams) => [...prevTeams, team]);
   };
 
-  const handleClose = () => {
-    setModalOpen(false);
+  const removeTeam = (index: number) => {
+    setTeams((prevTeams) => prevTeams.filter((_, i) => i !== index));
   };
-
-  // const handleSave = () => {
-  //   console.log('Salvar');
-  //   setModalOpen(false);
-  // };
 
   function resetForm() {
     setPlayerData({
-      totalScore: 0,
-      mpvOfTheGames: 0,
-      mvpOfTheChampionship: 0,
       name: "",
-      threePointers: 0,
-      topScorersOfTheChampionship: 0,
-      topScorersOfTheGame: 0,
-      kingplayer: 0,
       position: "",
       instagram: "",
       cpf: "",
@@ -161,6 +136,7 @@ export default function FormPlayer({ data }: { data: Modality }) {
     });
     setCroppedImage("");
     setImage("");
+    setTeams([]);
   }
 
   function handleInputChange(
@@ -173,20 +149,6 @@ export default function FormPlayer({ data }: { data: Modality }) {
     });
   }
 
-  function calculateAge(birthDate: string): number {
-    const today = new Date();
-    const birthDateObject = new Date(birthDate);
-    let age = today.getFullYear() - birthDateObject.getFullYear();
-    const month = today.getMonth() - birthDateObject.getMonth();
-    if (
-      month < 0 ||
-      (month === 0 && today.getDate() < birthDateObject.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  }
-
   async function uploadImage(): Promise<string | null> {
     if (croppedImage) {
       try {
@@ -195,11 +157,8 @@ export default function FormPlayer({ data }: { data: Modality }) {
         const storageRef = ref(storage, `avatars/${fileName}`);
         const response = await fetch(croppedImage);
         const blob = await response.blob();
-
         await uploadBytesResumable(storageRef, blob);
-
         const downloadURL = await getDownloadURL(storageRef);
-        console.log("URL da imagem:", downloadURL);
         return downloadURL;
       } catch (error) {
         console.error("Erro ao enviar a imagem:", error);
@@ -207,10 +166,6 @@ export default function FormPlayer({ data }: { data: Modality }) {
       }
     }
     return null;
-  }
-
-  function HandleBackButtonClick() {
-    window.history.back();
   }
 
   async function addNewDocumentWithReference(
@@ -224,15 +179,13 @@ export default function FormPlayer({ data }: { data: Modality }) {
     const referenceDoc = await getDoc(reference);
 
     if (!referenceDoc.exists()) {
-      toast.error("Modalidade nãoe encontrada!");
-      console.error("Objeto de referência não encontrado");
+      toast.error("Modalidade não encontrada!");
       return;
     }
 
     try {
       const newData = { ...data, modality: reference };
       const docRef = await addDoc(collection(db, collectionName), newData);
-      console.log("Documento criado com sucesso. ID:", docRef.id);
       toast.success("Jogador cadastrado com sucesso!");
       router.push("newPlayer?mdl=" + modality.id);
     } catch (e) {
@@ -243,25 +196,20 @@ export default function FormPlayer({ data }: { data: Modality }) {
 
   async function handleSubmit() {
     setIsLoading(true);
-
-    console.log(isLoading);
     let photoURL = null;
     if (croppedImage) {
       photoURL = await uploadImage();
     }
 
-    console.log("photoURL");
-    console.log(photoURL);
-
     const referenceCollectionName = "modalities";
     const referenceId = data.id;
 
-    const playerDataWithPhoto = { ...playerData, photo: photoURL };
+    const playerDataWithTeams = { ...playerData, photo: photoURL, teams };
 
     await addNewDocumentWithReference(
       db,
       "players",
-      playerDataWithPhoto,
+      playerDataWithTeams,
       referenceCollectionName,
       referenceId
     );
@@ -272,31 +220,29 @@ export default function FormPlayer({ data }: { data: Modality }) {
 
   return (
     <>
-      <HomeButton></HomeButton>
+      <HomeButton />
 
       <div className={styles.Container}>
         <div className={styles.Card}>
           <div className={styles.titleGroup}>
             <h1 className={styles.title}>Jogadores</h1>
-
             <div className={styles.new}>
               <p className={styles.newTitle}>NOVO JOGADOR</p>
               <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
             </div>
           </div>
+
           <div className={styles.form}>
             <label onClick={handleImageClick} className={styles.playerAvatar}>
               <p className={styles.label}>Foto do Jogador</p>
               <img
                 className={styles.playerAvatar}
-                src={croppedImage ? croppedImage : "./assets/avatar.jpg"}
+                src={croppedImage || "./assets/avatar.jpg"}
                 alt="Avatar"
               />
             </label>
-
             <input
               type="file"
-              value=""
               ref={fileInputRef}
               onChange={handleImageUpload}
               style={{ display: "none" }}
@@ -312,17 +258,6 @@ export default function FormPlayer({ data }: { data: Modality }) {
               onChange={(e) => handleInputChange(e, "name")}
             />
           </div>
-
-          {/* <div className={styles.form}>
-            <p className={styles.label}>Foto do Jogador</p>
-            <input
-                className={styles.fieldFile}
-                type="file"
-                accept="image/*"
-
-            />
-
-          </div> */}
 
           <div className={styles.form}>
             <p className={styles.label}>Posição</p>
@@ -365,78 +300,6 @@ export default function FormPlayer({ data }: { data: Modality }) {
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>Pontuação total</p>
-            <input
-              className={styles.field}
-              type="number"
-              value={playerData.totalScore.toString()}
-              onChange={(e) => handleInputChange(e, "totalScore")}
-            />
-          </div>
-
-          <div className={styles.form}>
-            <p className={styles.label}>Bolas de três</p>
-            <input
-              className={styles.field}
-              type="number"
-              value={playerData.threePointers.toString()}
-              onChange={(e) => handleInputChange(e, "threePointers")}
-            />
-          </div>
-
-          <div className={styles.form}>
-            <p className={styles.label}>MVPs partida</p>
-            <input
-              className={styles.field}
-              type="number"
-              value={playerData.mpvOfTheGames.toString()}
-              onChange={(e) => handleInputChange(e, "mpvOfTheGames")}
-            />
-          </div>
-
-          <div className={styles.form}>
-            <p className={styles.label}>Rei(a) dos Três Jogadores</p>
-            <input
-              className={styles.field}
-              type="number"
-              value={playerData.kingplayer.toString()}
-              onChange={(e) => handleInputChange(e, "kingplayer")}
-            />
-          </div>
-
-          <div className={styles.form}>
-            <p className={styles.label}>MVPs campeonato</p>
-            <input
-              className={styles.field}
-              type="number"
-              value={playerData.mvpOfTheChampionship.toString()}
-              onChange={(e) => handleInputChange(e, "mvpOfTheChampionship")}
-            />
-          </div>
-
-          <div className={styles.form}>
-            <p className={styles.label}>Cestinhas partida</p>
-            <input
-              className={styles.field}
-              type="number"
-              value={playerData.topScorersOfTheGame.toString()}
-              onChange={(e) => handleInputChange(e, "topScorersOfTheGame")}
-            />
-          </div>
-
-          <div className={styles.form}>
-            <p className={styles.label}>Cestinhas campeonato</p>
-            <input
-              className={styles.field}
-              type="number"
-              value={playerData.topScorersOfTheChampionship.toString()}
-              onChange={(e) =>
-                handleInputChange(e, "topScorersOfTheChampionship")
-              }
-            />
-          </div>
-
-          <div className={styles.form}>
             <p className={styles.label}>Instagram</p>
             <input
               className={styles.field}
@@ -447,16 +310,26 @@ export default function FormPlayer({ data }: { data: Modality }) {
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>Time</p>
-            <SearchSelectTeam
-              onSelectItem={(team: any) => {
-                const updatedPlayerData = { ...playerData };
-                updatedPlayerData.team = team.name;
-                updatedPlayerData.teamLogo = team.logo;
-                setPlayerData(updatedPlayerData);
-              }}
-            />
+            <p className={styles.label}>Equipes</p>
+            {teams.map((team, index) => (
+              <div key={index} className={styles.teamItem}>
+                <span className={styles.label}>{team.name}</span>
+                <button
+                  type="button"
+                  className={styles.save}
+                  onClick={() => removeTeam(index)}
+                >
+                  Remover
+                </button>
+              </div>
+            ))}
+
+            <SearchSelectTeam onSelectItem={(team: Team) => addTeam(team)} />
+            {/* <button className={styles.save} onClick={() => setModalOpen(true)}>
+              Adicionar nova equipe
+            </button> */}
           </div>
+
           <button
             className={styles.save}
             onClick={handleSubmit}
@@ -466,11 +339,12 @@ export default function FormPlayer({ data }: { data: Modality }) {
           </button>
         </div>
 
-        <button className={styles.back} onClick={HandleBackButtonClick}>
+        <button className={styles.back} onClick={() => window.history.back()}>
           Voltar
         </button>
       </div>
-      {isLoading && <Spinner></Spinner>}
+
+      {isLoading && <Spinner />}
 
       <CustomModal
         open={modalOpen}
@@ -486,7 +360,7 @@ export default function FormPlayer({ data }: { data: Modality }) {
                   width={90}
                   height={90}
                   border={50}
-                  borderRadius={50} // Adicione esta linha para tornar o recorte redondo
+                  borderRadius={50} // Cortar redondo
                   color={[255, 255, 255, 0.6]} // RGBA
                   scale={1.2}
                 />
@@ -503,7 +377,6 @@ export default function FormPlayer({ data }: { data: Modality }) {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const { query } = context;
   const { mdl } = query;
-  console.log(mdl);
 
   return {
     props: {

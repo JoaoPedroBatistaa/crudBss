@@ -13,11 +13,8 @@ import InputMask from "react-input-mask";
 import { toast } from "react-toastify";
 import styles from "./styles.module.css";
 
+import SearchSelectTeam from "@/components/SearchSelectTeam";
 import HomeButton from "../../components/HomeButton";
-
-interface Modality {
-  id: string;
-}
 
 interface Player {
   instagram?: string;
@@ -25,50 +22,40 @@ interface Player {
   photo?: File | string | null;
   position: string;
   cpf: string;
-  kingplayer: Number;
   birthDate: string;
   about: string;
+  teams?: { name: string }[]; // Adicionado para suportar múltiplas equipes
 }
 
 export default function EditPlayer() {
-  const [modality, setModality] = useState<string>("");
-  const router = useRouter();
-  const { id } = router.query;
-
   const [playerData, setPlayerData] = useState<Player>({
     name: "",
     photo: null,
-    kingplayer: 0,
     position: "",
     instagram: "",
     birthDate: "",
     cpf: "",
     about: "",
+    teams: [], // Inicializando lista de equipes
   });
+  const router = useRouter();
+  const { id } = router.query;
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = event.target as
-      | HTMLInputElement
-      | HTMLTextAreaElement;
+    const { name, value } = event.target;
     setPlayerData((prevState) => ({ ...prevState, [name]: value }));
   };
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file =
-      event.target.files && event.target.files.length > 0
-        ? event.target.files[0]
-        : null;
+    const file = event.target.files && event.target.files[0];
     setPlayerData((prevState) => ({ ...prevState, photo: file }));
   };
 
   useEffect(() => {
     const fetchPlayer = async () => {
-      if (!id) {
-        console.log("Player ID is not defined.");
-        return;
-      }
+      if (!id) return;
 
       try {
         const playerDoc = await getDoc(doc(db, "players", id as string));
@@ -88,6 +75,20 @@ export default function EditPlayer() {
     }
   }, [router.isReady, id]);
 
+  const addTeam = (team: { name: string }) => {
+    setPlayerData((prevState) => ({
+      ...prevState,
+      teams: [...(prevState.teams || []), team],
+    }));
+  };
+
+  const removeTeam = (index: number) => {
+    setPlayerData((prevState) => ({
+      ...prevState,
+      teams: prevState.teams?.filter((_, i) => i !== index) || [],
+    }));
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -101,7 +102,6 @@ export default function EditPlayer() {
       if (playerData.photo instanceof File) {
         const storage = getStorage();
         const fileRef = ref(storage, `players/${playerData.photo.name}`);
-
         const uploadTask = uploadBytesResumable(fileRef, playerData.photo);
         await uploadTask;
 
@@ -110,7 +110,6 @@ export default function EditPlayer() {
       }
 
       await setDoc(doc(db, "players", id as string), playerData);
-
       toast.success("Player updated successfully!");
     } catch (error) {
       console.error("Error when updating player: ", error);
@@ -124,7 +123,7 @@ export default function EditPlayer() {
 
   return (
     <>
-      <HomeButton></HomeButton>
+      <HomeButton />
 
       <div className={styles.Container}>
         <div className={styles.Card}>
@@ -187,17 +186,6 @@ export default function EditPlayer() {
             </div>
 
             <div className={styles.form}>
-              <p className={styles.label}>Rei(a) dos Três Jogadores</p>
-              <input
-                className={styles.field}
-                type="number"
-                value={playerData.kingplayer.toString()}
-                name="kingplayer"
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className={styles.form}>
               <p className={styles.label}>CPF</p>
               <InputMask
                 className={styles.field}
@@ -218,6 +206,24 @@ export default function EditPlayer() {
                 name="instagram"
                 onChange={handleInputChange}
               />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Equipes</p>
+              {playerData.teams?.map((team, index) => (
+                <div key={index} className={styles.teamItem}>
+                  <span className={styles.label}>{team.name}</span>
+                  <button
+                    type="button"
+                    className={styles.save}
+                    onClick={() => removeTeam(index)}
+                  >
+                    Remover
+                  </button>
+                </div>
+              ))}
+
+              <SearchSelectTeam onSelectItem={addTeam} />
             </div>
 
             <button type="submit" className={styles.save}>
