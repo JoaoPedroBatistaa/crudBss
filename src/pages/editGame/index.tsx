@@ -33,8 +33,8 @@ export default function EditMatch() {
     isVolleyball: false,
     setScores: { set1: "", set2: "", set3: "" },
     isUndefinedMatch: "não", // Indefinido por padrão
-    nextTeam1: "",
-    nextTeam2: "",
+    next_team_1: "",
+    next_team_2: "",
   });
 
   const [selectedTeamOne, setSelectedTeamOne] = useState<Item | null>(null);
@@ -67,8 +67,8 @@ export default function EditMatch() {
               setScores: match.setScores || { set1: "", set2: "", set3: "" },
               isUndefinedMatch:
                 match.next_team_1 && match.next_team_2 ? "sim" : "não",
-              nextTeam1: match.next_team_1 || "",
-              nextTeam2: match.next_team_2 || "",
+              next_team_1: match.next_team_1 || "",
+              next_team_2: match.next_team_2 || "",
             });
             if (match.team_1) {
               setSelectedTeamOne({
@@ -224,7 +224,7 @@ export default function EditMatch() {
                   <input
                     className={styles.field}
                     type="text"
-                    value={matchData.nextTeam1}
+                    value={matchData.next_team_1}
                     onChange={(e) =>
                       setMatchData((prev) => ({
                         ...prev,
@@ -238,7 +238,7 @@ export default function EditMatch() {
                   <input
                     className={styles.field}
                     type="text"
-                    value={matchData.nextTeam2}
+                    value={matchData.next_team_2}
                     onChange={(e) =>
                       setMatchData((prev) => ({
                         ...prev,
