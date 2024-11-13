@@ -43,6 +43,15 @@ interface Player {
   team?: string;
   teamLogo?: string;
   about: string;
+  curiosities?: string[];
+  destaquePartida?: string;
+  pontuacaoGeral?: string;
+  cestinhaPartida?: string;
+  cestinhaCampeonato?: string;
+  bolasTresGeral?: string;
+  reiTresCampeonato?: string;
+  selecaoCampeonato?: string;
+  destaqueCampeonato?: string;
   teams?: Team[];
 }
 
@@ -60,10 +69,20 @@ export default function FormPlayer({ data }: { data: Modality }) {
     cpf: "",
     birthDate: "",
     about: "",
+    curiosities: [],
+    destaquePartida: "",
+    pontuacaoGeral: "",
+    cestinhaPartida: "",
+    cestinhaCampeonato: "",
+    bolasTresGeral: "",
+    reiTresCampeonato: "",
+    selecaoCampeonato: "",
+    destaqueCampeonato: "",
   });
-  const [teams, setTeams] = useState<Team[]>([]); // Lista de equipes
+  const [teams, setTeams] = useState<Team[]>([]);
   const [image, setImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState("");
+  const [newCuriosity, setNewCuriosity] = useState("");
   const editorRef = useRef<AvatarEditor | null>(null);
 
   const handleImageClick = () => {
@@ -125,6 +144,23 @@ export default function FormPlayer({ data }: { data: Modality }) {
     setTeams((prevTeams) => prevTeams.filter((_, i) => i !== index));
   };
 
+  const addCuriosity = () => {
+    if (newCuriosity.trim()) {
+      setPlayerData((prevData) => ({
+        ...prevData,
+        curiosities: [...(prevData.curiosities || []), newCuriosity],
+      }));
+      setNewCuriosity("");
+    }
+  };
+
+  const removeCuriosity = (index: number) => {
+    setPlayerData((prevData) => ({
+      ...prevData,
+      curiosities: (prevData.curiosities || []).filter((_, i) => i !== index),
+    }));
+  };
+
   function resetForm() {
     setPlayerData({
       name: "",
@@ -133,6 +169,15 @@ export default function FormPlayer({ data }: { data: Modality }) {
       cpf: "",
       birthDate: "",
       about: "",
+      curiosities: [],
+      destaquePartida: "",
+      pontuacaoGeral: "",
+      cestinhaPartida: "",
+      cestinhaCampeonato: "",
+      bolasTresGeral: "",
+      reiTresCampeonato: "",
+      selecaoCampeonato: "",
+      destaqueCampeonato: "",
     });
     setCroppedImage("");
     setImage("");
@@ -310,6 +355,112 @@ export default function FormPlayer({ data }: { data: Modality }) {
           </div>
 
           <div className={styles.form}>
+            <p className={styles.label}>Curiosidades</p>
+            {playerData.curiosities?.map((curiosity, index) => (
+              <div key={index} className={styles.teamItem}>
+                <span className={styles.label}>{curiosity}</span>
+                <button
+                  type="button"
+                  className={styles.save}
+                  onClick={() => removeCuriosity(index)}
+                >
+                  Remover
+                </button>
+              </div>
+            ))}
+            <input
+              className={styles.field}
+              type="text"
+              value={newCuriosity}
+              onChange={(e) => setNewCuriosity(e.target.value)}
+              placeholder="Adicione uma curiosidade"
+            />
+            <button className={styles.save} onClick={addCuriosity}>
+              Adicionar Curiosidade
+            </button>
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Destaque da Partida</p>
+            <input
+              className={styles.field}
+              type="text"
+              value={playerData.destaquePartida}
+              onChange={(e) => handleInputChange(e, "destaquePartida")}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Pontuação Geral</p>
+            <input
+              className={styles.field}
+              type="text"
+              value={playerData.pontuacaoGeral}
+              onChange={(e) => handleInputChange(e, "pontuacaoGeral")}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Cestinha da Partida</p>
+            <input
+              className={styles.field}
+              type="text"
+              value={playerData.cestinhaPartida}
+              onChange={(e) => handleInputChange(e, "cestinhaPartida")}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Cestinha Campeonato</p>
+            <input
+              className={styles.field}
+              type="text"
+              value={playerData.cestinhaCampeonato}
+              onChange={(e) => handleInputChange(e, "cestinhaCampeonato")}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Bolas de 3 Geral</p>
+            <input
+              className={styles.field}
+              type="text"
+              value={playerData.bolasTresGeral}
+              onChange={(e) => handleInputChange(e, "bolasTresGeral")}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Rei dos 3 Campeonato</p>
+            <input
+              className={styles.field}
+              type="text"
+              value={playerData.reiTresCampeonato}
+              onChange={(e) => handleInputChange(e, "reiTresCampeonato")}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Seleção do Campeonato</p>
+            <input
+              className={styles.field}
+              type="text"
+              value={playerData.selecaoCampeonato}
+              onChange={(e) => handleInputChange(e, "selecaoCampeonato")}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Destaque do Campeonato</p>
+            <input
+              className={styles.field}
+              type="text"
+              value={playerData.destaqueCampeonato}
+              onChange={(e) => handleInputChange(e, "destaqueCampeonato")}
+            />
+          </div>
+
+          <div className={styles.form}>
             <p className={styles.label}>Equipes</p>
             {teams.map((team, index) => (
               <div key={index} className={styles.teamItem}>
@@ -325,9 +476,6 @@ export default function FormPlayer({ data }: { data: Modality }) {
             ))}
 
             <SearchSelectTeam onSelectItem={(team: Team) => addTeam(team)} />
-            {/* <button className={styles.save} onClick={() => setModalOpen(true)}>
-              Adicionar nova equipe
-            </button> */}
           </div>
 
           <button
@@ -360,8 +508,8 @@ export default function FormPlayer({ data }: { data: Modality }) {
                   width={90}
                   height={90}
                   border={50}
-                  borderRadius={50} // Cortar redondo
-                  color={[255, 255, 255, 0.6]} // RGBA
+                  borderRadius={50}
+                  color={[255, 255, 255, 0.6]}
                   scale={1.2}
                 />
                 <button onClick={handleSave}>Cortar Imagem</button>

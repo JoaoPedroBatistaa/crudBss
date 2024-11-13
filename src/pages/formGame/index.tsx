@@ -22,22 +22,10 @@ interface Modality {
   id: string;
 }
 
-interface PlayerDetail {
-  id: string;
-  name: string;
-  photo: string;
-}
-
 interface Item {
   id: string;
   name: string;
   logo: string;
-}
-
-interface Player {
-  id: string;
-  name: string;
-  photo: string;
 }
 
 export default function FormNewMatche({ data }: { data: Modality }) {
@@ -64,14 +52,16 @@ export default function FormNewMatche({ data }: { data: Modality }) {
   const [isVolleyball, setIsVolleyball] = useState(false);
   const [setScores, setSetScores] = useState({ set1: "", set2: "", set3: "" });
 
+  const [isUndefinedMatch, setIsUndefinedMatch] = useState("não"); // Campo para "Partida Indefinida"
+  const [nextTeam1, setNextTeam1] = useState("");
+  const [nextTeam2, setNextTeam2] = useState("");
+
   async function handleSubmit() {
     try {
       setIsLoading(true);
       const matcheRef = collection(db, "matches");
 
       const modalityRef = doc(db, "modalities", data.id);
-      const teamOneRef = doc(db, "teams", selectedTeamOne?.id || "");
-      const teamTwoRef = doc(db, "teams", selectedTeamTwo?.id || "");
       const championshipRef = doc(
         db,
         "championships",
@@ -82,14 +72,6 @@ export default function FormNewMatche({ data }: { data: Modality }) {
         championship: championshipRef,
         date: selectedDate,
         modality: modalityRef,
-        team_1: {
-          score: selectedTeam1Score || "",
-          team_id: teamOneRef,
-        },
-        team_2: {
-          score: selectedTeam2Score || "",
-          team_id: teamTwoRef,
-        },
         venue: selectedVenue,
         time: selectedTime,
         topScorer: selectedTopScorer,
@@ -98,6 +80,26 @@ export default function FormNewMatche({ data }: { data: Modality }) {
         isVolleyball,
         setScores: isVolleyball ? setScores : null,
       };
+
+      if (isUndefinedMatch === "sim") {
+        // @ts-ignore
+        newMatche["next_team_1"] = nextTeam1;
+        // @ts-ignore
+        newMatche["next_team_2"] = nextTeam2;
+      } else {
+        const teamOneRef = doc(db, "teams", selectedTeamOne?.id || "");
+        const teamTwoRef = doc(db, "teams", selectedTeamTwo?.id || "");
+        // @ts-ignore
+        newMatche["team_1"] = {
+          score: selectedTeam1Score || "",
+          team_id: teamOneRef,
+        };
+        // @ts-ignore
+        newMatche["team_2"] = {
+          score: selectedTeam2Score || "",
+          team_id: teamTwoRef,
+        };
+      }
 
       const docRef = await addDoc(matcheRef, {
         ...newMatche,
@@ -127,6 +129,9 @@ export default function FormNewMatche({ data }: { data: Modality }) {
       setSelectedFileName("");
       setIsVolleyball(false);
       setSetScores({ set1: "", set2: "", set3: "" });
+      setIsUndefinedMatch("não");
+      setNextTeam1("");
+      setNextTeam2("");
       toast.success("Jogo cadastrado com sucesso!");
       router.push("newGame?mdl=" + data.id);
       console.log("Novo jogo salvo com sucesso no Firestore!");
@@ -159,8 +164,6 @@ export default function FormNewMatche({ data }: { data: Modality }) {
     window.history.back();
   }
 
-  console.log(selectedTeam1Score, selectedTeam2Score);
-
   return isLoading ? (
     <Spinner />
   ) : (
@@ -176,19 +179,57 @@ export default function FormNewMatche({ data }: { data: Modality }) {
               <img className={styles.crudIcon} src="./assets/novo.png" alt="" />
             </div>
           </div>
+
           <div className={styles.form}>
             <p className={styles.label}>Campeonato:</p>
             <SearchSelectChampionship onSelectItem={handleSelectChampionship} />
           </div>
 
           <div className={styles.form}>
-            <p className={styles.label}>Time 1:</p>
-            <SearchSelectTeam onSelectItem={handleSelectTeamOne} />
+            <p className={styles.label}>Partida Indefinida?</p>
+            <select
+              className={styles.field}
+              value={isUndefinedMatch}
+              onChange={(e) => setIsUndefinedMatch(e.target.value)}
+            >
+              <option value="não">Não</option>
+              <option value="sim">Sim</option>
+            </select>
           </div>
-          <div className={styles.form}>
-            <p className={styles.label}>Time 2:</p>
-            <SearchSelectTeam onSelectItem={handleSelectTeamTwo} />
-          </div>
+
+          {isUndefinedMatch === "sim" ? (
+            <>
+              <div className={styles.form}>
+                <p className={styles.label}>Próximo Time 1</p>
+                <input
+                  className={styles.field}
+                  type="text"
+                  value={nextTeam1}
+                  onChange={(e) => setNextTeam1(e.target.value)}
+                />
+              </div>
+              <div className={styles.form}>
+                <p className={styles.label}>Próximo Time 2</p>
+                <input
+                  className={styles.field}
+                  type="text"
+                  value={nextTeam2}
+                  onChange={(e) => setNextTeam2(e.target.value)}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.form}>
+                <p className={styles.label}>Time 1:</p>
+                <SearchSelectTeam onSelectItem={handleSelectTeamOne} />
+              </div>
+              <div className={styles.form}>
+                <p className={styles.label}>Time 2:</p>
+                <SearchSelectTeam onSelectItem={handleSelectTeamTwo} />
+              </div>
+            </>
+          )}
 
           <div className={styles.form}>
             <p className={styles.label}>Cestinha</p>

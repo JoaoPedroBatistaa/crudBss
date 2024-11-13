@@ -10,12 +10,6 @@ import SearchSelectChampionship from "@/components/SearchSelectChampionship";
 import SearchSelectTeam from "@/components/SearchSelectTeam";
 import HomeButton from "../../components/HomeButton";
 
-interface PlayerDetail {
-  id: string;
-  name: string;
-  photo: string;
-}
-
 interface Item {
   id: string;
   name: string;
@@ -30,6 +24,7 @@ export default function EditMatch() {
     team1Score: 0,
     team2Score: 0,
     date: "",
+    time: "",
     venue: "",
     fase: "",
     fileURL: "",
@@ -37,6 +32,9 @@ export default function EditMatch() {
     mvp: "",
     isVolleyball: false,
     setScores: { set1: "", set2: "", set3: "" },
+    isUndefinedMatch: "não", // Indefinido por padrão
+    nextTeam1: "",
+    nextTeam2: "",
   });
 
   const [selectedTeamOne, setSelectedTeamOne] = useState<Item | null>(null);
@@ -59,6 +57,7 @@ export default function EditMatch() {
               team1Score: match.team_1?.score || "",
               team2Score: match.team_2?.score || "",
               date: match.date || "",
+              time: match.time || "",
               venue: match.venue || "",
               fase: match.fase || "",
               fileURL: match.fileURL || "",
@@ -66,17 +65,25 @@ export default function EditMatch() {
               mvp: match.mvp || "",
               isVolleyball: match.isVolleyball || false,
               setScores: match.setScores || { set1: "", set2: "", set3: "" },
+              isUndefinedMatch:
+                match.next_team_1 && match.next_team_2 ? "sim" : "não",
+              nextTeam1: match.next_team_1 || "",
+              nextTeam2: match.next_team_2 || "",
             });
-            setSelectedTeamOne({
-              id: match.team_1.team_id.id,
-              name: match.team_1.team_id.name,
-              logo: match.team_1.team_id.logo,
-            });
-            setSelectedTeamTwo({
-              id: match.team_2.team_id.id,
-              name: match.team_2.team_id.name,
-              logo: match.team_2.team_id.logo,
-            });
+            if (match.team_1) {
+              setSelectedTeamOne({
+                id: match.team_1.team_id.id,
+                name: match.team_1.team_data.name,
+                logo: match.team_1.team_data.logo,
+              });
+            }
+            if (match.team_2) {
+              setSelectedTeamTwo({
+                id: match.team_2.team_id.id,
+                name: match.team_2.team_data.name,
+                logo: match.team_2.team_data.logo,
+              });
+            }
             setSelectedChampionship({
               id: match.championship.id,
               name: match.championship.name,
@@ -114,17 +121,35 @@ export default function EditMatch() {
 
       const matchDataToSave = {
         ...matchData,
-        team_1: {
-          score: matchData.team1Score.toString(),
-          team_id: doc(db, "teams", selectedTeamOne?.id || ""),
-        },
-        team_2: {
-          score: matchData.team2Score.toString(),
-          team_id: doc(db, "teams", selectedTeamTwo?.id || ""),
-        },
         championship: doc(db, "championships", selectedChampionship?.id || ""),
         fileURL,
       };
+
+      if (matchData.isUndefinedMatch === "sim") {
+        // @ts-ignore
+        matchDataToSave["next_team_1"] = matchData.nextTeam1;
+        // @ts-ignore
+        matchDataToSave["next_team_2"] = matchData.nextTeam2;
+        // @ts-ignore
+        delete matchDataToSave["team_1"];
+        // @ts-ignore
+        delete matchDataToSave["team_2"];
+      } else {
+        // @ts-ignore
+        matchDataToSave["team_1"] = {
+          score: matchData.team1Score.toString(),
+          team_id: doc(db, "teams", selectedTeamOne?.id || ""),
+        };
+        // @ts-ignore
+        matchDataToSave["team_2"] = {
+          score: matchData.team2Score.toString(),
+          team_id: doc(db, "teams", selectedTeamTwo?.id || ""),
+        };
+        // @ts-ignore
+        delete matchDataToSave["next_team_1"];
+        // @ts-ignore
+        delete matchDataToSave["next_team_2"];
+      }
 
       await setDoc(doc(db, "matches", id as string), matchDataToSave, {
         merge: true,
@@ -176,39 +201,74 @@ export default function EditMatch() {
             </div>
 
             <div className={styles.form}>
-              <p className={styles.label}>Time 1:</p>
-              <SearchSelectTeam onSelectItem={handleSelectTeamOne} />
-            </div>
-            <div className={styles.form}>
-              <p className={styles.label}>Time 2:</p>
-              <SearchSelectTeam onSelectItem={handleSelectTeamTwo} />
-            </div>
-
-            <div className={styles.form}>
-              <p className={styles.label}>Cestinha</p>
-              <input
+              <p className={styles.label}>Partida Indefinida?</p>
+              <select
                 className={styles.field}
-                type="text"
-                name="topScorer"
-                value={matchData.topScorer}
+                value={matchData.isUndefinedMatch}
                 onChange={(e) =>
                   setMatchData((prev) => ({
                     ...prev,
-                    topScorer: e.target.value,
+                    isUndefinedMatch: e.target.value,
                   }))
                 }
-              />
+              >
+                <option value="não">Não</option>
+                <option value="sim">Sim</option>
+              </select>
             </div>
 
+            {matchData.isUndefinedMatch === "sim" ? (
+              <>
+                <div className={styles.form}>
+                  <p className={styles.label}>Próximo Time 1</p>
+                  <input
+                    className={styles.field}
+                    type="text"
+                    value={matchData.nextTeam1}
+                    onChange={(e) =>
+                      setMatchData((prev) => ({
+                        ...prev,
+                        nextTeam1: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className={styles.form}>
+                  <p className={styles.label}>Próximo Time 2</p>
+                  <input
+                    className={styles.field}
+                    type="text"
+                    value={matchData.nextTeam2}
+                    onChange={(e) =>
+                      setMatchData((prev) => ({
+                        ...prev,
+                        nextTeam2: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={styles.form}>
+                  <p className={styles.label}>Time 1:</p>
+                  <SearchSelectTeam onSelectItem={handleSelectTeamOne} />
+                </div>
+                <div className={styles.form}>
+                  <p className={styles.label}>Time 2:</p>
+                  <SearchSelectTeam onSelectItem={handleSelectTeamTwo} />
+                </div>
+              </>
+            )}
+
             <div className={styles.form}>
-              <p className={styles.label}>Destaque da partida</p>
+              <p className={styles.label}>Horário do Jogo</p>
               <input
                 className={styles.field}
-                type="text"
-                name="mvp"
-                value={matchData.mvp}
+                type="time"
+                value={matchData.time}
                 onChange={(e) =>
-                  setMatchData((prev) => ({ ...prev, mvp: e.target.value }))
+                  setMatchData((prev) => ({ ...prev, time: e.target.value }))
                 }
               />
             </div>
@@ -218,7 +278,6 @@ export default function EditMatch() {
               <input
                 className={styles.field}
                 type="number"
-                name="team1Score"
                 value={matchData.team1Score}
                 onChange={(e) =>
                   setMatchData((prev) => ({
@@ -234,7 +293,6 @@ export default function EditMatch() {
               <input
                 className={styles.field}
                 type="number"
-                name="team2Score"
                 value={matchData.team2Score}
                 onChange={(e) =>
                   setMatchData((prev) => ({
@@ -246,11 +304,37 @@ export default function EditMatch() {
             </div>
 
             <div className={styles.form}>
+              <p className={styles.label}>Cestinha</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={matchData.topScorer}
+                onChange={(e) =>
+                  setMatchData((prev) => ({
+                    ...prev,
+                    topScorer: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Destaque da partida</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={matchData.mvp}
+                onChange={(e) =>
+                  setMatchData((prev) => ({ ...prev, mvp: e.target.value }))
+                }
+              />
+            </div>
+
+            <div className={styles.form}>
               <p className={styles.label}>Data do Jogo</p>
               <input
                 className={styles.field}
                 type="date"
-                name="date"
                 value={matchData.date}
                 onChange={(e) =>
                   setMatchData((prev) => ({ ...prev, date: e.target.value }))
@@ -263,13 +347,9 @@ export default function EditMatch() {
               <input
                 className={styles.field}
                 type="text"
-                name="venue"
-                value={matchData.venue || ""}
+                value={matchData.venue}
                 onChange={(e) =>
-                  setMatchData((prev) => ({
-                    ...prev,
-                    venue: e.target.value,
-                  }))
+                  setMatchData((prev) => ({ ...prev, venue: e.target.value }))
                 }
               />
             </div>
@@ -279,7 +359,6 @@ export default function EditMatch() {
               <input
                 className={styles.field}
                 type="text"
-                name="fase"
                 value={matchData.fase}
                 onChange={(e) =>
                   setMatchData((prev) => ({ ...prev, fase: e.target.value }))

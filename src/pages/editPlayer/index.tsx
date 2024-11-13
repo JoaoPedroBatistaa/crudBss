@@ -24,7 +24,16 @@ interface Player {
   cpf: string;
   birthDate: string;
   about: string;
-  teams?: { name: string }[]; // Adicionado para suportar múltiplas equipes
+  destaquePartida?: string;
+  pontuacaoGeral?: string;
+  cestinhaPartida?: string;
+  cestinhaCampeonato?: string;
+  bolasTresGeral?: string;
+  reiTresCampeonato?: string;
+  selecaoCampeonato?: string;
+  destaqueCampeonato?: string;
+  curiosities?: string[];
+  teams?: { name: string }[];
 }
 
 export default function EditPlayer() {
@@ -36,8 +45,18 @@ export default function EditPlayer() {
     birthDate: "",
     cpf: "",
     about: "",
-    teams: [], // Inicializando lista de equipes
+    destaquePartida: "",
+    pontuacaoGeral: "",
+    cestinhaPartida: "",
+    cestinhaCampeonato: "",
+    bolasTresGeral: "",
+    reiTresCampeonato: "",
+    selecaoCampeonato: "",
+    destaqueCampeonato: "",
+    curiosities: [],
+    teams: [],
   });
+  const [newCuriosity, setNewCuriosity] = useState("");
   const router = useRouter();
   const { id } = router.query;
 
@@ -86,6 +105,23 @@ export default function EditPlayer() {
     setPlayerData((prevState) => ({
       ...prevState,
       teams: prevState.teams?.filter((_, i) => i !== index) || [],
+    }));
+  };
+
+  const addCuriosity = () => {
+    if (newCuriosity.trim()) {
+      setPlayerData((prevState) => ({
+        ...prevState,
+        curiosities: [...(prevState.curiosities || []), newCuriosity],
+      }));
+      setNewCuriosity("");
+    }
+  };
+
+  const removeCuriosity = (index: number) => {
+    setPlayerData((prevState) => ({
+      ...prevState,
+      curiosities: prevState.curiosities?.filter((_, i) => i !== index) || [],
     }));
   };
 
@@ -206,6 +242,120 @@ export default function EditPlayer() {
                 name="instagram"
                 onChange={handleInputChange}
               />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Destaque da Partida</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={playerData.destaquePartida}
+                name="destaquePartida"
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Pontuação Geral</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={playerData.pontuacaoGeral}
+                name="pontuacaoGeral"
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Cestinha da Partida</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={playerData.cestinhaPartida}
+                name="cestinhaPartida"
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Cestinha Campeonato</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={playerData.cestinhaCampeonato}
+                name="cestinhaCampeonato"
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Bolas de 3 Geral</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={playerData.bolasTresGeral}
+                name="bolasTresGeral"
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Rei dos 3 Campeonato</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={playerData.reiTresCampeonato}
+                name="reiTresCampeonato"
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Seleção do Campeonato</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={playerData.selecaoCampeonato}
+                name="selecaoCampeonato"
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Destaque do Campeonato</p>
+              <input
+                className={styles.field}
+                type="text"
+                value={playerData.destaqueCampeonato}
+                name="destaqueCampeonato"
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Curiosidades</p>
+              {playerData.curiosities?.map((curiosity, index) => (
+                <div key={index} className={styles.teamItem}>
+                  <span className={styles.label}>{curiosity}</span>
+                  <button
+                    type="button"
+                    className={styles.save}
+                    onClick={() => removeCuriosity(index)}
+                  >
+                    Remover
+                  </button>
+                </div>
+              ))}
+              <input
+                className={styles.field}
+                type="text"
+                value={newCuriosity}
+                onChange={(e) => setNewCuriosity(e.target.value)}
+                placeholder="Adicione uma curiosidade"
+              />
+              <button className={styles.save} onClick={addCuriosity}>
+                Adicionar Curiosidade
+              </button>
             </div>
 
             <div className={styles.form}>
