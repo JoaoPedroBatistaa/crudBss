@@ -113,6 +113,13 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
     }));
   };
 
+  const removePlayer = (index: number) => {
+    setTeamData((prevState) => ({
+      ...prevState,
+      squad: prevState.squad.filter((_, i) => i !== index),
+    }));
+  };
+
   const addTitle = () => {
     setTeamData((prevState) => ({
       ...prevState,
@@ -437,12 +444,19 @@ export default function EditTeam({ teams }: { teams: TeamData[] }) {
             {teamData.squad && teamData.squad.length > 0 ? (
               teamData.squad.map((player, playerIndex) => (
                 <div key={playerIndex} className={styles.tableItem}>
-                  <p className={styles.label}>Nome do jogador</p>
+                  <p className={styles.label}>Nome do jogador: {player.name}</p>
                   <SearchSelect
                     onSelectItems={(items) =>
                       handleSelectItems(items[0], playerIndex)
                     }
                   />
+                  <button
+                    type="button"
+                    onClick={() => removePlayer(playerIndex)}
+                    className={styles.back}
+                  >
+                    Remover
+                  </button>
                 </div>
               ))
             ) : (
