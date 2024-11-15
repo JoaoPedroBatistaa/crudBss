@@ -192,116 +192,133 @@ export default function NewGame({
       <HomeButton />
 
       <div className={styles.Container}>
-        {matches.map((matche) => (
-          <React.Fragment key={matche.id}>
-            <div className={styles.newTeam}>
-              <div className={styles.NameGroup}>
-                <div className={styles.Game}>
-                  <div className={styles.TeamLogo}>
-                    <Image
-                      src={
-                        matche.team_1?.team_data?.logo || "/undefined-team.png"
-                      }
-                      alt="Team 1 Logo"
-                      width={60}
-                      height={60}
-                    />
-                  </div>
-                  <div className={styles.Scoreboard}>
-                    <h2>{matche.team_1?.score || ""}</h2>
-                    <h1>X</h1>
-                    <h2>{matche.team_2?.score || ""}</h2>
-                  </div>
-                  <div className={styles.TeamLogo}>
-                    <Image
-                      src={
-                        matche.team_2?.team_data?.logo || "/undefined-team.png"
-                      }
-                      alt="Team 2 Logo"
-                      width={60}
-                      height={60}
-                    />
+        <div className={styles.Card}>
+          <div className={styles.titleGroup}>
+            <h1 className={styles.title}>Jogos</h1>
+            <div className={styles.new}>
+              <p className={styles.newTitle}>NOVO JOGO</p>
+              <Link href={{ pathname: "/formGame", query: { mdl: data.id } }}>
+                <img
+                  className={styles.crudIcon}
+                  src="./assets/novo.png"
+                  alt=""
+                />
+              </Link>
+            </div>
+          </div>
+          {matches.map((matche) => (
+            <React.Fragment key={matche.id}>
+              <div className={styles.newTeam}>
+                <div className={styles.NameGroup}>
+                  <div className={styles.Game}>
+                    <div className={styles.TeamLogo}>
+                      <Image
+                        src={
+                          matche.team_1?.team_data?.logo ||
+                          "/undefined-team.png"
+                        }
+                        alt="Team 1 Logo"
+                        width={60}
+                        height={60}
+                      />
+                    </div>
+                    <div className={styles.Scoreboard}>
+                      <h2>{matche.team_1?.score || ""}</h2>
+                      <h1>X</h1>
+                      <h2>{matche.team_2?.score || ""}</h2>
+                    </div>
+                    <div className={styles.TeamLogo}>
+                      <Image
+                        src={
+                          matche.team_2?.team_data?.logo ||
+                          "/undefined-team.png"
+                        }
+                        alt="Team 2 Logo"
+                        width={60}
+                        height={60}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className={styles.crudGroup}>
-                <img
-                  id={`moreInfoButton_${matche.id}`}
-                  className={styles.crudIcon}
-                  src="./assets/detalhes.png"
-                  alt=""
-                  onClick={() => toggleMoreInfo(matche.id)}
-                />
-                <Link
-                  href={{ pathname: `/editGame`, query: { id: matche.id } }}
-                >
+                <div className={styles.crudGroup}>
+                  <img
+                    id={`moreInfoButton_${matche.id}`}
+                    className={styles.crudIcon}
+                    src="./assets/detalhes.png"
+                    alt=""
+                    onClick={() => toggleMoreInfo(matche.id)}
+                  />
+                  <Link
+                    href={{ pathname: `/editGame`, query: { id: matche.id } }}
+                  >
+                    <img
+                      className={styles.crudIcon}
+                      src="./assets/editar.png"
+                      alt=""
+                    />
+                  </Link>
                   <img
                     className={styles.crudIcon}
-                    src="./assets/editar.png"
+                    src="./assets/excluir.png"
                     alt=""
+                    onClick={() => popup(matche.id)}
                   />
-                </Link>
-                <img
-                  className={styles.crudIcon}
-                  src="./assets/excluir.png"
-                  alt=""
-                  onClick={() => popup(matche.id)}
-                />
-              </div>
-            </div>
-
-            <div
-              id={`moreInfo_${matche.id}`}
-              className={`${styles.moreInfo} ${
-                moreInfoVisible[matche.id] ? "" : styles.hidden
-              }`}
-            >
-              <div className={styles.line}>
-                <p className={styles.dataInfo}>Horario</p>
-                <p className={styles.dataInfo}>{matche.time}</p>
+                </div>
               </div>
 
-              <div className={styles.line}>
-                <p className={styles.dataInfo}>Local</p>
-                <p className={styles.dataInfo}>{matche.venue}</p>
+              <div
+                id={`moreInfo_${matche.id}`}
+                className={`${styles.moreInfo} ${
+                  moreInfoVisible[matche.id] ? "" : styles.hidden
+                }`}
+              >
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Horario</p>
+                  <p className={styles.dataInfo}>{matche.time}</p>
+                </div>
+
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Local</p>
+                  <p className={styles.dataInfo}>{matche.venue}</p>
+                </div>
+
+                <div className={styles.line}>
+                  <p className={styles.dataInfo}>Data</p>
+                  <p className={styles.dataInfo}>{matche.date}</p>
+                </div>
+
+                {matche.team_1 ? (
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Time 1</p>
+                    <p className={styles.dataInfo}>
+                      {matche.team_1.team_data?.name}
+                    </p>
+                  </div>
+                ) : (
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Próximo Time 1</p>
+                    <p className={styles.dataInfo}>{matche.next_team_1}</p>
+                  </div>
+                )}
+
+                {matche.team_2 ? (
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Time 2</p>
+                    <p className={styles.dataInfo}>
+                      {matche.team_2.team_data?.name}
+                    </p>
+                  </div>
+                ) : (
+                  <div className={styles.line}>
+                    <p className={styles.dataInfo}>Próximo Time 2</p>
+                    <p className={styles.dataInfo}>{matche.next_team_2}</p>
+                  </div>
+                )}
               </div>
-
-              <div className={styles.line}>
-                <p className={styles.dataInfo}>Data</p>
-                <p className={styles.dataInfo}>{matche.date}</p>
-              </div>
-
-              {matche.team_1 ? (
-                <div className={styles.line}>
-                  <p className={styles.dataInfo}>Time 1</p>
-                  <p className={styles.dataInfo}>
-                    {matche.team_1.team_data?.name}
-                  </p>
-                </div>
-              ) : (
-                <div className={styles.line}>
-                  <p className={styles.dataInfo}>Próximo Time 1</p>
-                  <p className={styles.dataInfo}>{matche.next_team_1}</p>
-                </div>
-              )}
-
-              {matche.team_2 ? (
-                <div className={styles.line}>
-                  <p className={styles.dataInfo}>Time 2</p>
-                  <p className={styles.dataInfo}>
-                    {matche.team_2.team_data?.name}
-                  </p>
-                </div>
-              ) : (
-                <div className={styles.line}>
-                  <p className={styles.dataInfo}>Próximo Time 2</p>
-                  <p className={styles.dataInfo}>{matche.next_team_2}</p>
-                </div>
-              )}
-            </div>
-          </React.Fragment>
-        ))}
+            </React.Fragment>
+          ))}
+        </div>
 
         <button className={styles.back} onClick={() => router.back()}>
           Voltar
