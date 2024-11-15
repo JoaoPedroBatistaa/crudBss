@@ -3,7 +3,7 @@ import { deleteDoc, getDocs, query, where } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./styles.module.css";
 
 import { GetServerSidePropsContext } from "next";
@@ -64,7 +64,6 @@ async function getCollectionData(modalityId: string) {
   const documents = querySnapshot.docs.map(async (doc1) => {
     const data = doc1.data();
 
-    // Verificar se team_1 e team_2 estão definidos antes de tentar acessar seus IDs
     const team1Data = data.team_1?.team_id
       ? (await getDoc(doc(db, "teams", data.team_1.team_id.id))).data()
       : null;
@@ -125,6 +124,55 @@ export default function NewGame({
   const [matchet, setMatches] = useState<Matche[]>(matches);
   const [selectedChampionship, setSelectedChampionship] = useState<string>("");
 
+  // Função para aplicar filtros
+  useEffect(() => {
+    const applyFilters = () => {
+      const filteredMatches = matches.filter((match) => {
+        const matchDate = new Date(`${match.date}T${match.time}`);
+        const isCompleted =
+          match.team_1?.score !== "" && match.team_2?.score !== "";
+
+        const matchesDateFilter =
+          (startDate === "" || matchDate >= new Date(`${startDate}T00:00`)) &&
+          (endDate === "" || matchDate <= new Date(`${endDate}T23:59`));
+
+        const matchesStatusFilter = !showCompleted || isCompleted;
+
+        const matchesChampionshipFilter =
+          selectedChampionship === "" ||
+          // @ts-ignore
+          match.championship?.id === selectedChampionship;
+
+        return (
+          matchesDateFilter && matchesStatusFilter && matchesChampionshipFilter
+        );
+      });
+
+      setMatches(filteredMatches);
+    };
+
+    applyFilters();
+  }, [startDate, endDate, showCompleted, selectedChampionship, matches]);
+
+  // Handlers para atualizar os estados dos filtros
+  function handleStartDateChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setStartDate(event.target.value);
+  }
+
+  function handleEndDateChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setEndDate(event.target.value);
+  }
+
+  function handleStatusChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setShowCompleted(event.target.checked);
+  }
+
+  function handleChampionshipChange(
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) {
+    setSelectedChampionship(event.target.value);
+  }
+
   function toggleMoreInfo(matchId: string) {
     setMoreInfoVisible((prevState) => ({
       ...prevState,
@@ -148,49 +196,9 @@ export default function NewGame({
     }
   }
 
-  const filteredMatches = matches.filter((match) => {
-    const matchDate = new Date(`${match.date}T${match.time}`);
-    const isCompleted =
-      match.team_1?.score !== "" && match.team_2?.score !== "";
-
-    const matchesDateFilter =
-      (startDate === "" || matchDate >= new Date(`${startDate}T00:00`)) &&
-      (endDate === "" || matchDate <= new Date(`${endDate}T23:59`));
-
-    const matchesStatusFilter = !showCompleted || isCompleted;
-
-    const matchesChampionshipFilter =
-      selectedChampionship === "" ||
-      // @ts-ignore
-      match.championship?.id === selectedChampionship;
-
-    return (
-      matchesDateFilter && matchesStatusFilter && matchesChampionshipFilter
-    );
-  });
-
-  const matchesWithScore = filteredMatches.filter(
-    (match) => match.team_1?.score && match.team_2?.score
-  );
-  const matchesWithoutScore = filteredMatches.filter(
-    (match) => !match.team_1?.score && !match.team_2?.score
-  );
-
-  matchesWithScore.sort(
-    (a, b) =>
-      new Date(`${a.date}T${a.time}`).getTime() -
-      new Date(`${b.date}T${b.time}`).getTime()
-  );
-  matchesWithoutScore.sort(
-    (a, b) =>
-      new Date(`${a.date}T${a.time}`).getTime() -
-      new Date(`${b.date}T${b.time}`).getTime()
-  );
-
   return (
     <>
       <HomeButton />
-
       <div className={styles.Container}>
         <div className={styles.Card}>
           <div className={styles.titleGroup}>
@@ -206,7 +214,54 @@ export default function NewGame({
               </Link>
             </div>
           </div>
-          {matches.map((matche) => (
+
+          <div className={styles.filterContainer}>
+            <label className={styles.dataInfon}>
+              Campeonato:
+              <select
+                value={selectedChampionship}
+                onChange={handleChampionshipChange}
+              >
+                <option value="">Todos os Campeonatos</option>
+                {championships.map((championship) => (
+                  <option key={championship.id} value={championship.id}>
+                    {championship.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className={styles.filterContainer}>
+            <label className={styles.dataInfon}>
+              Data Início:
+              <input
+                type="date"
+                value={startDate}
+                onChange={handleStartDateChange}
+              />
+            </label>
+
+            <label className={styles.dataInfon}>
+              Data Fim:
+              <input
+                type="date"
+                value={endDate}
+                onChange={handleEndDateChange}
+              />
+            </label>
+          </div>
+
+          <label className={styles.dataInfon}>
+            Mostrar apenas Concluídos:
+            <input
+              type="checkbox"
+              checked={showCompleted}
+              onChange={handleStatusChange}
+            />
+          </label>
+
+          {matchet.map((matche) => (
             <React.Fragment key={matche.id}>
               <div className={styles.newTeam}>
                 <div className={styles.NameGroup}>
