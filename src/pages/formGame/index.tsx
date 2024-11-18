@@ -78,6 +78,7 @@ export default function FormNewMatche({ data }: { data: Modality }) {
         mvp: selectedMVP,
         fase: selectedFase,
         isVolleyball,
+        isUndefinedMatch,
         setScores: isVolleyball ? setScores : null,
       };
 
