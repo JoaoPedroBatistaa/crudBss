@@ -53,6 +53,29 @@ export default function EditMatch() {
         if (matchDoc.exists()) {
           const match = matchDoc.data();
           if (match) {
+            // Fetch Championship Name
+            let championshipData = null;
+            if (match.championship) {
+              const championshipDoc = await getDoc(match.championship);
+              championshipData = championshipDoc.exists()
+                ? championshipDoc.data()
+                : null;
+            }
+
+            // Fetch Team One Name
+            let teamOneData = null;
+            if (match.team_1?.team_id) {
+              const teamOneDoc = await getDoc(match.team_1.team_id);
+              teamOneData = teamOneDoc.exists() ? teamOneDoc.data() : null;
+            }
+
+            // Fetch Team Two Name
+            let teamTwoData = null;
+            if (match.team_2?.team_id) {
+              const teamTwoDoc = await getDoc(match.team_2.team_id);
+              teamTwoData = teamTwoDoc.exists() ? teamTwoDoc.data() : null;
+            }
+
             setMatchData({
               team1Score: match.team_1?.score || "",
               team2Score: match.team_2?.score || "",
@@ -70,25 +93,36 @@ export default function EditMatch() {
               next_team_1: match.next_team_1 || "",
               next_team_2: match.next_team_2 || "",
             });
-            if (match.team_1) {
+
+            if (championshipData) {
+              setSelectedChampionship({
+                id: match.championship.id,
+                // @ts-ignore
+                name: championshipData.name,
+                // @ts-ignore
+                logo: championshipData.logo || "",
+              });
+            }
+
+            if (teamOneData) {
               setSelectedTeamOne({
                 id: match.team_1.team_id.id,
-                name: match.team_1.team_data.name,
-                logo: match.team_1.team_data.logo,
+                // @ts-ignore
+                name: teamOneData.name,
+                // @ts-ignore
+                logo: teamOneData.logo || "",
               });
             }
-            if (match.team_2) {
+
+            if (teamTwoData) {
               setSelectedTeamTwo({
                 id: match.team_2.team_id.id,
-                name: match.team_2.team_data.name,
-                logo: match.team_2.team_data.logo,
+                // @ts-ignore
+                name: teamTwoData.name,
+                // @ts-ignore
+                logo: teamTwoData.logo || "",
               });
             }
-            setSelectedChampionship({
-              id: match.championship.id,
-              name: match.championship.name,
-              logo: match.championship.logo,
-            });
           }
         } else {
           console.log("Não existe partida com este ID.");
@@ -194,7 +228,9 @@ export default function EditMatch() {
 
           <form onSubmit={handleSubmit}>
             <div className={styles.form}>
-              <p className={styles.label}>Campeonato:</p>
+              <p className={styles.label}>
+                Campeonato: {selectedChampionship?.name || "Carregando..."}
+              </p>{" "}
               <SearchSelectChampionship
                 onSelectItem={handleSelectChampionship}
               />
@@ -251,11 +287,15 @@ export default function EditMatch() {
             ) : (
               <>
                 <div className={styles.form}>
-                  <p className={styles.label}>Time 1:</p>
+                  <p className={styles.label}>
+                    Time 1: {selectedTeamOne?.name || "Carregando..."}
+                  </p>{" "}
                   <SearchSelectTeam onSelectItem={handleSelectTeamOne} />
                 </div>
                 <div className={styles.form}>
-                  <p className={styles.label}>Time 2:</p>
+                  <p className={styles.label}>
+                    Time 2: {selectedTeamTwo?.name || "Carregando..."}
+                  </p>{" "}
                   <SearchSelectTeam onSelectItem={handleSelectTeamTwo} />
                 </div>
               </>

@@ -121,6 +121,7 @@ export default function NewGame({
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [showCompleted, setShowCompleted] = useState<boolean>(false);
+  const [showUncompleted, setShowUncompleted] = useState<boolean>(false);
   const [matchet, setMatches] = useState<Matche[]>(matches);
   const [selectedChampionship, setSelectedChampionship] = useState<string>("");
 
@@ -131,12 +132,15 @@ export default function NewGame({
         const matchDate = new Date(`${match.date}T${match.time}`);
         const isCompleted =
           match.team_1?.score !== "" && match.team_2?.score !== "";
+        const isUncompleted = !isCompleted;
 
         const matchesDateFilter =
           (startDate === "" || matchDate >= new Date(`${startDate}T00:00`)) &&
           (endDate === "" || matchDate <= new Date(`${endDate}T23:59`));
 
-        const matchesStatusFilter = !showCompleted || isCompleted;
+        const matchesStatusFilter =
+          (!showCompleted || isCompleted) &&
+          (!showUncompleted || isUncompleted);
 
         const matchesChampionshipFilter =
           selectedChampionship === "" ||
@@ -152,7 +156,14 @@ export default function NewGame({
     };
 
     applyFilters();
-  }, [startDate, endDate, showCompleted, selectedChampionship, matches]);
+  }, [
+    startDate,
+    endDate,
+    showCompleted,
+    showUncompleted,
+    selectedChampionship,
+    matches,
+  ]);
 
   // Handlers para atualizar os estados dos filtros
   function handleStartDateChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -163,8 +174,12 @@ export default function NewGame({
     setEndDate(event.target.value);
   }
 
-  function handleStatusChange(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleCompletedChange(event: React.ChangeEvent<HTMLInputElement>) {
     setShowCompleted(event.target.checked);
+  }
+
+  function handleUncompletedChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setShowUncompleted(event.target.checked);
   }
 
   function handleChampionshipChange(
@@ -257,7 +272,16 @@ export default function NewGame({
             <input
               type="checkbox"
               checked={showCompleted}
-              onChange={handleStatusChange}
+              onChange={handleCompletedChange}
+            />
+          </label>
+
+          <label className={styles.dataInfon}>
+            Mostrar apenas Não Concluídos:
+            <input
+              type="checkbox"
+              checked={showUncompleted}
+              onChange={handleUncompletedChange}
             />
           </label>
 
