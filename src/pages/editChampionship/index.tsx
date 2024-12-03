@@ -19,6 +19,7 @@ import HomeButton from "../../components/HomeButton";
 interface ChampionShip {
   id: string;
   name: string;
+  year: string;
   logo: string | File | null;
   description: string;
   phases: Phase[];
@@ -69,6 +70,7 @@ export default function EditChampionship() {
   const [championshipData, setChampionshipData] = useState<ChampionShip>({
     id: "",
     name: "",
+    year: "",
     logo: null,
     description: "",
     phases: [],
@@ -485,6 +487,17 @@ export default function EditChampionship() {
                 type="text"
                 value={championshipData.name}
                 name="name"
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className={styles.form}>
+              <p className={styles.label}>Inicio do Campeonato</p>
+              <input
+                className={styles.field}
+                type="date"
+                value={championshipData.year}
+                name="year"
                 onChange={handleInputChange}
               />
             </div>

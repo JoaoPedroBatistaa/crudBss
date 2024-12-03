@@ -31,6 +31,27 @@
   gap: 40px;
 }
 
+.filter {
+  display: flex;
+  flex-direction: column;
+
+
+}
+
+.filter select {
+  width: 32rem;
+  height: 3.75rem;
+  border-radius: 20px;
+  background-color: #0B0B0B;
+  border: 1px solid #FF9F00;
+  margin-top: 8px;
+  margin-bottom: 25px;
+  font-size: 16px;
+  color: #6b6b6b;
+  padding-left: 25px;
+  font-family: 'Montserrat', sans-serif;
+}
+
 .NameGroup {
   display: flex;
   flex-direction: row;

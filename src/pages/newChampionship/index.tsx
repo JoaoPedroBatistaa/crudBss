@@ -78,10 +78,14 @@ interface ChampionShip {
   id: string;
   logo: string;
   name: string;
+  year: string;
   criterion: string;
   description: string;
 }
 
+import { useMemo } from "react";
+
+// Adicione esse estado e a lógica de filtro no componente
 export default function NewChampionship({
   data,
   championships,
@@ -92,11 +96,38 @@ export default function NewChampionship({
   const [moreInfoVisible, setMoreInfoVisible] = useState<{
     [key: string]: boolean;
   }>({});
+  const [selectedYear, setSelectedYear] = useState<string>("");
+
   const router = useRouter();
 
   useEffect(() => {
     console.log("Championships State:", championships); // Log para verificar o estado
   }, [championships]);
+
+  // Extração de anos únicos
+  const years = useMemo(() => {
+    const allYears = championships
+      .map((championship) => {
+        if (championship.year) {
+          return new Date(championship.year).getFullYear();
+        }
+        return null;
+      })
+      .filter((year) => year !== null); // Remove valores nulos
+    return Array.from(new Set(allYears)); // Remove duplicados
+  }, [championships]);
+
+  // Campeonatos filtrados
+  const filteredChampionships = useMemo(() => {
+    if (!selectedYear) return championships;
+    return championships.filter((championship) => {
+      if (championship.year) {
+        const year = new Date(championship.year).getFullYear();
+        return year.toString() === selectedYear;
+      }
+      return false;
+    });
+  }, [selectedYear, championships]);
 
   function toggleMoreInfo(championshipId: string) {
     setMoreInfoVisible((prevState) => ({
@@ -113,46 +144,15 @@ export default function NewChampionship({
   }
 
   async function popup(championshipId: string) {
-    console.log("Attempting to delete championship with ID:", championshipId);
-
     if (window.confirm("Deseja mesmo excluir?")) {
       try {
-        // Certifique-se de que o championshipId seja uma string válida e não esteja vazio
-        if (!championshipId || typeof championshipId !== "string") {
-          toast.error("ID do campeonato inválido.");
-          console.error("Invalid championship ID:", championshipId);
-          return;
-        }
-
-        console.log(
-          "Deleting document from Firestore with ID:",
-          championshipId
-        );
         await deleteDoc(doc(db, "championships", championshipId));
         toast.success("Campeonato excluído com sucesso!");
-
-        console.log(
-          "Document deleted successfully. Filtering remaining championships."
-        );
-        const updatedChampionships = championships.filter(
-          (championship) => championship.id !== championshipId
-        );
-
-        console.log("Updated championships list:", updatedChampionships);
-        // Atualizar estado dos campeonatos após exclusão
-        setMoreInfoVisible((prevState) => {
-          const newState = { ...prevState };
-          delete newState[championshipId];
-          return newState;
-        });
-        // Use `router.reload()` to refresh the page or manually update the state.
         router.reload();
       } catch (error) {
         console.error("Error while deleting championship:", error);
         toast.error("Erro ao excluir campeonato.");
       }
-    } else {
-      console.log("User canceled the delete operation.");
     }
   }
 
@@ -182,7 +182,28 @@ export default function NewChampionship({
               </Link>
             </div>
           </div>
-          {championships.map((championship) => (
+
+          {/* Adicione o seletor de ano */}
+          <div className={styles.filter}>
+            <label htmlFor="yearFilter" className={styles.filterLabel}>
+              Filtrar por ano:
+            </label>
+            <select
+              id="yearFilter"
+              className={styles.filterSelect}
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+            >
+              <option value="">Todos os anos</option>
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {filteredChampionships.map((championship) => (
             <div key={championship.id} className={styles.newTeam}>
               <div className={styles.NameGroup}>
                 <img
@@ -242,11 +263,6 @@ export default function NewChampionship({
                   <p className={styles.description}>
                     {championship.description}
                   </p>
-                </div>
-
-                <div className={styles.line}>
-                  <p className={styles.dataInfo}>info</p>
-                  <p className={styles.dataInfo}>dados</p>
                 </div>
               </div>
             </div>

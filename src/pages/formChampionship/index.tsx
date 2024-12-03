@@ -25,6 +25,7 @@ interface Modality {
 interface ChampionShip {
   id: string;
   name: string;
+  year: string;
   logo: string | null;
   criterion: string;
   description: string;
@@ -79,6 +80,7 @@ export default function NewFormChampionship({
   const [championShipData, setChampionShipData] = useState<ChampionShip>({
     id: "",
     name: "",
+    year: "",
     logo: null,
     criterion: "",
     description: "",
@@ -438,6 +440,7 @@ export default function NewFormChampionship({
       id: "",
       logo: "",
       name: "",
+      year: "",
       criterion: "",
       description: "",
       dataMatrix: [],
@@ -519,6 +522,15 @@ export default function NewFormChampionship({
               className={styles.field}
               type="text"
               onChange={(e) => handleInputChange(e, "name")}
+            />
+          </div>
+
+          <div className={styles.form}>
+            <p className={styles.label}>Inicio Campeonato</p>
+            <input
+              className={styles.field}
+              type="date"
+              onChange={(e) => handleInputChange(e, "year")}
             />
           </div>
 
