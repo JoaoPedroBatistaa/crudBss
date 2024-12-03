@@ -196,6 +196,7 @@ export default function NewChampionship({
             >
               <option value="">Todos os anos</option>
               {years.map((year) => (
+                // @ts-ignore
                 <option key={year} value={year}>
                   {year}
                 </option>
