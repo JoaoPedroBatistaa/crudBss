@@ -117,10 +117,16 @@ export default function NewChampionship({
     return Array.from(new Set(allYears)); // Remove duplicados
   }, [championships]);
 
-  // Campeonatos filtrados
+  // Campeonatos filtrados e ordenados
   const filteredChampionships = useMemo(() => {
-    if (!selectedYear) return championships;
-    return championships.filter((championship) => {
+    let sortedChampionships = [...championships];
+
+    // Ordena os campeonatos por nome em ordem alfabética
+    sortedChampionships.sort((a, b) => a.name.localeCompare(b.name));
+
+    if (!selectedYear) return sortedChampionships;
+
+    return sortedChampionships.filter((championship) => {
       if (championship.year) {
         const year = new Date(championship.year).getFullYear();
         return year.toString() === selectedYear;
