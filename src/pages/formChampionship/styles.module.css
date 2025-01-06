@@ -154,6 +154,25 @@
   cursor: pointer;
 }
 
+.removePlayer {
+  width: 12rem;
+  height: 3.5rem;
+  background-color: #0B0B0B;
+  border: 1px solid #FF9F00;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+  border-radius: 15px;
+  margin-left: 30px;
+  margin-top: 1.5rem;
+}
+
+.removePlayer:hover {
+  background-color: #FF9F00;
+  cursor: pointer;
+}
+
 .newPlayer {
   width: 22rem;
   height: 3.5rem;

@@ -83,6 +83,20 @@ export default function EditChampionship() {
 
   const [rankings, setRankings] = useState<Ranking[]>([]);
 
+  const handleRemovePosition = (phaseIndex: number, rowIndex: number) => {
+    const updatedPhases = [...championshipData.phases];
+    updatedPhases[phaseIndex].dataMatrix = updatedPhases[
+      phaseIndex
+    ].dataMatrix.filter((_, i) => i !== rowIndex);
+    updatedPhases[phaseIndex].count =
+      updatedPhases[phaseIndex].dataMatrix.length;
+
+    setChampionshipData((prevState) => ({
+      ...prevState,
+      phases: updatedPhases,
+    }));
+  };
+
   const addRanking = () => {
     setRankings([...rankings, { name: "", value: 0, athlete: "", photo: "" }]);
   };
@@ -592,7 +606,7 @@ export default function EditChampionship() {
                           </div>
                           <div className={styles.tableItem}>
                             <p className={styles.tableLabel}>
-                              Time: {phase.dataMatrix[rowIndex]?.time ?? ""}
+                              Time ({phase.dataMatrix[rowIndex]?.time ?? ""})
                             </p>
                             <SearchSelectTeam
                               onSelectItem={(team: Item) => {
@@ -648,6 +662,15 @@ export default function EditChampionship() {
                               />
                             </div>
                           ))}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemovePosition(phaseIndex, rowIndex)
+                            }
+                            className={styles.removePlayer}
+                          >
+                            Remover
+                          </button>
                         </div>
                       )
                     )}

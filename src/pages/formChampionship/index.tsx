@@ -122,6 +122,22 @@ export default function NewFormChampionship({
 
   const [rankings, setRankings] = useState<Ranking[]>([]);
 
+  const handleRemovePosition = (phaseId: number, index: number) => {
+    setPhases((prevPhases) =>
+      prevPhases.map((phase) => {
+        if (phase.id === phaseId) {
+          const newDataMatrix = phase.dataMatrix.filter((_, i) => i !== index);
+          return {
+            ...phase,
+            dataMatrix: newDataMatrix,
+            count: newDataMatrix.length,
+          };
+        }
+        return phase;
+      })
+    );
+  };
+
   const addRanking = () => {
     setRankings([...rankings, { name: "", value: "", athlete: "", photo: "" }]);
   };
@@ -591,15 +607,26 @@ export default function NewFormChampionship({
                       Tabela do Campeonato - insira o Nº posições
                     </p>
                     <input
-                      type="number" // Mudei para "number" para garantir que o input aceita números corretamente
+                      type="number"
                       className={styles.pos}
-                      value={phase.count || ""} // Mantém o valor do input mesmo que seja 0
+                      value={phase.count || ""}
                       onChange={(e) => {
                         const value = parseInt(e.target.value);
-                        if (!isNaN(value)) {
+                        if (!isNaN(value) && value >= 0) {
                           setPhases(
                             phases.map((p) =>
-                              p.id === phase.id ? { ...p, count: value } : p
+                              p.id === phase.id
+                                ? {
+                                    ...p,
+                                    count: value,
+                                    dataMatrix: Array.from(
+                                      { length: value },
+                                      (_, i) => ({
+                                        ...p.dataMatrix[i],
+                                      })
+                                    ),
+                                  }
+                                : p
                             )
                           );
                         }
@@ -607,16 +634,14 @@ export default function NewFormChampionship({
                     />
                   </div>
 
-                  {Array.from({ length: phase.count || 0 }).map((_, index) => (
+                  {phase.dataMatrix.map((row, index) => (
                     <div key={index} className={styles.table}>
                       <div className={styles.tableItem}>
                         <p className={styles.tableLabel}>Posi</p>
                         <input
                           type="number"
                           className={styles.position}
-                          value={
-                            phase.dataMatrix[index]?.position ?? "" // Usa nullish coalescing (??) para garantir que "0" seja exibido corretamente
-                          }
+                          value={row.position ?? ""}
                           onChange={(e) =>
                             handleTableInputChange(
                               phase.id,
@@ -643,11 +668,9 @@ export default function NewFormChampionship({
                           <input
                             type={
                               criterion.type === "number" ? "number" : "text"
-                            } // Garantir que tipos de números são aceitos
-                            className={styles.position}
-                            value={
-                              phase.dataMatrix[index]?.[criterion.name] ?? "" // Usa nullish coalescing para garantir que "0" seja exibido corretamente
                             }
+                            className={styles.position}
+                            value={row[criterion.name] ?? ""}
                             onChange={(e) =>
                               handleTableInputChange(
                                 phase.id,
@@ -659,6 +682,12 @@ export default function NewFormChampionship({
                           />
                         </div>
                       ))}
+                      <button
+                        onClick={() => handleRemovePosition(phase.id, index)}
+                        className={styles.removePlayer}
+                      >
+                        Remover
+                      </button>
                     </div>
                   ))}
                 </div>

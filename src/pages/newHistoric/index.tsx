@@ -181,9 +181,12 @@ export default function NewNews({
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const news = await getCollectionData();
 
+  // Organizar os dados por título em ordem alfabética
+  const sortedNews = news.sort((a, b) => a.title.localeCompare(b.title));
+
   return {
     props: {
-      news: news,
+      news: sortedNews,
     },
   };
 }
